@@ -13,6 +13,12 @@ namespace Asuka.Commands
         protected readonly IOptions<DiscordOptions> Config;
         // protected readonly DbRootController DbRoot;
 
+        protected override void BeforeExecute(CommandInfo command)
+        {
+            base.BeforeExecute(command);
+            Context.Channel.TriggerTypingAsync();
+        }
+
         public CommandModuleBase(
             IOptions<DiscordOptions> config)
             // DbRootController dbRoot)

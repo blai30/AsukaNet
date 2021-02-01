@@ -90,10 +90,7 @@ namespace Asuka.Services
             // Create a WebSocket-based command context based on the message.
             var context = new SocketCommandContext(_client, message);
             // Execute the command.
-            using (context.Channel.EnterTypingState())
-            {
-                await _commands.ExecuteAsync(context, argPos, _provider);
-            }
+            await _commands.ExecuteAsync(context, argPos, _provider);
         }
 
         /// <summary>
