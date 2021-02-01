@@ -8,7 +8,7 @@
         <Description>Discord bot written in .NET 5 using Discord.Net.</Description>
         <AssemblyName>Asuka</AssemblyName>
         <RootNamespace>Asuka</RootNamespace>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <PackageId>Asuka</PackageId>
         <Title>Asuka Discord Bot</Title>
         <Product>Asuka</Product>

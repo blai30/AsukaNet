@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Discord;
@@ -10,11 +11,26 @@ namespace Asuka.Modules.Utility
     public class ColorModule : CommandModuleBase
     {
         [Command("color")]
-        public async Task ColorAsync(byte r, byte g, byte b, byte a = 255)
+        [Summary("Get the color from hex code or RGB.")]
+        public async Task ColorAsync(string hex)
+        {
+            if (hex.StartsWith("#"))
+            {
+                hex = hex.Substring(1);
+            }
+
+            uint value = Convert.ToUInt32(hex, 16);
+            var color = new Color(value);
+            await ColorAsync(color.R, color.G, color.B);
+        }
+
+        [Command("color")]
+        [Summary("Get the color from hex code or RGB.")]
+        public async Task ColorAsync(byte r = 0, byte g = 0, byte b = 0)
         {
             // Create color objects.
             var skColor = new SKColor(r, g, b);
-            var color = new Color(skColor.Red, skColor.Green, skColor.Blue);
+            var color = new Color(r, g, b);
 
             // Get HSL and HSV values.
             var hsl = new Vector3();
@@ -41,11 +57,12 @@ namespace Asuka.Modules.Utility
                 .WithThumbnailUrl($"attachment://{fileName}")
                 .WithColor(color)
                 .AddField(
+                    // Strip alpha from hex.
                     "Hex code",
-                    $"`{skColor.ToString().ToUpper()}`")
+                    $"`#{skColor.ToString().Substring(2).ToUpper()}`")
                 .AddField(
-                    "RGBA",
-                    $"`rgba({skColor.Red}, {skColor.Green}, {skColor.Blue}, {skColor.Alpha})`")
+                    "RGB",
+                    $"`rgb({skColor.Red}, {skColor.Green}, {skColor.Blue})`")
                 .AddField(
                     "HSL",
                     $"**H**: {hsl.X:F2}, **S**: {hsl.Y:F2}, **L**: {hsl.Z:F2}")
