@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>9.0</LangVersion>
+        <OutputType>Exe</OutputType>
+        <Authors>Brian Lai</Authors>
+        <Description>Discord bot written in .NET 5 using Discord.Net.</Description>
+        <AssemblyName>Asuka</AssemblyName>
+        <RootNamespace>Asuka</RootNamespace>
+        <Nullable>enable</Nullable>
+        <PackageId>Asuka</PackageId>
+        <Title>Asuka Discord Bot</Title>
+        <Product>Asuka</Product>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="appsettings.Example.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Modules\Fun" />
+      <Folder Include="Modules\Roles" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
+    </ItemGroup>
+
+</Project>
