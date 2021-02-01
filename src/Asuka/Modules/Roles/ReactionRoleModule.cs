@@ -8,6 +8,7 @@ namespace Asuka.Modules.Roles
 {
     [Group("reactionrole")]
     [Alias("rr")]
+    [RequireContext(ContextType.Guild)]
     public class ReactionRoleModule : CommandModuleBase
     {
         public ReactionRoleModule(

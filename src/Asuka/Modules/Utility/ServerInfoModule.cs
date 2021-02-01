@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
 {
+    [RequireContext(ContextType.Guild)]
     public class ServerInfoModule : CommandModuleBase
     {
         public ServerInfoModule(
