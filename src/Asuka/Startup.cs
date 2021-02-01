@@ -13,7 +13,7 @@ namespace Asuka
 {
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; set; }
+        public IConfiguration Configuration { get; set; }
         public CancellationTokenSource CancellationTokenSource { get; set; }
 
         public Startup(string[] args)
@@ -22,7 +22,7 @@ namespace Asuka
             var builder = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", false, true)
-                .AddJsonFile("appsettings.Development.json", true, true)
+                .AddJsonFile($"appsettings.Development.json", true, true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }

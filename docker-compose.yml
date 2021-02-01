@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  asuka:
+    container_name: asuka
+    restart: always
+    build: .
+    depends_on:
+      - mysql
+    links:
+      - mysql
+
+  mysql:
+    container_name: mysql
+    image: mysql
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      MYSQL_HOST: ${Database:Host}
+      MYSQL_USERNAME: ${Database:Username}
+      MYSQL_ROOT_PASSWORD: ${Database:Password}
+      MYSQL_DATABASE: ${Database:Schema}
