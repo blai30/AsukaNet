@@ -24,10 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Modules\Roles" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
     </ItemGroup>
 
