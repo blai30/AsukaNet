@@ -9,11 +9,10 @@ namespace Asuka.Modules.Utility
 {
     public class AvatarModule : CommandModuleBase
     {
-        private readonly IOptions<DiscordOptions> _config;
-
-        public AvatarModule(IOptions<DiscordOptions> config)
+        public AvatarModule(
+            IOptions<DiscordOptions> config)
+            : base(config)
         {
-            _config = config;
         }
 
         [Command("avatar")]
@@ -29,7 +28,7 @@ namespace Asuka.Modules.Utility
                 .WithUrl(avatarUrl)
                 .WithImageUrl(avatarUrl)
                 .WithAuthor(user)
-                .WithColor(_config.Value.EmbedColor)
+                .WithColor(Config.Value.EmbedColor)
                 .Build();
 
             await ReplyAsync(embed: embed);

@@ -2,14 +2,22 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using Asuka.Commands;
+using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Options;
 using SkiaSharp;
 
 namespace Asuka.Modules.Utility
 {
     public class ColorModule : CommandModuleBase
     {
+        public ColorModule(
+            IOptions<DiscordOptions> config)
+            : base(config)
+        {
+        }
+
         [Command("color")]
         [Summary("Get the color from hex code or RGB.")]
         public async Task ColorAsync(string hex)

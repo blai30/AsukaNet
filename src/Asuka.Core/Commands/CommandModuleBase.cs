@@ -1,12 +1,25 @@
 ﻿using System.Threading.Tasks;
+using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Options;
 
 namespace Asuka.Commands
 {
     public class CommandModuleBase : ModuleBase<SocketCommandContext>
     {
         // TODO: Add root database controller as protected field.
+
+        protected readonly IOptions<DiscordOptions> Config;
+        // protected readonly DbRootController DbRoot;
+
+        public CommandModuleBase(
+            IOptions<DiscordOptions> config)
+            // DbRootController dbRoot)
+        {
+            Config = config;
+            // DbRoot = dbRoot;
+        }
 
         public Task ReplyReactionAsync(IEmote emote)
         {

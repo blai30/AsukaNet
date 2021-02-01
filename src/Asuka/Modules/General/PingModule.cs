@@ -1,11 +1,19 @@
 ﻿using System.Threading.Tasks;
 using Asuka.Commands;
+using Asuka.Configuration;
 using Discord.Commands;
+using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General
 {
     public class PingModule : CommandModuleBase
     {
+        public PingModule(
+            IOptions<DiscordOptions> config)
+            : base(config)
+        {
+        }
+
         [Command("ping")]
         [Summary("View the latency of the bot and API.")]
         public async Task PingAsync()

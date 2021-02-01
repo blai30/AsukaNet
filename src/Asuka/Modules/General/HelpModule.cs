@@ -9,14 +9,13 @@ namespace Asuka.Modules.General
 {
     public class HelpModule : CommandModuleBase
     {
-        private readonly IOptions<DiscordOptions> _config;
         private CommandService _commandService;
 
         public HelpModule(
             IOptions<DiscordOptions> config,
             CommandService commandService)
+            : base(config)
         {
-            _config = config;
             _commandService = commandService;
         }
 
@@ -29,8 +28,8 @@ namespace Asuka.Modules.General
             var avatarUrl = clientUser.GetAvatarUrl();
             string[] links =
             {
-                $"[Invite me]({_config.Value.InviteUrl})",
-                $"[Invite me]({_config.Value.InviteUrl})"
+                $"[Invite me]({Config.Value.InviteUrl})",
+                $"[Invite me]({Config.Value.InviteUrl})"
             };
 
             var embed = new EmbedBuilder()
