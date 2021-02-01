@@ -4,7 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>Asuka</RootNamespace>
         <AssemblyName>Asuka.Core</AssemblyName>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <PackageId>Asuka.Core</PackageId>
         <Authors>Brian Lai</Authors>
         <Company>Asuka.Core</Company>

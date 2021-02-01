@@ -70,14 +70,14 @@ namespace Asuka
                 {
                     LogLevel = LogSeverity.Verbose,
                     DefaultRunMode = RunMode.Async,
-                    CaseSensitiveCommands = false
+                    CaseSensitiveCommands = false,
+                    IgnoreExtraArgs = true
                 }))
                 .AddSingleton<StartupService>()
                 .AddSingleton<CommandHandlerService>()
                 .AddSingleton<LoggingService>()
                 .AddSingleton<Random>()
-                .AddSingleton(CancellationTokenSource)
-                .AddSingleton(Configuration);
+                .AddSingleton(CancellationTokenSource);
         }
     }
 }
