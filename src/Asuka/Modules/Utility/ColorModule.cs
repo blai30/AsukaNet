@@ -59,7 +59,7 @@ namespace Asuka.Modules.Utility
                 .AddField(
                     // Strip alpha from hex.
                     "Hex code",
-                    $"`#{skColor.ToString().Substring(2).ToUpper()}`")
+                    $"`#{skColor.ToString().Substring(3).ToUpper()}`")
                 .AddField(
                     "RGB",
                     $"`rgb({skColor.Red}, {skColor.Green}, {skColor.Blue})`")

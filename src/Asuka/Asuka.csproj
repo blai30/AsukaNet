@@ -24,7 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Modules\Fun" />
       <Folder Include="Modules\Roles" />
     </ItemGroup>
 

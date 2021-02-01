@@ -17,6 +17,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command("avatar")]
+        [Summary("Displays the avatar of a user or self.")]
         public async Task AvatarAsync(IUser user = null)
         {
             user ??= Context.User;
