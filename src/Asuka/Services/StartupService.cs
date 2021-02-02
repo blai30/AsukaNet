@@ -13,19 +13,19 @@ namespace Asuka.Services
     public class StartupService : IHostedService
     {
         private readonly ILogger<StartupService> _logger;
-        private readonly IServiceProvider _provider;
         private readonly IOptions<TokenOptions> _tokens;
+        private readonly IOptions<DiscordOptions> _discord;
         private readonly DiscordSocketClient _client;
 
         public StartupService(
             ILogger<StartupService> logger,
-            IServiceProvider provider,
             IOptions<TokenOptions> tokens,
+            IOptions<DiscordOptions> discord,
             DiscordSocketClient client)
         {
             _logger = logger;
-            _provider = provider;
             _tokens = tokens;
+            _discord = discord;
             _client = client;
         }
 
@@ -41,8 +41,11 @@ namespace Asuka.Services
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
             await _client.SetActivityAsync(new Game(
-                "mentions",
-                ActivityType.Listening));
+                _discord.Value.Status.Game,
+                _discord.Value.Status.Activity));
+            // await _client.SetActivityAsync(new Game(
+            //     "mentions",
+            //     ActivityType.Listening));
 
             await Task.CompletedTask;
         }
