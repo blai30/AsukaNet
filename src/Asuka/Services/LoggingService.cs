@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -12,18 +11,15 @@ namespace Asuka.Services
     public class LoggingService : IHostedService
     {
         private readonly ILogger<LoggingService> _logger;
-        private readonly IServiceProvider _provider;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
 
         public LoggingService(
             ILogger<LoggingService> logger,
-            IServiceProvider provider,
             DiscordSocketClient client,
             CommandService commandService)
         {
             _logger = logger;
-            _provider = provider;
             _client = client;
             _commandService = commandService;
         }
