@@ -24,7 +24,7 @@ namespace Asuka.Logging
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             // Create and format the log entry line.
-            var logEntry = $"HAHAHA{DateTime.UtcNow.ToString(_options.DateFormat)} [{logLevel.ToString()}] {_source}: {formatter(state, exception)}\n";
+            var logEntry = $"{DateTime.UtcNow.ToString(_options.DateFormat)} [{logLevel.ToString()}] {_source}: {formatter(state, exception)}\n";
 
             // Generate directory for log file if it does not exist.
             if (!Directory.Exists(_options.OutputDirectory))
