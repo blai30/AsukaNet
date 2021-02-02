@@ -10,6 +10,7 @@ using SkiaSharp;
 
 namespace Asuka.Modules.Utility
 {
+    [Summary("Get the color from hex code or RGB.")]
     public class ColorModule : CommandModuleBase
     {
         public ColorModule(
@@ -19,26 +20,36 @@ namespace Asuka.Modules.Utility
         }
 
         [Command("color")]
-        [Summary("Get the color from hex code or RGB.")]
+        public async Task ColorAsync(int r = 0, int g = 0, int b = 0)
+        {
+            // Clamp rgb values between 0 and 255.
+            r = Math.Clamp(r, 0, 255);
+            g = Math.Clamp(g, 0, 255);
+            b = Math.Clamp(b, 0, 255);
+
+            // Convert rgb values to raw hex.
+            uint raw = (uint) ((r << 16) | (g << 8) | b);
+            await ColorAsync(raw);
+        }
+
+        [Command("color")]
         public async Task ColorAsync(string hex)
         {
+            // Ignore the pound sign if provided.
             if (hex.StartsWith("#"))
             {
                 hex = hex.Substring(1);
             }
 
-            uint value = Convert.ToUInt32(hex, 16);
-            var color = new Color(value);
-            await ColorAsync(color.R, color.G, color.B);
+            // Convert hex to rgb then execute command.
+            uint raw = Convert.ToUInt32(hex, 16);
+            await ColorAsync(raw);
         }
 
-        [Command("color")]
-        [Summary("Get the color from hex code or RGB.")]
-        public async Task ColorAsync(byte r = 0, byte g = 0, byte b = 0)
+        private async Task ColorAsync(uint raw)
         {
-            // Create color objects.
-            var skColor = new SKColor(r, g, b);
-            var color = new Color(r, g, b);
+            // Create SKColor object to draw on SKCanvas and get color info.
+            var skColor = new SKColor(raw).WithAlpha(0xFF);
 
             // Get HSL and HSV values.
             var hsl = new Vector3();
@@ -52,22 +63,23 @@ namespace Asuka.Modules.Utility
             using (var canvas = surface.Canvas)
             {
                 canvas.Clear(skColor);
+                canvas.Flush();
             }
 
             // Encode image to stream for uploading.
             var stream = surface.Snapshot().Encode().AsStream();
 
             // Use hex code as filename but omit the pound sign.
-            var fileName = $"{skColor.ToString().Substring(1).ToUpper()}.png";
+            var fileName = $"{raw:X6}.png";
 
             // Construct embed with color information and thumbnail.
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl($"attachment://{fileName}")
-                .WithColor(color)
+                .WithColor(raw)
                 .AddField(
                     // Strip alpha from hex.
                     "Hex code",
-                    $"`#{skColor.ToString().Substring(3).ToUpper()}`")
+                    $"`#{raw:X6}`")
                 .AddField(
                     "RGB",
                     $"`rgb({skColor.Red}, {skColor.Green}, {skColor.Blue})`")
