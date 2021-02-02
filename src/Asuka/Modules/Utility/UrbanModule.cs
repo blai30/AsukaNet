@@ -40,7 +40,7 @@ namespace Asuka.Modules.Utility
             // Term did not yield results.
             if (results?.UrbanEntries == null || results.UrbanEntries.Count <= 0)
             {
-                await ReplyAsync($"`{term.Truncate(32)}` was not found in the Urban Dictionary.");
+                await ReplyAsync($"`{term.Truncate(32, true)}` was not found in the Urban Dictionary.");
                 return;
             }
 
@@ -57,10 +57,10 @@ namespace Asuka.Modules.Utility
                     $"👎 {entry.ThumbsDown}")
                 .AddField(
                     "Definition",
-                    entry.Definition.Truncate(1024))
+                    entry.Definition.Truncate(1024, true))
                 .AddField(
                     "Example",
-                    entry.Example.Truncate(1024))
+                    entry.Example.Truncate(1024, true))
                 .AddField(
                     "Author",
                     entry.Author)
