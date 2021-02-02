@@ -17,7 +17,7 @@ services:
     ports:
       - 8080:8080
     environment:
-      MYSQL_HOST: ${Database:Host}
-      MYSQL_USERNAME: ${Database:Username}
-      MYSQL_ROOT_PASSWORD: ${Database:Password}
-      MYSQL_DATABASE: ${Database:Schema}
+      MYSQL_HOST: ${DB_HOST}
+      MYSQL_USERNAME: ${DB_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_SCHEMA}
