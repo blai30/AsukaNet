@@ -9,10 +9,14 @@ namespace Asuka.Modules.Fun
 {
     public class FlipCoinModule : CommandModuleBase
     {
+        private readonly Random _random;
+
         public FlipCoinModule(
-            IOptions<DiscordOptions> config)
+            IOptions<DiscordOptions> config,
+            Random random)
             : base(config)
         {
+            _random = random;
         }
 
         [Command("flipcoin")]
@@ -20,9 +24,7 @@ namespace Asuka.Modules.Fun
         public async Task FlipCoinAsync()
         {
             // Generates a random number 0 or 1.
-            var seed = Guid.NewGuid().GetHashCode();
-            var random = new Random(seed);
-            var coin = random.Next(2);
+            var coin = _random.Next(2);
 
             await ReplyAsync(coin == 0 ? "🪙 **Heads!**" : "🪙 **Tails!**");
         }

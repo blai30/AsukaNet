@@ -38,10 +38,8 @@ namespace Asuka
                 .Configure<DiscordOptions>(Configuration.GetSection("Discord"))
                 .Configure<DatabaseOptions>(Configuration.GetSection("Database"))
 
-                // IHostedServices.
-                .AddHostedService<StartupService>()
-                .AddHostedService<LoggingService>()
-                .AddHostedService<CommandHandlerService>()
+                // Reusable random number generator with random GUID seed.
+                .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
 
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
@@ -63,7 +61,12 @@ namespace Asuka
                     CaseSensitiveCommands = false,
                     IgnoreExtraArgs = true
                 }))
-                .AddSingleton<Random>();
+
+                // Background hosted services.
+                .AddHostedService<StartupService>()
+                .AddHostedService<LoggingService>()
+                .AddHostedService<CommandHandlerService>()
+                ;
         }
 
         public void Configure(IHostEnvironment env)
