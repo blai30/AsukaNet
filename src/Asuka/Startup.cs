@@ -7,7 +7,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace Asuka
@@ -70,10 +69,6 @@ namespace Asuka
                 .AddHostedService<LoggingService>()
                 .AddHostedService<CommandHandlerService>()
                 ;
-        }
-
-        public void Configure(IHostEnvironment env)
-        {
         }
     }
 }
