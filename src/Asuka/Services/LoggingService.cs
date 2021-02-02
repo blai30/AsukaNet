@@ -1,33 +1,36 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Asuka.Services
 {
     public class LoggingService : IHostedService
     {
+        private readonly ILogger<LoggingService> _logger;
+        private readonly IServiceProvider _provider;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
 
-        private string LogDirectory { get; set; }
-        private string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.log");
-
         public LoggingService(
+            ILogger<LoggingService> logger,
+            IServiceProvider provider,
             DiscordSocketClient client,
             CommandService commandService)
         {
+            _logger = logger;
+            _provider = provider;
             _client = client;
             _commandService = commandService;
         }
 
         public async Task StartAsync(CancellationToken stoppingToken)
         {
-            LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+            _client.Ready += OnReadyAsync;
             _client.Log += OnLogAsync;
             _commandService.Log += OnLogAsync;
 
@@ -36,25 +39,27 @@ namespace Asuka.Services
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            _client.Ready -= OnReadyAsync;
+            _client.Log -= OnLogAsync;
+            _commandService.Log -= OnLogAsync;
+
             await Task.CompletedTask;
+        }
+
+        private Task OnReadyAsync()
+        {
+            _logger.LogInformation($"Client logged in as {_client.CurrentUser}");
+            _logger.LogInformation($"Listening in {_client.Guilds.Count} guilds");
+
+            return Task.CompletedTask;
         }
 
         private Task OnLogAsync(LogMessage log)
         {
-            if (!Directory.Exists(LogDirectory))
-            {
-                Directory.CreateDirectory(LogDirectory);
-            }
+            string message = $"{log.Exception?.ToString() ?? log.Message}";
+            _logger.LogInformation(message);
 
-            if (!File.Exists(LogFile))
-            {
-                File.Create(LogFile).Dispose();
-            }
-
-            var logEntry = $"{DateTime.UtcNow:HH:mm:ss} [{log.Severity}] {log.Source}: {log.Exception?.ToString() ?? log.Message}";
-            File.AppendAllText(LogFile, $"{logEntry}\n");
-
-            return Console.Out.WriteLineAsync(logEntry);
+            return Task.CompletedTask;
         }
     }
 }

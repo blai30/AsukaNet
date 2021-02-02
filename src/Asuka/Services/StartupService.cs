@@ -1,33 +1,32 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Services
 {
     public class StartupService : IHostedService
     {
+        private readonly ILogger<StartupService> _logger;
         private readonly IServiceProvider _provider;
         private readonly IOptions<TokenOptions> _tokens;
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands;
 
         public StartupService(
+            ILogger<StartupService> logger,
             IServiceProvider provider,
             IOptions<TokenOptions> tokens,
-            DiscordSocketClient client,
-            CommandService commands)
+            DiscordSocketClient client)
         {
+            _logger = logger;
             _provider = provider;
             _tokens = tokens;
             _client = client;
-            _commands = commands;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -44,6 +43,8 @@ namespace Asuka.Services
             await _client.SetActivityAsync(new Game(
                 "mentions",
                 ActivityType.Listening));
+
+            await Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

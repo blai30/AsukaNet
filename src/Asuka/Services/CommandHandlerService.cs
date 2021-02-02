@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Services
@@ -16,6 +17,7 @@ namespace Asuka.Services
     /// </summary>
     public class CommandHandlerService : IHostedService
     {
+        private readonly ILogger<CommandHandlerService> _logger;
         private readonly IServiceProvider _provider;
         private readonly IOptions<DiscordOptions> _config;
         private readonly DiscordSocketClient _client;
@@ -24,16 +26,19 @@ namespace Asuka.Services
         /// <summary>
         /// Injected automatically from the service provider.
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="provider"></param>
         /// <param name="config"></param>
         /// <param name="client"></param>
         /// <param name="commands"></param>
         public CommandHandlerService(
+            ILogger<CommandHandlerService> logger,
             IServiceProvider provider,
             IOptions<DiscordOptions> config,
             DiscordSocketClient client,
             CommandService commands)
         {
+            _logger = logger;
             _provider = provider;
             _config = config;
             _client = client;
@@ -52,6 +57,7 @@ namespace Asuka.Services
 
             _client.MessageReceived += OnMessageReceivedAsync;
             _commands.CommandExecuted += OnCommandExecutedAsync;
+            _logger.LogInformation("Started");
 
             await Task.CompletedTask;
         }
@@ -60,6 +66,7 @@ namespace Asuka.Services
         {
             _client.MessageReceived -= OnMessageReceivedAsync;
             _commands.CommandExecuted -= OnCommandExecutedAsync;
+            _logger.LogInformation("Stopped");
 
             await Task.CompletedTask;
         }
