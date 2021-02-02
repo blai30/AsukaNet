@@ -5,9 +5,6 @@ namespace Asuka.Models.Api.Urban
 {
     public class UrbanEntry
     {
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
-
         [JsonPropertyName("definition")]
         public string Definition { get; set; }
 
