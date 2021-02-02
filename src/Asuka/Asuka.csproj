@@ -25,6 +25,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
+      <ProjectReference Include="..\Asuka.Extensions\Asuka.Extensions.csproj" />
     </ItemGroup>
 
 </Project>

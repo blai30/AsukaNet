@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka", "src\Asuka\Asuka.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Core", "src\Asuka.Core\Asuka.Core.csproj", "{5B02A340-AA0B-4992-924A-8F6855514EF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Extensions", "src\Asuka.Extensions\Asuka.Extensions.csproj", "{98D48BF8-38E6-4906-9CAE-064277564CEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{5B02A340-AA0B-4992-924A-8F6855514EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B02A340-AA0B-4992-924A-8F6855514EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B02A340-AA0B-4992-924A-8F6855514EF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
