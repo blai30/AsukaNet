@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using Asuka.Configuration;
 using Asuka.Services;
 using Discord;
@@ -7,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace Asuka
 {
@@ -17,6 +19,12 @@ namespace Asuka
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            // Initialize Serilog logger from appsettings.json configurations.
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
