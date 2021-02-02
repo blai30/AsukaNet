@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Models.Api.Urban;
 using Discord;
 using Discord.Commands;
 using Microsoft.AspNetCore.WebUtilities;
@@ -10,37 +14,56 @@ namespace Asuka.Modules.Utility
 {
     public class UrbanModule : CommandModuleBase
     {
+        private readonly HttpClient _client;
+
+        private const string Uri = "https://api.urbandictionary.com/v0/define";
+
         public UrbanModule(
-            IOptions<DiscordOptions> config)
+            IOptions<DiscordOptions> config,
+            HttpClient client)
             : base(config)
         {
+            _client = client;
         }
 
         [Command("urban")]
         [Summary("Look up a word or phrase on Urban Dictionary.")]
         public async Task UrbanAsync([Remainder] string term)
         {
-            var url = "https://api.urbandictionary.com/v0/define";
-            var query = QueryHelpers.AddQueryString(url, "term", term);
+            // Build query and send http request to urban api.
+            var query = QueryHelpers.AddQueryString(Uri, "term", term);
+            var streamTask = _client.GetStreamAsync(query);
+
+            // Deserialize json response.
+            var results = await JsonSerializer.DeserializeAsync<UrbanList>(await streamTask);
+
+            // Term did not yield results.
+            if (results?.UrbanEntries == null || results.UrbanEntries.Count <= 0)
+            {
+                await ReplyAsync($"`{term.Truncate(32)}` was not found in the Urban Dictionary.");
+                return;
+            }
+
+            var entry = results.UrbanEntries[0];
 
             var embed = new EmbedBuilder()
-                .WithTitle("entry.word")
-                .WithUrl("https://www.google.com/")
+                .WithTitle(entry.Word)
+                .WithUrl(entry.Permalink)
                 .WithColor(0xefff00)
-                .WithAuthor("Urban Dictionary", Context.Guild.IconUrl)
-                .WithDescription("Written on: parse date entry.written_on")
+                .WithAuthor("Urban Dictionary")
+                .WithDescription($"Written on: {entry.WrittenOn:R}")
                 .WithFooter(
-                    "👍 entry.thumbsUp\n" +
-                    "👎 entry.thumbsDown")
+                    $"👍 {entry.ThumbsUp}\n" +
+                    $"👎 {entry.ThumbsDown}")
                 .AddField(
                     "Definition",
-                    "entry.definition trim to 1024 char")
+                    entry.Definition.Truncate(1024))
                 .AddField(
                     "Example",
-                    "entry.example trim to 1024 char")
+                    entry.Example.Truncate(1024))
                 .AddField(
                     "Author",
-                    "entry.author")
+                    entry.Author)
                 .Build();
 
             await ReplyAsync(query, embed: embed);

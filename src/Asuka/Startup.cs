@@ -41,6 +41,9 @@ namespace Asuka
                 // Reusable random number generator with random GUID seed.
                 .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
 
+                // Http client for interfacing with Api requests.
+                .AddSingleton<HttpClient>()
+
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
                 {
