@@ -10,6 +10,7 @@ using SkiaSharp;
 
 namespace Asuka.Modules.Utility
 {
+    [Group("color")]
     [Summary("Get the color from hex code or RGB.")]
     public class ColorModule : CommandModuleBase
     {
@@ -19,8 +20,30 @@ namespace Asuka.Modules.Utility
         {
         }
 
-        [Command("color")]
-        public async Task ColorAsync(int r = 0, int g = 0, int b = 0)
+        [Command]
+        [Priority(0)]
+        public async Task ColorAsync(string hex)
+        {
+            if (hex.StartsWith("#"))
+            {
+                hex = hex.Substring(1);
+            }
+
+            if (hex.Length != 6)
+            {
+                await ReplyAsync("Hex code needs to be 6 characters.");
+                return;
+            }
+
+            // Convert hex to rgb then execute command.
+            var bytes = Convert.FromHexString(hex);
+            uint raw = (uint) ((bytes[0] << 16) | (bytes[1] << 8) | bytes[2]);
+            await ColorAsync(raw);
+        }
+
+        [Command]
+        [Priority(1)]
+        public async Task ColorAsync(int r, int g, int b)
         {
             // Clamp rgb values between 0 and 255.
             r = Math.Clamp(r, 0, 255);
@@ -32,21 +55,7 @@ namespace Asuka.Modules.Utility
             await ColorAsync(raw);
         }
 
-        [Command("color")]
-        public async Task ColorAsync(string hex)
-        {
-            // Ignore the pound sign if provided.
-            if (hex.StartsWith("#"))
-            {
-                hex = hex.Substring(1);
-            }
-
-            // Convert hex to rgb then execute command.
-            uint raw = Convert.ToUInt32(hex, 16);
-            await ColorAsync(raw);
-        }
-
-        private async Task ColorAsync(uint raw)
+        public async Task ColorAsync(uint raw)
         {
             // Create SKColor object to draw on SKCanvas and get color info.
             var skColor = new SKColor(raw).WithAlpha(0xFF);
@@ -78,7 +87,7 @@ namespace Asuka.Modules.Utility
                 .WithColor(raw)
                 .AddField(
                     // Strip alpha from hex.
-                    "Hex code",
+                    "HEX",
                     $"`#{raw:X6}`")
                 .AddField(
                     "RGB",
