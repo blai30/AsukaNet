@@ -24,12 +24,19 @@ namespace Asuka.Modules.Utility
         [Priority(0)]
         public async Task ColorAsync(string hex)
         {
+            // Ignore pound sign hex prefix.
             if (hex.StartsWith("#"))
             {
                 hex = hex.Substring(1);
             }
 
-            if (hex.Length != 6)
+            if (hex.Length == 3)
+            {
+                // Expand 3 digit hex to 6 digits.
+                var chars = new[] {hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]};
+                hex = new string(chars);
+            }
+            else if (hex.Length != 6)
             {
                 await ReplyAsync("Hex code needs to be 6 characters.");
                 return;
