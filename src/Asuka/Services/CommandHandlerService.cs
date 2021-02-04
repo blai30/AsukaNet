@@ -21,7 +21,7 @@ namespace Asuka.Services
         private readonly IServiceProvider _provider;
         private readonly IOptions<DiscordOptions> _config;
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands;
+        private readonly CommandService _commandService;
 
         /// <summary>
         /// Injected automatically from the service provider.
@@ -30,19 +30,19 @@ namespace Asuka.Services
         /// <param name="provider"></param>
         /// <param name="config"></param>
         /// <param name="client"></param>
-        /// <param name="commands"></param>
+        /// <param name="commandService"></param>
         public CommandHandlerService(
             ILogger<CommandHandlerService> logger,
             IServiceProvider provider,
             IOptions<DiscordOptions> config,
             DiscordSocketClient client,
-            CommandService commands)
+            CommandService commandService)
         {
             _logger = logger;
             _provider = provider;
             _config = config;
             _client = client;
-            _commands = commands;
+            _commandService = commandService;
         }
 
         /// <summary>
@@ -53,11 +53,11 @@ namespace Asuka.Services
         public async Task StartAsync(CancellationToken stoppingToken)
         {
             // Dynamically load all command modules.
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+            await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
             _client.MessageReceived += OnMessageReceivedAsync;
-            _commands.CommandExecuted += OnCommandExecutedAsync;
-            _logger.LogInformation("Started");
+            _commandService.CommandExecuted += OnCommandExecutedAsync;
+            _commandService.Log += OnLogAsync;
 
             await Task.CompletedTask;
         }
@@ -65,8 +65,8 @@ namespace Asuka.Services
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _client.MessageReceived -= OnMessageReceivedAsync;
-            _commands.CommandExecuted -= OnCommandExecutedAsync;
-            _logger.LogInformation("Stopped");
+            _commandService.CommandExecuted -= OnCommandExecutedAsync;
+            _commandService.Log -= OnLogAsync;
 
             await Task.CompletedTask;
         }
@@ -97,7 +97,7 @@ namespace Asuka.Services
             // Create a WebSocket-based command context based on the message.
             var context = new SocketCommandContext(_client, message);
             // Execute the command.
-            await _commands.ExecuteAsync(context, argPos, _provider);
+            await _commandService.ExecuteAsync(context, argPos, _provider);
         }
 
         /// <summary>
@@ -113,6 +113,14 @@ namespace Asuka.Services
 
             // Command not successful, reply with error.
             await context.Message.ReplyAsync(result.ToString());
+        }
+
+        private Task OnLogAsync(LogMessage log)
+        {
+            string message = $"{log.Exception?.ToString() ?? log.Message}";
+            _logger.LogTrace(message);
+
+            return Task.CompletedTask;
         }
     }
 }
