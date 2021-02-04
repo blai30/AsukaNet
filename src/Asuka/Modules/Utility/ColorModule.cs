@@ -11,6 +11,7 @@ using SkiaSharp;
 namespace Asuka.Modules.Utility
 {
     [Group("color")]
+    [Remarks("Utility")]
     [Summary("Get the color from hex code or RGB.")]
     public class ColorModule : CommandModuleBase
     {

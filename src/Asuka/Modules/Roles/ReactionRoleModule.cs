@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
@@ -8,6 +9,19 @@ namespace Asuka.Modules.Roles
 {
     [Group("reactionrole")]
     [Alias("rr")]
+    [Remarks("Roles")]
+    [RequireBotPermission(
+        ChannelPermission.AddReactions |
+        ChannelPermission.ManageMessages |
+        ChannelPermission.ManageRoles |
+        ChannelPermission.ReadMessageHistory |
+        ChannelPermission.ViewChannel)]
+    [RequireUserPermission(
+        ChannelPermission.AddReactions |
+        ChannelPermission.ManageMessages |
+        ChannelPermission.ManageRoles |
+        ChannelPermission.ReadMessageHistory |
+        ChannelPermission.ViewChannel)]
     [RequireContext(ContextType.Guild)]
     public class ReactionRoleModule : CommandModuleBase
     {

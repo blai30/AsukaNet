@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.Fun
 {
     [Group("flipcoin")]
+    [Remarks("Fun")]
     [Summary("Flips a two-sided coin to determine heads or tails.")]
     public class FlipCoinModule : CommandModuleBase
     {

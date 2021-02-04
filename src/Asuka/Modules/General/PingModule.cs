@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.General
 {
     [Group("ping")]
+    [Remarks("General")]
     [Summary("View the latency of the bot and API.")]
     public class PingModule : CommandModuleBase
     {

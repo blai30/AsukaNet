@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.Utility
 {
     [Group("urban")]
+    [Remarks("Utility")]
     [Summary("Look up a word or phrase on Urban Dictionary.")]
     public class UrbanModule : CommandModuleBase
     {

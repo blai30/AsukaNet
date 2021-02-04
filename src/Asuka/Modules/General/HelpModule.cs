@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
@@ -9,6 +10,7 @@ namespace Asuka.Modules.General
 {
     [Group("help")]
     [Alias("h", "halp")]
+    [Remarks("General")]
     [Summary("View all commands or help info for a specific command.")]
     public class HelpModule : CommandModuleBase
     {
@@ -27,12 +29,14 @@ namespace Asuka.Modules.General
         {
             var clientUser = Context.Client.CurrentUser;
             var avatarUrl = clientUser.GetAvatarUrl();
+
             string[] links =
             {
                 $"[Invite me]({Config.Value.InviteUrl})",
                 $"[Invite me]({Config.Value.InviteUrl})"
             };
 
+            // Initialize embed builder with basic info.
             var embed = new EmbedBuilder()
                 .WithThumbnailUrl(avatarUrl)
                 .WithDescription(
@@ -45,20 +49,46 @@ namespace Asuka.Modules.General
                     $"`@{clientUser.Username} help avatar` to view help for the avatar command.")
                 .AddField(
                     "Useful links",
-                    $"{string.Join(", ", links)}")
-                .Build();
+                    $"{string.Join(", ", links)}");
 
-            await ReplyAsync(embed: embed);
+            // Get a sorted collection of command categories using
+            // the module's remarks attribute as the category name.
+            var moduleCategories =
+                _commandService.Modules
+                    .Select(module => module.Remarks)
+                    .Distinct()
+                    .OrderBy(s => s);
+
+            // Get a list of command names from each category.
+            foreach (var category in moduleCategories)
+            {
+                // Skip any empty categories.
+                if (string.IsNullOrWhiteSpace(category))
+                {
+                    continue;
+                }
+
+                // Get a sorted collection of command names,
+                // wrapped in code block markdown.
+                var commandList =
+                    _commandService.Modules
+                        .Where(module => module.Remarks == category)
+                        .Select(module => $"`{module.Name}`")
+                        .OrderBy(s => s);
+
+                // Combine command names separated by a comma into a single string.
+                var commands = string.Join(", ", commandList);
+                embed.AddField(category, commands);
+            }
+
+            await ReplyAsync(embed: embed.Build());
         }
 
-        // [Command]
-        // [Alias("h", "halp")]
-        // [Summary("View all commands or help info for a specific command.")]
-        // public async Task HelpAsync(
-        //     [Summary("Command name of which to view help info.")]
-        //     string commandName)
-        // {
-        //     await ReplyAsync(string.Join(", ", CommandService.Commands.Select(c => c.Name)));
-        // }
+        [Command]
+        public async Task HelpAsync(
+            [Summary("Command name of which to view help info.")]
+            string commandName)
+        {
+        }
     }
 }

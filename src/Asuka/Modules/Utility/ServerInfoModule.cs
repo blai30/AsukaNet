@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.Utility
 {
     [Group("serverinfo")]
+    [Remarks("Utility")]
     [Summary("Display information about the server.")]
     [RequireContext(ContextType.Guild)]
     public class ServerInfoModule : CommandModuleBase

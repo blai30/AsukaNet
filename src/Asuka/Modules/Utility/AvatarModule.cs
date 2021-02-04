@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.Utility
 {
     [Group("avatar")]
+    [Remarks("Utility")]
     [Summary("Displays the avatar of a user or self.")]
     public class AvatarModule : CommandModuleBase
     {
