@@ -6,7 +6,7 @@ using Serilog;
 
 namespace Asuka
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
 
@@ -18,7 +18,7 @@ namespace Asuka
 
         // Typical ASP.NET host builder pattern but for console app without the web.
         // TODO: Official support planned for .NET 6.0.
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host
                 .CreateDefaultBuilder(args)
                 .UseSerilog()
