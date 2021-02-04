@@ -10,6 +10,9 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Services
 {
+    /// <summary>
+    /// Starts the client and logs into discord using bot token.
+    /// </summary>
     public class StartupService : IHostedService
     {
         private readonly ILogger<StartupService> _logger;
@@ -40,7 +43,7 @@ namespace Asuka.Services
             _client.Ready += OnReadyAsync;
             _client.Log += OnLogAsync;
 
-            // Login to the discord client with bot token.
+            // Login to the discord client using bot token.
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
             await _client.SetActivityAsync(new Game(
