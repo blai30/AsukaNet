@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Fun
 {
+    [Group("flipcoin")]
+    [Summary("Flips a two-sided coin to determine heads or tails.")]
     public class FlipCoinModule : CommandModuleBase
     {
         private readonly Random _random;
@@ -19,14 +21,12 @@ namespace Asuka.Modules.Fun
             _random = random;
         }
 
-        [Command("flipcoin")]
-        [Summary("Flips a two-sided coin to determine heads or tails.")]
+        [Command]
         public async Task FlipCoinAsync()
         {
             // Generates a random number 0 or 1.
             var coin = _random.Next(2);
-
-            await ReplyAsync(coin == 0 ? "🪙 **Heads!**" : "🪙 **Tails!**");
+            await ReplyAsync(coin == 0 ? ":coin: **Heads!**" : ":coin: **Tails!**");
         }
     }
 }

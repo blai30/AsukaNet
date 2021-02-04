@@ -7,6 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General
 {
+    [Group("help")]
+    [Alias("h", "halp")]
+    [Summary("View all commands or help info for a specific command.")]
     public class HelpModule : CommandModuleBase
     {
         private CommandService _commandService;
@@ -19,9 +22,7 @@ namespace Asuka.Modules.General
             _commandService = commandService;
         }
 
-        [Command("help")]
-        [Alias("h", "halp")]
-        [Summary("View all commands or help info for a specific command.")]
+        [Command]
         public async Task HelpAsync()
         {
             var clientUser = Context.Client.CurrentUser;

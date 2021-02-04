@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
 {
+    [Group("userinfo")]
+    [Summary("Display information about a user or self.")]
     public class UserInfoModule : CommandModuleBase
     {
         public UserInfoModule(
@@ -15,10 +17,10 @@ namespace Asuka.Modules.Utility
         {
         }
 
-        [Command("userinfo")]
-        [Summary("Display information about a user or self.")]
+        [Command]
         public async Task UserInfoAsync(IUser user = null)
         {
+            // Use self if no user was specified.
             user ??= Context.User;
             var avatarUrl = user.GetAvatarUrl();
 

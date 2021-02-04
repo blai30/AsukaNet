@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
 {
+    [Group("avatar")]
+    [Summary("Displays the avatar of a user or self.")]
     public class AvatarModule : CommandModuleBase
     {
         public AvatarModule(
@@ -15,8 +17,7 @@ namespace Asuka.Modules.Utility
         {
         }
 
-        [Command("avatar")]
-        [Summary("Displays the avatar of a user or self.")]
+        [Command]
         public async Task AvatarAsync(IUser user = null)
         {
             user ??= Context.User;

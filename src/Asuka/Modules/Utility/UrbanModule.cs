@@ -12,6 +12,8 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
 {
+    [Group("urban")]
+    [Summary("Look up a word or phrase on Urban Dictionary.")]
     public class UrbanModule : CommandModuleBase
     {
         private readonly HttpClient _client;
@@ -26,8 +28,7 @@ namespace Asuka.Modules.Utility
             _client = client;
         }
 
-        [Command("urban")]
-        [Summary("Look up a word or phrase on Urban Dictionary.")]
+        [Command]
         public async Task UrbanAsync([Remainder] string term)
         {
             // Build query and send http request to urban api.

@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
 {
+    [Group("serverinfo")]
+    [Summary("Display information about the server.")]
     [RequireContext(ContextType.Guild)]
     public class ServerInfoModule : CommandModuleBase
     {
@@ -17,10 +19,10 @@ namespace Asuka.Modules.Utility
         {
         }
 
-        [Command("serverinfo")]
-        [Summary("Display information about the server.")]
+        [Command]
         public async Task ServerInfoAsync()
         {
+            // Collect guild information.
             var guild = Context.Guild;
             var textChannels = guild.TextChannels;
             var voiceChannels = guild.VoiceChannels;
@@ -28,6 +30,7 @@ namespace Asuka.Modules.Utility
             var roles = guild.Roles;
             var guildIconUrl = guild.IconUrl;
 
+            // Sort collection of roles to print alphabetically.
             var roleList = roles.Select(role => role.Name).ToList();
             roleList.Sort();
 
