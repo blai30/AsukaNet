@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -25,6 +26,44 @@ namespace Asuka.Modules.General
         }
 
         [Command]
+        [Name("")]
+        public async Task HelpAsync(
+            [Summary("Command name of which to view help info.")]
+            string commandName)
+        {
+            var module = _commandService.Modules.First(moduleInfo => moduleInfo.Name == commandName);
+
+            var usage = new StringBuilder();
+            foreach (var command in module.Commands)
+            {
+                usage.Append(module.Name);
+                usage.Append(" " + command.Name);
+                foreach (var parameter in command.Parameters)
+                {
+                    usage.Append(
+                        parameter.IsOptional ?
+                            $" [{parameter.Name}] " :
+                            $" <{parameter.Name}>");
+                }
+
+                usage.AppendLine();
+            }
+
+            var aliases = module.Aliases.Select(alias => $"`{alias}`");
+
+            var embed = new EmbedBuilder()
+                .WithTitle(module.Name)
+                .WithDescription($"__{module.Remarks}__\n{module.Summary}")
+                .WithColor(Config.Value.EmbedColor)
+                .AddField("Usage", $"`{usage}`")
+                .AddField("Aliases", string.Join(", ", aliases))
+                .Build();
+
+            await ReplyAsync(embed: embed);
+        }
+
+        [Command]
+        [Name("")]
         public async Task HelpAsync()
         {
             var clientUser = Context.Client.CurrentUser;
@@ -82,13 +121,6 @@ namespace Asuka.Modules.General
             }
 
             await ReplyAsync(embed: embed.Build());
-        }
-
-        [Command]
-        public async Task HelpAsync(
-            [Summary("Command name of which to view help info.")]
-            string commandName)
-        {
         }
     }
 }

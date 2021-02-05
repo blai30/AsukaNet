@@ -22,6 +22,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Name("")]
         [Priority(0)]
         public async Task ColorAsync(string hex)
         {
@@ -50,6 +51,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Name("")]
         [Priority(1)]
         public async Task ColorAsync(int r, int g, int b)
         {

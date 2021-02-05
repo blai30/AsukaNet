@@ -30,6 +30,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Name("")]
         public async Task UrbanAsync([Remainder] string term)
         {
             // Build query and send http request to urban api.

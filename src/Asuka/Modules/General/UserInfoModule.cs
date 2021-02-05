@@ -5,9 +5,9 @@ using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility
+namespace Asuka.Modules.General
 {
-    [Remarks("Utility")]
+    [Remarks("General")]
     [Summary("Display information about a user or self.")]
     public class UserInfoModule : CommandModuleBase
     {
@@ -18,6 +18,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command("userinfo")]
+        [Name("")]
         public async Task UserInfoAsync(IUser user = null)
         {
             // Use self if no user was specified.

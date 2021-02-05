@@ -6,10 +6,10 @@ using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility
+namespace Asuka.Modules.General
 {
     [Group("serverinfo")]
-    [Remarks("Utility")]
+    [Remarks("General")]
     [Summary("Display information about the server.")]
     [RequireContext(ContextType.Guild)]
     public class ServerInfoModule : CommandModuleBase
@@ -21,6 +21,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Name("")]
         public async Task ServerInfoAsync()
         {
             // Collect guild information.

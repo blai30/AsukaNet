@@ -19,6 +19,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Name("")]
         public async Task AvatarAsync(IUser user = null)
         {
             user ??= Context.User;
