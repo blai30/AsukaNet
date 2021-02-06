@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General
 {
+    [Group("userinfo")]
     [Remarks("General")]
     [Summary("Display information about a user or self.")]
     public class UserInfoModule : CommandModuleBase
@@ -17,8 +18,9 @@ namespace Asuka.Modules.General
         {
         }
 
-        [Command("userinfo")]
+        [Command]
         [Name("")]
+        [Remarks("userinfo [@user]")]
         public async Task UserInfoAsync(IUser user = null)
         {
             // Use self if no user was specified.

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -28,28 +26,23 @@ namespace Asuka.Modules.General
 
         [Command]
         [Name("")]
+        [Remarks("help [command]")]
         public async Task HelpAsync(
             [Summary("Command name of which to view help info.")]
             string commandName)
         {
-            // Get module by name.
-            var module = _commandService.Modules.First(moduleInfo => moduleInfo.Name == commandName);
+            // Get module by name or alias.
+            var module = _commandService.Modules
+                .First(moduleInfo =>
+                    moduleInfo.Name == commandName ||
+                    moduleInfo.Aliases.Contains(commandName));
 
-            // Command usage examples with <required> and [optional] parameters.
-            var usage = new StringBuilder();
+            string usage = null;
             foreach (var command in module.Commands)
             {
-                usage.Append(module.Name);
-                usage.Append(" " + command.Name);
-                foreach (var parameter in command.Parameters)
-                {
-                    usage.Append(
-                        parameter.IsOptional ?
-                            $" [{parameter.Name}] " :
-                            $" <{parameter.Name}>");
-                }
-
-                usage.AppendLine();
+                // Use command remarks as usage.
+                if (string.IsNullOrWhiteSpace(command.Remarks)) continue;
+                usage += $"`{command.Remarks}`\n";
             }
 
             // List of command aliases separated by a comma.
@@ -57,10 +50,14 @@ namespace Asuka.Modules.General
 
             var embed = new EmbedBuilder()
                 .WithTitle(module.Name)
-                .WithDescription($"__{module.Remarks}__\n{module.Summary}")
+                .WithDescription($"__Category: {module.Remarks}__\n{module.Summary}")
                 .WithColor(Config.Value.EmbedColor)
-                .AddField("Usage", $"`{usage}`")
-                .AddField("Aliases", string.Join(", ", aliases))
+                .AddField(
+                    "Usage",
+                    usage)
+                .AddField(
+                    "Aliases",
+                    string.Join(", ", aliases))
                 .Build();
 
             await ReplyAsync(embed: embed);

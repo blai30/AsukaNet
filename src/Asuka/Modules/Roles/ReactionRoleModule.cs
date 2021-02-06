@@ -34,6 +34,7 @@ namespace Asuka.Modules.Roles
         [Command("create")]
         [Alias("c")]
         [Summary("Create a reaction role message.")]
+        [Remarks("reactionrole create")]
         public async Task CreateRoleAsync()
         {
             await Task.CompletedTask;
@@ -42,6 +43,7 @@ namespace Asuka.Modules.Roles
         [Command("add")]
         [Alias("a")]
         [Summary("Add a reaction role to a reaction role message.")]
+        [Remarks("reactionrole add <messageId> <:emoji:> <@role>")]
         public async Task AddRoleAsync()
         {
             await Task.CompletedTask;
@@ -50,6 +52,7 @@ namespace Asuka.Modules.Roles
         [Command("remove")]
         [Alias("r")]
         [Summary("Remove a reaction role from a reaction role message.")]
+        [Remarks("reactionrole remove <messageId> <@role>")]
         public async Task RemoveRoleAsync()
         {
             await Task.CompletedTask;

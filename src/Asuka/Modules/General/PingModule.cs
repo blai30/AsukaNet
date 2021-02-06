@@ -19,6 +19,7 @@ namespace Asuka.Modules.General
 
         [Command]
         [Name("")]
+        [Remarks("ping")]
         public async Task PingAsync()
         {
             var reply = await ReplyAsync("Pong! Latency: `... ms`. API: `... ms`.");

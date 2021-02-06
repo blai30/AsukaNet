@@ -24,6 +24,7 @@ namespace Asuka.Modules.Fun
 
         [Command]
         [Name("")]
+        [Remarks("flipcoin")]
         public async Task FlipCoinAsync()
         {
             // Generates a random number 0 or 1.
