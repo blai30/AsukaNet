@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Models.Api.Urban;
+using Asuka.Models.API.Urban;
 using Discord;
 using Discord.Commands;
 using Microsoft.AspNetCore.WebUtilities;

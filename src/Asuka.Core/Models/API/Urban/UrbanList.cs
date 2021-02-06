@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Asuka.Models.Api.Urban
+namespace Asuka.Models.API.Urban
 {
     public class UrbanList
     {
