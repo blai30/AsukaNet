@@ -49,6 +49,9 @@ namespace Asuka
                     LogLevel = LogSeverity.Verbose,
                     MessageCacheSize = 1000,
                     GatewayIntents =
+                        GatewayIntents.DirectMessages |
+                        GatewayIntents.DirectMessageReactions |
+                        GatewayIntents.DirectMessageTyping |
                         GatewayIntents.Guilds |
                         GatewayIntents.GuildMembers |
                         GatewayIntents.GuildMessages |
