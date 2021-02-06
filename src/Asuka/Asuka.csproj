@@ -12,6 +12,8 @@
         <PackageId>Asuka</PackageId>
         <Title>Asuka Discord Bot</Title>
         <Product>Asuka</Product>
+        <ApplicationIcon>asuka.ico</ApplicationIcon>
+        <StartupObject>Asuka.Program</StartupObject>
     </PropertyGroup>
 
     <ItemGroup>
