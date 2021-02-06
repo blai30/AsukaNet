@@ -57,7 +57,6 @@ namespace Asuka.Services
 
             _client.MessageReceived += OnMessageReceivedAsync;
             _commandService.CommandExecuted += OnCommandExecutedAsync;
-            _commandService.Log += OnLogAsync;
 
             await Task.CompletedTask;
         }
@@ -66,7 +65,6 @@ namespace Asuka.Services
         {
             _client.MessageReceived -= OnMessageReceivedAsync;
             _commandService.CommandExecuted -= OnCommandExecutedAsync;
-            _commandService.Log -= OnLogAsync;
 
             await Task.CompletedTask;
         }
@@ -113,38 +111,6 @@ namespace Asuka.Services
 
             // Command not successful, reply with error.
             await context.Message.ReplyAsync(result.ToString());
-        }
-
-        private Task OnLogAsync(LogMessage log)
-        {
-            string message = $"{log.Exception?.ToString() ?? log.Message}";
-
-            switch (log.Severity)
-            {
-                case LogSeverity.Critical:
-                    _logger.LogCritical(message);
-                    break;
-                case LogSeverity.Error:
-                    _logger.LogError(message);
-                    break;
-                case LogSeverity.Warning:
-                    _logger.LogWarning(message);
-                    break;
-                case LogSeverity.Info:
-                    _logger.LogInformation(message);
-                    break;
-                case LogSeverity.Verbose:
-                    _logger.LogTrace(message);
-                    break;
-                case LogSeverity.Debug:
-                    _logger.LogDebug(message);
-                    break;
-                default:
-                    _logger.LogInformation(message);
-                    break;
-            }
-
-            return Task.CompletedTask;
         }
     }
 }

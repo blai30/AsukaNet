@@ -40,9 +40,6 @@ namespace Asuka.Services
                 throw new Exception("Enter bot token into the `appsettings.json` file found in the application's root directory.");
             }
 
-            _client.Ready += OnReadyAsync;
-            _client.Log += OnLogAsync;
-
             // Login to the discord client using bot token.
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
@@ -55,48 +52,7 @@ namespace Asuka.Services
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _client.Ready -= OnReadyAsync;
-            _client.Log -= OnLogAsync;
             await Task.CompletedTask;
-        }
-
-        private Task OnReadyAsync()
-        {
-            _logger.LogInformation($"Client logged in as {_client.CurrentUser}");
-            _logger.LogInformation($"Listening in {_client.Guilds.Count} guilds");
-            return Task.CompletedTask;
-        }
-
-        private Task OnLogAsync(LogMessage log)
-        {
-            string message = $"{log.Exception?.ToString() ?? log.Message}";
-
-            switch (log.Severity)
-            {
-                case LogSeverity.Critical:
-                    _logger.LogCritical(message);
-                    break;
-                case LogSeverity.Error:
-                    _logger.LogError(message);
-                    break;
-                case LogSeverity.Warning:
-                    _logger.LogWarning(message);
-                    break;
-                case LogSeverity.Info:
-                    _logger.LogInformation(message);
-                    break;
-                case LogSeverity.Verbose:
-                    _logger.LogTrace(message);
-                    break;
-                case LogSeverity.Debug:
-                    _logger.LogDebug(message);
-                    break;
-                default:
-                    _logger.LogInformation(message);
-                    break;
-            }
-
-            return Task.CompletedTask;
         }
     }
 }

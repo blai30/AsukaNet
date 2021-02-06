@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Asuka.Commands;
@@ -31,8 +32,10 @@ namespace Asuka.Modules.General
             [Summary("Command name of which to view help info.")]
             string commandName)
         {
+            // Get module by name.
             var module = _commandService.Modules.First(moduleInfo => moduleInfo.Name == commandName);
 
+            // Command usage examples with <required> and [optional] parameters.
             var usage = new StringBuilder();
             foreach (var command in module.Commands)
             {
@@ -49,6 +52,7 @@ namespace Asuka.Modules.General
                 usage.AppendLine();
             }
 
+            // List of command aliases separated by a comma.
             var aliases = module.Aliases.Select(alias => $"`{alias}`");
 
             var embed = new EmbedBuilder()
@@ -82,7 +86,7 @@ namespace Asuka.Modules.General
                     $"View available commands for {clientUser.Mention}.\n" +
                     $"Enter `@{clientUser.Username} help [command]` for command help info.")
                 .WithAuthor(clientUser)
-                .WithColor(0xe91e63)
+                .WithColor(Config.Value.EmbedColor)
                 .AddField(
                     "Examples",
                     $"`@{clientUser.Username} help avatar` to view help for the avatar command.")
