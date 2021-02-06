@@ -84,8 +84,14 @@ namespace Asuka.Services
 
             int argPos = 0;
             // TODO: Fetch custom set guild prefix from database.
-            // Check if message has prefix or mentions the bot, and was not invoked by a bot.
-            // if (!message.HasStringPrefix(_config.Value.BotPrefix, ref argPos) &&
+            // Check if message has string prefix, only if it is not null.
+            var prefix = _config.Value.BotPrefix;
+            if (prefix != null && !message.HasStringPrefix(prefix, ref argPos))
+            {
+                return;
+            }
+
+            // Check if message has bot mention prefix and was not invoked by a bot.
             if (!message.HasMentionPrefix(_client.CurrentUser, ref argPos) &&
                 !message.Author.IsBot)
             {
