@@ -25,7 +25,6 @@ namespace Asuka.Modules.General
         }
 
         [Command]
-        [Name("")]
         [Remarks("help [command]")]
         public async Task HelpAsync(
             [Summary("Command name of which to view help info.")]
@@ -37,6 +36,7 @@ namespace Asuka.Modules.General
                     moduleInfo.Name == commandName ||
                     moduleInfo.Aliases.Contains(commandName));
 
+            // List the module usage examples using the command remarks.
             string usage = null;
             foreach (var command in module.Commands)
             {
@@ -64,7 +64,6 @@ namespace Asuka.Modules.General
         }
 
         [Command]
-        [Name("")]
         public async Task HelpAsync()
         {
             var clientUser = Context.Client.CurrentUser;

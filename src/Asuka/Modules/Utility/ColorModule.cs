@@ -22,8 +22,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
-        [Name("")]
-        [Priority(0)]
+        [Remarks("color <hex>")]
         public async Task ColorAsync(string hex)
         {
             // Ignore pound sign hex prefix.
@@ -51,8 +50,7 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
-        [Name("")]
-        [Priority(1)]
+        [Remarks("color <red> <green> <blue>")]
         public async Task ColorAsync(int r, int g, int b)
         {
             // Clamp rgb values between 0 and 255.

@@ -23,7 +23,6 @@ namespace Asuka.Modules.Fun
         }
 
         [Command]
-        [Name("")]
         [Remarks("flipcoin")]
         public async Task FlipCoinAsync()
         {

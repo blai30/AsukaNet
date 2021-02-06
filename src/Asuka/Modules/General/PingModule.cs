@@ -18,7 +18,6 @@ namespace Asuka.Modules.General
         }
 
         [Command]
-        [Name("")]
         [Remarks("ping")]
         public async Task PingAsync()
         {

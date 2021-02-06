@@ -19,7 +19,6 @@ namespace Asuka.Modules.General
         }
 
         [Command]
-        [Name("")]
         [Remarks("userinfo [@user]")]
         public async Task UserInfoAsync(IUser user = null)
         {

@@ -21,7 +21,6 @@ namespace Asuka.Modules.General
         }
 
         [Command]
-        [Name("")]
         public async Task ServerInfoAsync()
         {
             // Collect guild information.
