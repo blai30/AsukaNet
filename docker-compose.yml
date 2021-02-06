@@ -1,14 +1,25 @@
-version: "3.9"
+version: "3"
 
 services:
   asuka:
     container_name: asuka
-    restart: always
-    build: .
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
 #    depends_on:
+#      - seq
 #      - mysql
 #    links:
+#      - seq
 #      - mysql
+#
+#  seq:
+#    container_name: seq
+#    restart: unless-stopped
+#    image: datalust/seq:latest
+#    environment:
+#      ACCEPT_EULA: Y
 #
 #  mysql:
 #    container_name: mysql
