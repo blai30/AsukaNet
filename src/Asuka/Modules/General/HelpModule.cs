@@ -37,7 +37,7 @@ namespace Asuka.Modules.General
                     moduleInfo.Aliases.Contains(commandName));
 
             // List the module usage examples using the command remarks.
-            string usage = null;
+            string usage = string.Empty;
             foreach (var command in module.Commands)
             {
                 // Use command remarks as usage.
