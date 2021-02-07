@@ -21,6 +21,7 @@ namespace Asuka.Modules.General
         }
 
         [Command]
+        [Remarks("serverinfo")]
         public async Task ServerInfoAsync()
         {
             // Collect guild information.
@@ -46,10 +47,14 @@ namespace Asuka.Modules.General
                 .AddField(
                     "ID",
                     guild.Id,
-                    true)
+                    false)
                 .AddField(
                     "Region",
                     guild.VoiceRegionId,
+                    true)
+                .AddField(
+                    "Max Bitrate",
+                    guild.MaxBitrate + " kbps",
                     true)
                 .AddField(
                     "Members",
