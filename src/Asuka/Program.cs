@@ -13,6 +13,7 @@ namespace Asuka
         private static async Task MainAsync(string[] args)
         {
             Console.WriteLine(DateTime.UtcNow);
+            Console.WriteLine(Environment.ProcessId);
             await CreateHostBuilder(args).Build().RunAsync();
         }
 

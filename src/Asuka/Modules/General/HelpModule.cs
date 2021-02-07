@@ -1,11 +1,12 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Commands.Modules.General
+namespace Asuka.Modules.General
 {
     [Group("help")]
     [Alias("h", "halp")]
@@ -27,18 +28,12 @@ namespace Asuka.Commands.Modules.General
         [Remarks("help [command]")]
         public async Task HelpAsync(
             [Summary("Command name of which to view help info.")]
-            string commandName)
+            ModuleInfo module = null)
         {
-            // Get module by name or alias.
-            var module = _commandService.Modules
-                .FirstOrDefault(moduleInfo =>
-                    moduleInfo.Name == commandName ||
-                    moduleInfo.Aliases.Contains(commandName));
-
-            // Specified module is invalid.
+            // No module was specified, reply with default help embed.
             if (module == null)
             {
-                await ReplyInlineAsync($"Command `{commandName}` does not exist.");
+                await DefaultHelpAsync();
                 return;
             }
 
@@ -69,8 +64,13 @@ namespace Asuka.Commands.Modules.General
             await ReplyAsync(embed: embed);
         }
 
-        [Command]
-        public async Task HelpAsync()
+        /// <summary>
+        /// Builds the default help embed for the bot that lists all available commands
+        /// separated by categories. Shows the user how to execute commands and provides
+        /// some useful links about the bot.
+        /// </summary>
+        /// <returns></returns>
+        private async Task DefaultHelpAsync()
         {
             var clientUser = Context.Client.CurrentUser;
             var avatarUrl = clientUser.GetAvatarUrl();

@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Asuka.Commands.Readers;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
@@ -46,12 +47,15 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Initialize service at start.
+        /// Initialize service at start. Load command type readers and modules.
         /// </summary>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
         public async Task StartAsync(CancellationToken stoppingToken)
         {
+            // Load custom command type readers. Must be done before loading modules.
+            _commandService.AddTypeReader<ModuleInfo>(new ModuleTypeReader(_commandService));
+
             // Dynamically load all command modules.
             await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 
