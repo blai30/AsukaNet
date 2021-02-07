@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SkiaSharp;
 
 namespace Asuka.Services
 {
@@ -54,7 +55,8 @@ namespace Asuka.Services
         public async Task StartAsync(CancellationToken stoppingToken)
         {
             // Load custom command type readers. Must be done before loading modules.
-            _commandService.AddTypeReader<ModuleInfo>(new ModuleTypeReader(_commandService));
+            _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
+            _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
 
             // Dynamically load all command modules.
             await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);

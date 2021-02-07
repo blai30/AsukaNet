@@ -23,30 +23,9 @@ namespace Asuka.Modules.Utility
 
         [Command]
         [Remarks("color <hex>")]
-        public async Task ColorAsync(string hex)
+        public async Task ColorAsync(SKColor color)
         {
-            // Ignore pound sign hex prefix.
-            if (hex.StartsWith("#"))
-            {
-                hex = hex.Substring(1);
-            }
-
-            if (hex.Length == 3)
-            {
-                // Expand 3 digit hex to 6 digits.
-                var chars = new[] {hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]};
-                hex = new string(chars);
-            }
-            else if (hex.Length != 6)
-            {
-                await ReplyAsync("Hex code needs to be 6 characters.");
-                return;
-            }
-
-            // Convert hex to rgb then execute command.
-            var bytes = Convert.FromHexString(hex);
-            uint raw = (uint) ((bytes[0] << 16) | (bytes[1] << 8) | bytes[2]);
-            await ColorAsync(raw);
+            await GetColorAsync(color.WithAlpha(0xFF));
         }
 
         [Command]
@@ -58,28 +37,28 @@ namespace Asuka.Modules.Utility
             g = Math.Clamp(g, 0, 255);
             b = Math.Clamp(b, 0, 255);
 
-            // Convert rgb values to raw hex.
-            uint raw = (uint) ((r << 16) | (g << 8) | b);
-            await ColorAsync(raw);
+            // Create color object from rgb values.
+            var color = new SKColor((byte) r, (byte) g, (byte) b, 255);
+            await GetColorAsync(color);
         }
 
-        public async Task ColorAsync(uint raw)
+        private async Task GetColorAsync(SKColor color)
         {
-            // Create SKColor object to draw on SKCanvas and get color info.
-            var skColor = new SKColor(raw).WithAlpha(0xFF);
+            // Get raw uint32 value from color by extracting rgb values.
+            uint raw = (uint) ((color.Red << 16) | (color.Green << 8) | color.Blue);
 
             // Get HSL and HSV values.
             var hsl = new Vector3();
             var hsv = new Vector3();
-            skColor.ToHsl(out hsl.X, out hsl.Y, out hsl.Z);
-            skColor.ToHsv(out hsv.X, out hsv.Y, out hsv.Z);
+            color.ToHsl(out hsl.X, out hsl.Y, out hsl.Z);
+            color.ToHsv(out hsv.X, out hsv.Y, out hsv.Z);
 
             // Draw color to image.
             var bitmap = new SKBitmap(128, 128);
             var surface = SKSurface.Create(bitmap.Info);
             using (var canvas = surface.Canvas)
             {
-                canvas.Clear(skColor);
+                canvas.Clear(color);
                 canvas.Flush();
             }
 
@@ -99,7 +78,7 @@ namespace Asuka.Modules.Utility
                     $"`#{raw:X6}`")
                 .AddField(
                     "RGB",
-                    $"`rgb({skColor.Red}, {skColor.Green}, {skColor.Blue})`")
+                    $"`rgb({color.Red}, {color.Green}, {color.Blue})`")
                 .AddField(
                     "HSL",
                     $"**H**: {hsl.X:F2}, **S**: {hsl.Y:F2}, **L**: {hsl.Z:F2}")

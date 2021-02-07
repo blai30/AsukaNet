@@ -5,19 +5,16 @@ using Discord.Commands;
 
 namespace Asuka.Commands.Readers
 {
-    public class ModuleTypeReader : CommandTypeReader
+    public class ModuleInfoTypeReader : TypeReader
     {
-        public ModuleTypeReader(CommandService commandService) : base(commandService)
-        {
-        }
-
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input,
             IServiceProvider services)
         {
+            var commands = services.GetService(typeof(CommandService)) as CommandService;
             var moduleName = input.ToUpperInvariant();
 
             // Get module by name or alias.
-            var module = CommandService.Modules.FirstOrDefault(info =>
+            var module = commands?.Modules.FirstOrDefault(info =>
                 info.Name.ToUpperInvariant() == moduleName ||
                 info.Aliases.Any(alias => alias.ToUpperInvariant() == moduleName));
 
