@@ -18,8 +18,8 @@ namespace Asuka.Modules.Utility
     public class ColorModule : CommandModuleBase
     {
         public ColorModule(
-            IOptions<DiscordOptions> config)
-            : base(config)
+            IOptions<DiscordOptions> config) :
+            base(config)
         {
         }
 

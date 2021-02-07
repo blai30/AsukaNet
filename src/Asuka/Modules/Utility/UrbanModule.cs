@@ -23,8 +23,8 @@ namespace Asuka.Modules.Utility
 
         public UrbanModule(
             IOptions<DiscordOptions> config,
-            HttpClient client)
-            : base(config)
+            HttpClient client) :
+            base(config)
         {
             _client = client;
         }

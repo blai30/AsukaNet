@@ -15,8 +15,8 @@ namespace Asuka.Modules.General
     public class ServerInfoModule : CommandModuleBase
     {
         public ServerInfoModule(
-            IOptions<DiscordOptions> config)
-            : base(config)
+            IOptions<DiscordOptions> config) :
+            base(config)
         {
         }
 

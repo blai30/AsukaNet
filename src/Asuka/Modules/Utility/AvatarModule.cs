@@ -13,8 +13,8 @@ namespace Asuka.Modules.Utility
     public class AvatarModule : CommandModuleBase
     {
         public AvatarModule(
-            IOptions<DiscordOptions> config)
-            : base(config)
+            IOptions<DiscordOptions> config) :
+            base(config)
         {
         }
 

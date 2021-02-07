@@ -12,8 +12,8 @@ namespace Asuka.Modules.General
     public class PingModule : CommandModuleBase
     {
         public PingModule(
-            IOptions<DiscordOptions> config)
-            : base(config)
+            IOptions<DiscordOptions> config) :
+            base(config)
         {
         }
 

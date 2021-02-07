@@ -16,8 +16,8 @@ namespace Asuka.Modules.Fun
 
         public FlipCoinModule(
             IOptions<DiscordOptions> config,
-            Random random)
-            : base(config)
+            Random random) :
+            base(config)
         {
             _random = random;
         }

@@ -18,8 +18,8 @@ namespace Asuka.Modules.General
 
         public HelpModule(
             IOptions<DiscordOptions> config,
-            CommandService commandService)
-            : base(config)
+            CommandService commandService) :
+            base(config)
         {
             _commandService = commandService;
         }

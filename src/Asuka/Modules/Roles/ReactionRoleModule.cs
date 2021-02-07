@@ -26,8 +26,8 @@ namespace Asuka.Modules.Roles
     public class ReactionRoleModule : CommandModuleBase
     {
         public ReactionRoleModule(
-            IOptions<DiscordOptions> config)
-            : base(config)
+            IOptions<DiscordOptions> config) :
+            base(config)
         {
         }
 

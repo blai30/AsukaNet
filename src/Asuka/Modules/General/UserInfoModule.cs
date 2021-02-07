@@ -13,8 +13,8 @@ namespace Asuka.Modules.General
     public class UserInfoModule : CommandModuleBase
     {
         public UserInfoModule(
-            IOptions<DiscordOptions> config)
-            : base(config)
+            IOptions<DiscordOptions> config) :
+            base(config)
         {
         }
 
