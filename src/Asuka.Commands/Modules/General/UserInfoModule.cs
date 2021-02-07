@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.General
+namespace Asuka.Commands.Modules.General
 {
     [Group("userinfo")]
     [Remarks("General")]
