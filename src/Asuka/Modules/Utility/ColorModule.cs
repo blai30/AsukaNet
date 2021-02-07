@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Numerics;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -19,6 +21,36 @@ namespace Asuka.Modules.Utility
             IOptions<DiscordOptions> config)
             : base(config)
         {
+        }
+
+        [Command]
+        [Remarks("color <keywords>")]
+        public async Task ColorAsync([Remainder] string keywords)
+        {
+            // Remove non-alphabetical characters and spaces from keywords.
+            var regex = new Regex("[^a-zA-Z]");
+            keywords = regex.Replace(keywords, "");
+            keywords = string.Join("", keywords.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
+
+            // SKColors contains predefined named color objects.
+            var type = typeof(SKColors);
+
+            // Get color by keyword color name using reflection.
+            FieldInfo info = type.GetField(keywords,
+                BindingFlags.IgnoreCase |
+                BindingFlags.Instance |
+                BindingFlags.Public |
+                BindingFlags.Static);
+            var temp = info?.GetValue(null);
+
+            // Reflection was successful.
+            if (temp is SKColor color)
+            {
+                await GetColorAsync(color.WithAlpha(0xFF));
+                return;
+            }
+
+            await ReplyInlineAsync("Could not understand color keywords... (┬┬﹏┬┬)");
         }
 
         [Command]
