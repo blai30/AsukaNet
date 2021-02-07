@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Net.Http;
 using Asuka.Configuration;
 using Asuka.Services;
@@ -39,6 +40,8 @@ namespace Asuka
 
                 // Reusable random number generator with random GUID seed.
                 .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
+
+                .AddSingleton<DataTable>()
 
                 // Http client for interfacing with Api requests.
                 .AddSingleton<HttpClient>()
