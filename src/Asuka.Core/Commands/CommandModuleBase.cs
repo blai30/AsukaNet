@@ -19,7 +19,7 @@ namespace Asuka.Commands
             Context.Channel.TriggerTypingAsync();
         }
 
-        public CommandModuleBase(
+        protected CommandModuleBase(
             IOptions<DiscordOptions> config)
             // DbRootController dbRoot)
         {
@@ -27,7 +27,18 @@ namespace Asuka.Commands
             // DbRoot = dbRoot;
         }
 
-        public Task ReplyReactionAsync(IEmote emote)
+        protected async Task ReplyInlineAsync(
+            string message = null,
+            bool isTTS = false,
+            Embed embed = null,
+            RequestOptions options = null,
+            AllowedMentions allowedMentions = null,
+            MessageReference messageReference = null)
+        {
+            await Context.Message.ReplyAsync(message, isTTS, embed, allowedMentions, options).ConfigureAwait(false);
+        }
+
+        protected Task ReplyReactionAsync(IEmote emote)
         {
             return Context.Message.AddReactionAsync(emote);
         }
