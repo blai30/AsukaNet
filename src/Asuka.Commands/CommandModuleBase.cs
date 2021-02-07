@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Commands
 {
-    public class CommandModuleBase : ModuleBase<SocketCommandContext>
+    public abstract class CommandModuleBase : ModuleBase<SocketCommandContext>
     {
         // TODO: Add root database controller as protected field.
 
