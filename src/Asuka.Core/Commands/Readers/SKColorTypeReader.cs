@@ -11,16 +11,10 @@ namespace Asuka.Commands.Readers
         {
             await Task.Yield();
 
-            // Ignore pound sign hex prefix.
-            if (input.StartsWith("#"))
-            {
-                input = input.Substring(1);
-            }
-
-            // Get color from hex.
+            // Get color from hex, TryParse will take care of the pound (#) symbol.
             return SKColor.TryParse(input, out var color) ?
                 TypeReaderResult.FromSuccess(color) :
-                TypeReaderResult.FromError(CommandError.ParseFailed, "Parameter is not a valid hex.");
+                TypeReaderResult.FromError(CommandError.ParseFailed, "Not a valid hex!! (*/ω＼*)");
         }
     }
 }
