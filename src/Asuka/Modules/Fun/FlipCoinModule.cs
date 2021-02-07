@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Asuka.Commands;
 using Asuka.Configuration;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Commands.Modules.Fun
+namespace Asuka.Modules.Fun
 {
     [Group("flipcoin")]
     [Remarks("Fun")]

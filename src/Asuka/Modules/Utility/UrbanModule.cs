@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Asuka.Commands;
 using Asuka.Configuration;
 using Asuka.Models.API.Urban;
 using Discord;
@@ -9,7 +10,7 @@ using Discord.Commands;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Commands.Modules.Utility
+namespace Asuka.Modules.Utility
 {
     [Group("urban")]
     [Remarks("Utility")]

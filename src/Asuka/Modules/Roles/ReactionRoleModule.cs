@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
+using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Commands.Modules.Roles
+namespace Asuka.Modules.Roles
 {
     [Group("reactionrole")]
     [Alias("rr")]

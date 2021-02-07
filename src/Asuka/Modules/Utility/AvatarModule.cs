@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
+using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Commands.Modules.Utility
+namespace Asuka.Modules.Utility
 {
     [Group("avatar")]
     [Remarks("Utility")]

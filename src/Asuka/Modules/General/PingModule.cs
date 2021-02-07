@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Asuka.Commands;
 using Asuka.Configuration;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Commands.Modules.General
+namespace Asuka.Modules.General
 {
     [Group("ping")]
     [Remarks("General")]
