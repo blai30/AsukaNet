@@ -32,9 +32,16 @@ namespace Asuka.Modules.General
         {
             // Get module by name or alias.
             var module = _commandService.Modules
-                .First(moduleInfo =>
+                .FirstOrDefault(moduleInfo =>
                     moduleInfo.Name == commandName ||
                     moduleInfo.Aliases.Contains(commandName));
+
+            // Specified module is invalid.
+            if (module == null)
+            {
+                await ReplyInlineAsync($"Command `{commandName}` does not exist.");
+                return;
+            }
 
             // List the module usage examples using the command remarks.
             string usage = string.Empty;
