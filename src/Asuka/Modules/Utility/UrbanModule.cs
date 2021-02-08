@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
@@ -7,6 +6,7 @@ using Asuka.Configuration;
 using Asuka.Models.API.Urban;
 using Discord;
 using Discord.Commands;
+using Humanizer;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
@@ -43,7 +43,7 @@ namespace Asuka.Modules.Utility
             // Term did not yield results.
             if (results?.UrbanEntries == null || results.UrbanEntries.Count <= 0)
             {
-                await ReplyAsync($"`{term.Truncate(32, true)}` was not found in the Urban Dictionary.");
+                await ReplyAsync($"`{term.Truncate(32, "...")}` was not found in the Urban Dictionary.");
                 return;
             }
 
@@ -60,10 +60,10 @@ namespace Asuka.Modules.Utility
                     $"👎 {entry.ThumbsDown}")
                 .AddField(
                     "Definition",
-                    entry.Definition.Truncate(1024, true))
+                    entry.Definition.Truncate(1024, "..."))
                 .AddField(
                     "Example",
-                    entry.Example.Truncate(1024, true))
+                    entry.Example.Truncate(1024, "..."))
                 .AddField(
                     "Author",
                     entry.Author)
