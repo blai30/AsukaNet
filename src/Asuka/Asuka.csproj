@@ -31,6 +31,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Asuka.Common\Asuka.Common.csproj" />
       <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
+      <ProjectReference Include="..\Asuka.Database\Asuka.Database.csproj" />
       <ProjectReference Include="..\Asuka.Extensions\Asuka.Extensions.csproj" />
     </ItemGroup>
 

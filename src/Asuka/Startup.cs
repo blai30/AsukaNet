@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySql.Data.MySqlClient;
 using Serilog;
 
 namespace Asuka
@@ -45,6 +46,8 @@ namespace Asuka
 
                 // Http client for interfacing with Api requests.
                 .AddSingleton<HttpClient>()
+
+                .AddTransient<IDbConnection>(_ => new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")))
 
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig

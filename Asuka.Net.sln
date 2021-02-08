@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Tests", "tests\Asuka.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Common", "src\Asuka.Common\Asuka.Common.csproj", "{99B5ED91-B160-4605-93C7-C24B6C8B5B1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Database", "src\Asuka.Database\Asuka.Database.csproj", "{ACEA074E-F93B-4785-B2BA-257DC7F704FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,5 +47,9 @@ Global
 		{99B5ED91-B160-4605-93C7-C24B6C8B5B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99B5ED91-B160-4605-93C7-C24B6C8B5B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99B5ED91-B160-4605-93C7-C24B6C8B5B1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
