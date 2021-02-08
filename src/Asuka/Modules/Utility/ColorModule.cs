@@ -24,6 +24,13 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Remarks("color <hex>")]
+        public async Task ColorAsync(SKColor hex)
+        {
+            await GetColorAsync(hex);
+        }
+
+        [Command]
         [Remarks("color <keywords>")]
         public async Task ColorAsync([Remainder] string keywords)
         {
@@ -46,18 +53,11 @@ namespace Asuka.Modules.Utility
             // Reflection was successful.
             if (temp is SKColor color)
             {
-                await GetColorAsync(color.WithAlpha(0xFF));
+                await GetColorAsync(color);
                 return;
             }
 
             await ReplyInlineAsync("Could not understand color keywords... (┬┬﹏┬┬)");
-        }
-
-        [Command]
-        [Remarks("color <hex>")]
-        public async Task ColorAsync(SKColor color)
-        {
-            await GetColorAsync(color.WithAlpha(0xFF));
         }
 
         [Command]
@@ -70,12 +70,15 @@ namespace Asuka.Modules.Utility
             b = Math.Clamp(b, 0, 255);
 
             // Create color object from rgb values.
-            var color = new SKColor((byte) r, (byte) g, (byte) b, 255);
+            var color = new SKColor((byte) r, (byte) g, (byte) b);
             await GetColorAsync(color);
         }
 
         private async Task GetColorAsync(SKColor color)
         {
+            // Force alpha to 255.
+            color = color.WithAlpha(0xFF);
+
             // Get raw uint32 value from color by extracting rgb values.
             uint raw = (uint) ((color.Red << 16) | (color.Green << 8) | color.Blue);
 
