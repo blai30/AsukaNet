@@ -1,4 +1,6 @@
-﻿namespace Asuka.Database.Models
+﻿using System;
+
+namespace Asuka.Database.Models
 {
     public class Tag
     {
@@ -7,6 +9,8 @@
         public string Content { get; set; }
         public ulong UserId { get; set; }
         public ulong GuildId { get; set; }
-        public int UsageCount { get; set; } = 0;
+        public int UsageCount { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
