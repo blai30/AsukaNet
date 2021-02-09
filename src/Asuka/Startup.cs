@@ -75,6 +75,7 @@ namespace Asuka
 
                 // Background hosted services.
                 .AddHostedService<LoggingService>()
+                .AddHostedService<DatabaseService>()
                 .AddHostedService<StartupService>()
                 .AddHostedService<CommandHandlerService>()
                 ;
