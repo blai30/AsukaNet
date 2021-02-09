@@ -1,34 +1,28 @@
-version: "3"
+version: '3.8'
+
+volumes:
+  db_data:
 
 services:
   asuka:
     container_name: asuka
+    image: asuka
     restart: always
+    env_file:
+      - .env
     build:
       context: .
-      dockerfile: Dockerfile
-#    depends_on:
-#      - seq
-#      - mysql
-#    links:
-#      - seq
-#      - mysql
-#
-#  seq:
-#    container_name: seq
-#    restart: unless-stopped
-#    image: datalust/seq:latest
-#    environment:
-#      ACCEPT_EULA: Y
-#
-#  mysql:
-#    container_name: mysql
-#    image: mysql
-#    restart: always
-#    ports:
-#      - 8080:8080
-#    environment:
-#      MYSQL_HOST: ${DB_HOST}
-#      MYSQL_USERNAME: ${DB_USERNAME}
-#      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-#      MYSQL_DATABASE: ${DB_SCHEMA}
+      dockerfile: src/Asuka/Dockerfile
+    # Application might continue crashing until
+    # dependent service(s) fully initialize
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: mysql
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
