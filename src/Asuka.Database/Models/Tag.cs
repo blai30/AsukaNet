@@ -2,16 +2,11 @@
 {
     public class Tag
     {
-        public ulong Id { get; set; }
-
+        public int Id { get; set; }
         public string Name { get; set; }
-
         public string Content { get; set; }
-
         public ulong UserId { get; set; }
-
         public ulong GuildId { get; set; }
-
         public int UsageCount { get; set; } = 0;
     }
 }

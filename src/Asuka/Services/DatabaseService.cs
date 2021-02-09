@@ -28,13 +28,14 @@ namespace Asuka.Services
             var connectionString = _db.ConnectionString;
             EnsureDatabase.For.MySqlDatabase(connectionString);
 
-            // Run database upgrade migration scripts.
+            // Load sql migration scripts from assembly.
             var upgrader = DeployChanges.To
                 .MySqlDatabase(connectionString)
                 .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
                 .LogToConsole()
                 .Build();
 
+            // Run database upgrade migration scripts.
             var result = upgrader.PerformUpgrade();
             if (!result.Successful)
             {
