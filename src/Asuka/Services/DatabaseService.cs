@@ -25,8 +25,6 @@ namespace Asuka.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            CustomMappers.Initialize();
-
             // Get connection string and ensure the database is created if not exists.
             var connectionString = _db.ConnectionString;
             EnsureDatabase.For.MySqlDatabase(connectionString);

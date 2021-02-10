@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Database;
 using Asuka.Database.Models;
-using Asuka.Database.Repositories;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
 
@@ -14,14 +14,14 @@ namespace Asuka.Modules.Tags
     [RequireContext(ContextType.Guild)]
     public class TagModule : CommandModuleBase
     {
-        private readonly TagRepository _tags;
+        private readonly IUnitOfWork _unitOfWork;
 
         public TagModule(
             IOptions<DiscordOptions> config,
-            TagRepository tags) :
+            IUnitOfWork unitOfWork) :
             base(config)
         {
-            _tags = tags;
+            _unitOfWork = unitOfWork;
         }
 
         [Command("add")]
@@ -37,7 +37,8 @@ namespace Asuka.Modules.Tags
                 GuildId = Context.Guild.Id
             };
 
-            await _tags.InsertAsync(tag);
+            await _unitOfWork.Tags.AddAsync(tag);
+            _unitOfWork.Complete();
             await ReplyAsync($"Added new tag `{tag.Name}`.");
         }
 
@@ -54,7 +55,7 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            var tag = await _tags.GetByNameAsync(tagName);
+            var tag = await _unitOfWork.Tags.GetByNameAsync(tagName);
 
             if (tag == null)
             {
