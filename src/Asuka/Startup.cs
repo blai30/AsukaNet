@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Net.Http;
 using Asuka.Configuration;
+using Asuka.Database.Repositories;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
@@ -48,6 +49,7 @@ namespace Asuka
                 .AddSingleton<HttpClient>()
 
                 .AddTransient<IDbConnection>(_ => new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                .AddTransient<TagRepository>()
 
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig

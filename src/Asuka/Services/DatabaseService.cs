@@ -24,6 +24,9 @@ namespace Asuka.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            // Map properties to snake_case columns.
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             // Get connection string and ensure the database is created if not exists.
             var connectionString = _db.ConnectionString;
             EnsureDatabase.For.MySqlDatabase(connectionString);

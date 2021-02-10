@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Asuka.Database.Models
 {
+    [Table("tags")]
     public class Tag
     {
         public int Id { get; set; }
@@ -10,7 +12,7 @@ namespace Asuka.Database.Models
         public ulong UserId { get; set; }
         public ulong GuildId { get; set; }
         public int UsageCount { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }
