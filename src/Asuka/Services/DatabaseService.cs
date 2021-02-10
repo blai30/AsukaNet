@@ -3,6 +3,7 @@ using System.Data;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Asuka.Database;
 using DbUp;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,8 +25,7 @@ namespace Asuka.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            // Map properties to snake_case columns.
-            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+            CustomMappers.Initialize();
 
             // Get connection string and ensure the database is created if not exists.
             var connectionString = _db.ConnectionString;

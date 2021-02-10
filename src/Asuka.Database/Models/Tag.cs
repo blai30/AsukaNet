@@ -1,9 +1,7 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Asuka.Database.Models
 {
-    [Table("tags")]
     public class Tag
     {
         public int Id { get; set; }

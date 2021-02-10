@@ -33,8 +33,8 @@ namespace Asuka.Modules.Tags
             {
                 Name = tagName,
                 Content = tagContent,
-                GuildId = Context.Guild.Id,
-                UserId = Context.User.Id
+                UserId = Context.User.Id,
+                GuildId = Context.Guild.Id
             };
 
             await _tags.InsertAsync(tag);
@@ -54,15 +54,15 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            // var tag = await _tags.GetAsync(t => t.Name == tagName);
-            //
-            // if (tag == null)
-            // {
-            //     await ReplyAsync($"Tag `{tagName}` does not exist. .·´¯`(>▂<)´¯`·. ");
-            //     return;
-            // }
-            //
-            // await ReplyAsync(tag.Content);
+            var tag = await _tags.GetByNameAsync(tagName);
+
+            if (tag == null)
+            {
+                await ReplyAsync($"Tag `{tagName}` does not exist. .·´¯`(>▂<)´¯`·. ");
+                return;
+            }
+
+            await ReplyAsync(tag.Content);
         }
 
         [Command("remove")]
