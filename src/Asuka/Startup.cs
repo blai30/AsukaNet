@@ -2,12 +2,14 @@ using System;
 using System.Data;
 using System.Net.Http;
 using Asuka.Configuration;
+using Asuka.Database;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySql.Data.MySqlClient;
 using Serilog;
 
 namespace Asuka
@@ -46,6 +48,9 @@ namespace Asuka
                 // Http client for interfacing with Api requests.
                 .AddSingleton<HttpClient>()
 
+                .AddTransient<IDbConnection>(_ => new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                .AddTransient<IUnitOfWork>(_ => new UnitOfWork(Configuration.GetConnectionString("DefaultConnection")))
+
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
                 {
@@ -72,6 +77,7 @@ namespace Asuka
 
                 // Background hosted services.
                 .AddHostedService<LoggingService>()
+                .AddHostedService<DatabaseService>()
                 .AddHostedService<StartupService>()
                 .AddHostedService<CommandHandlerService>()
                 ;
