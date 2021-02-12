@@ -28,7 +28,7 @@ namespace Asuka.Modules.Fun
         {
             // Generates a random number 0 or 1.
             var die = _random.Next(1, sides + 1);
-            await ReplyAsync($"🎲 Rolled **{die}** from {sides}-sided die.");
+            await ReplyAsync($":game_die: Rolled **{die}** from {sides}-sided die.");
         }
     }
 }
