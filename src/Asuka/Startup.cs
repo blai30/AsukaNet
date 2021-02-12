@@ -2,11 +2,12 @@ using System;
 using System.Data;
 using System.Net.Http;
 using Asuka.Configuration;
-using Asuka.Database.Controllers;
+using Asuka.Database;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -39,20 +40,6 @@ namespace Asuka
                 .Configure<DiscordOptions>(Configuration.GetSection("Discord"))
                 .Configure<DatabaseOptions>(Configuration.GetSection("Database"))
 
-                // Mathematics.
-                .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
-                .AddSingleton<DataTable>()
-
-                // Http client for interfacing with Api requests.
-                .AddSingleton<HttpClient>()
-
-                .AddDbContext<BotContext>(builder =>
-                {
-                })
-
-                // .AddTransient<IDbConnection>(_ => new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                // .AddTransient<IUnitOfWork>(_ => new UnitOfWork(Configuration.GetConnectionString("DefaultConnection")))
-
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
                 {
@@ -77,10 +64,29 @@ namespace Asuka
                     IgnoreExtraArgs = true
                 }))
 
+                .AddDbContext<DiscordBotContext>(options =>
+                {
+                    var connectionString = Configuration.GetConnectionString("Docker");
+                    options
+                        .UseMySql(
+                            connectionString,
+                            ServerVersion.AutoDetect(connectionString));
+                })
+
+                // Http client for interfacing with Api requests.
+                .AddSingleton<HttpClient>()
+
+                // .AddTransient<IDbConnection>(_ => new MySqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                // .AddTransient<IUnitOfWork>(_ => new UnitOfWork(Configuration.GetConnectionString("DefaultConnection")))
+
+                // Mathematics.
+                .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
+                .AddSingleton<DataTable>()
+
                 // Background hosted services.
                 .AddHostedService<LoggingService>()
-                .AddHostedService<StartupService>()
                 .AddHostedService<CommandHandlerService>()
+                .AddHostedService<StartupService>()
                 ;
         }
     }
