@@ -64,6 +64,7 @@ namespace Asuka
                     IgnoreExtraArgs = true
                 }))
 
+                // Data access.
                 .AddDbContext<AsukaDbContext>()
                 .AddTransient<AsukaDbController>()
 
