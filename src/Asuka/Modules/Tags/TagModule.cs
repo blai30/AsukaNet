@@ -62,7 +62,7 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            var content = await _controller.GetAsync(new Tag { Name = tagName });
+            var content = await _controller.GetTagAsync(tagName);
 
             // No such tag exists in guild.
             if (string.IsNullOrEmpty(content))

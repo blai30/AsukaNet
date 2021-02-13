@@ -36,14 +36,12 @@ namespace Asuka.Database.Controllers
         }
 
         /// <summary>
-        /// Gets the content of a tag entity from the database by name.
+        /// Gets the content of a tag identified by name.
         /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        public async Task<string> GetAsync(Tag tag)
+        /// <param name="tagName"></param>
+        /// <returns>Tag content</returns>
+        public async Task<string> GetTagAsync(string tagName)
         {
-            var tagName = tag.Name;
-
             // Get content from tag retrieved by name.
             var content = await Context.Tags.AsQueryable()
                 .Where(t => t.Name == tagName)
