@@ -1,7 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Database;
+using Asuka.Database.Controllers;
 using Asuka.Database.Models;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
@@ -14,14 +15,14 @@ namespace Asuka.Modules.Tags
     [RequireContext(ContextType.Guild)]
     public class TagModule : CommandModuleBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly AsukaDbController _controller;
 
         public TagModule(
             IOptions<DiscordOptions> config,
-            IUnitOfWork unitOfWork) :
+            AsukaDbController controller) :
             base(config)
         {
-            _unitOfWork = unitOfWork;
+            _controller = controller;
         }
 
         [Command("add")]
@@ -37,9 +38,15 @@ namespace Asuka.Modules.Tags
                 GuildId = Context.Guild.Id
             };
 
-            await _unitOfWork.Tags.AddAsync(tag);
-            _unitOfWork.Complete();
-            await ReplyAsync($"Added new tag `{tag.Name}`.");
+            try
+            {
+                await _controller.AddAsync(tag);
+                await ReplyAsync($"Added new tag `{tag.Name}`.");
+            }
+            catch
+            {
+                await ReplyAsync($"Error adding `{tagName}`, either a tag with the same name already exists or the input parameters are invalid.");
+            }
         }
 
         [Command("edit")]
@@ -55,15 +62,16 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            var tag = await _unitOfWork.Tags.GetByNameAsync(tagName);
+            var content = await _controller.GetTagAsync(tagName);
 
-            if (tag == null)
+            // No such tag exists in guild.
+            if (string.IsNullOrEmpty(content))
             {
-                await ReplyAsync($"Tag `{tagName}` does not exist. .·´¯`(>▂<)´¯`·. ");
+                await ReplyAsync($@"Tag `{tagName}` does not exist. .·´¯\`(>▂<)´¯\`·. ");
                 return;
             }
 
-            await ReplyAsync(tag.Content);
+            await ReplyAsync(content);
         }
 
         [Command("remove")]

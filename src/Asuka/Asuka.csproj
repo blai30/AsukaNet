@@ -35,8 +35,4 @@
       <ProjectReference Include="..\Asuka.Extensions\Asuka.Extensions.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Include="Migrations\*.sql" />
-    </ItemGroup>
-
 </Project>

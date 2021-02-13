@@ -122,7 +122,7 @@ namespace Asuka.Services
             if (!command.IsSpecified || result.IsSuccess) return;
 
             // Command not successful, reply with error.
-            await context.Message.ReplyAsync(result.ToString());
+            await context.Message.ReplyAsync(result.ToString(), allowedMentions: AllowedMentions.None);
         }
     }
 }
