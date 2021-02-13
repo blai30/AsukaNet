@@ -8,10 +8,7 @@ namespace Asuka.Commands
 {
     public abstract class CommandModuleBase : ModuleBase<SocketCommandContext>
     {
-        // TODO: Add root database controller as protected field.
-
         protected readonly IOptions<DiscordOptions> Config;
-        // protected readonly DbRootController DbRoot;
 
         protected override void BeforeExecute(CommandInfo command)
         {
@@ -21,10 +18,8 @@ namespace Asuka.Commands
 
         protected CommandModuleBase(
             IOptions<DiscordOptions> config)
-            // DbRootController dbRoot)
         {
             Config = config;
-            // DbRoot = dbRoot;
         }
 
         protected async Task ReplyInlineAsync(
