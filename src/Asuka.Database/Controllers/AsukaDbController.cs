@@ -20,11 +20,14 @@ namespace Asuka.Database.Controllers
         /// <returns>The entity that was inserted.</returns>
         public async Task<Tag> AddAsync(Tag tag)
         {
-            await Context.Tags.AddAsync(tag);
+            using var scope = _scopeFactory.CreateScope();
+            await using var context = scope.ServiceProvider.GetRequiredService<AsukaDbContext>();
+
+            await context.Tags.AddAsync(tag);
 
             try
             {
-                await Context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (Exception e)
             {
@@ -42,8 +45,11 @@ namespace Asuka.Database.Controllers
         /// <returns>Tag content</returns>
         public async Task<string> GetTagAsync(string tagName)
         {
+            using var scope = _scopeFactory.CreateScope();
+            await using var context = scope.ServiceProvider.GetRequiredService<AsukaDbContext>();
+
             // Get content from tag retrieved by name.
-            var content = await Context.Tags.AsQueryable()
+            string content = await context.Tags.AsQueryable()
                 .Where(t => t.Name == tagName)
                 .Select(t => t.Content)
                 .FirstOrDefaultAsync();
