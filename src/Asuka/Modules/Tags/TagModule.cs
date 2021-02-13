@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Database;
+using Asuka.Database.Controllers;
 using Asuka.Database.Models;
 using Discord.Commands;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Tags
@@ -16,14 +15,14 @@ namespace Asuka.Modules.Tags
     [RequireContext(ContextType.Guild)]
     public class TagModule : CommandModuleBase
     {
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly AsukaDbController _controller;
 
         public TagModule(
             IOptions<DiscordOptions> config,
-            IServiceScopeFactory scopeFactory) :
+            AsukaDbController controller) :
             base(config)
         {
-            _scopeFactory = scopeFactory;
+            _controller = controller;
         }
 
         [Command("add")]
@@ -39,12 +38,15 @@ namespace Asuka.Modules.Tags
                 GuildId = Context.Guild.Id
             };
 
-            using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<DiscordBotContext>();
-
-            await context.Tags.AddAsync(tag);
-            await context.SaveChangesAsync();
-            await ReplyAsync($"Added new tag `{tag.Name}`.");
+            try
+            {
+                await _controller.AddAsync(tag);
+                await ReplyAsync($"Added new tag `{tag.Name}`.");
+            }
+            catch
+            {
+                await ReplyAsync($"Error adding `{tagName}`, either a tag with the same name already exists or the input parameters are invalid.");
+            }
         }
 
         [Command("edit")]
@@ -60,17 +62,16 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<DiscordBotContext>();
-            var tag = await context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+            var content = await _controller.GetAsync(new Tag { Name = tagName });
 
-            if (tag == null)
+            // No such tag exists in guild.
+            if (string.IsNullOrEmpty(content))
             {
-                await ReplyAsync($"Tag `{tagName}` does not exist. .·´¯`(>▂<)´¯`·. ");
+                await ReplyAsync($@"Tag `{tagName}` does not exist. .·´¯\`(>▂<)´¯\`·. ");
                 return;
             }
 
-            await ReplyAsync(tag.Content);
+            await ReplyAsync(content);
         }
 
         [Command("remove")]
