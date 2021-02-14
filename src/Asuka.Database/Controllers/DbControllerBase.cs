@@ -7,6 +7,15 @@ namespace Asuka.Database.Controllers
     {
         protected readonly IServiceScopeFactory _scopeFactory;
 
+        protected T Context
+        {
+            get
+            {
+                var scope = _scopeFactory.CreateScope();
+                return scope.ServiceProvider.GetRequiredService<T>();
+            }
+        }
+
         public DbControllerBase(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;

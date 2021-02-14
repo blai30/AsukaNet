@@ -20,9 +20,7 @@ namespace Asuka.Database.Controllers
         /// <returns>The entity that was inserted.</returns>
         public async Task<Tag> AddAsync(Tag tag)
         {
-            using var scope = _scopeFactory.CreateScope();
-            await using var context = scope.ServiceProvider.GetRequiredService<AsukaDbContext>();
-
+            await using var context = Context;
             await context.Tags.AddAsync(tag);
 
             try
@@ -45,9 +43,7 @@ namespace Asuka.Database.Controllers
         /// <returns>Tag content</returns>
         public async Task<string> GetTagAsync(string tagName)
         {
-            using var scope = _scopeFactory.CreateScope();
-            await using var context = scope.ServiceProvider.GetRequiredService<AsukaDbContext>();
-
+            await using var context = Context;
             // Get content from tag retrieved by name.
             string content = await context.Tags.AsQueryable()
                 .Where(t => t.Name == tagName)
