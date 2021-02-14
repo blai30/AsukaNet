@@ -15,7 +15,7 @@ namespace Asuka.Database.Mappers
             builder.Property(e => e.CreatedAt).ValueGeneratedOnAdd();
             builder.Property(e => e.UpdatedAt).ValueGeneratedOnAddOrUpdate();
 
-            builder.HasIndex(e => new { e.Name, e.GuildId }, "unique_per_guild").IsUnique();
+            builder.HasIndex(e => new { e.Name, e.GuildSnowflake }, "unique_per_guild").IsUnique();
         }
     }
 }
