@@ -12,7 +12,7 @@ namespace Asuka.Database
 
         public DbSet<Tag> Tags { get; set; }
 
-        public AsukaDbContext(IServiceScopeFactory scopeFactory, DbContextOptions<AsukaDbContext> options) : base(options)
+        public AsukaDbContext(DbContextOptions<AsukaDbContext> options, IServiceScopeFactory scopeFactory) : base(options)
         {
             _scopeFactory = scopeFactory;
         }
@@ -20,7 +20,7 @@ namespace Asuka.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             using var scope = _scopeFactory.CreateScope();
-            var connectionString = scope.ServiceProvider
+            string connectionString = scope.ServiceProvider
                 .GetRequiredService<IConfiguration>()
                 .GetConnectionString("Docker");
 
