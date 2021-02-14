@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Asuka.Database;
 using Asuka.Database.Models;
+using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -40,9 +41,9 @@ namespace Asuka.Modules.Tags
             };
 
             await using var context = _factory.CreateDbContext();
+            await context.AddAsync(tag);
             try
             {
-                await context.AddAsync(tag);
                 await context.SaveChangesAsync();
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
@@ -57,7 +58,26 @@ namespace Asuka.Modules.Tags
         [Remarks("Edit an existing tag from the server.")]
         public async Task EditAsync(string tagName, string tagContent)
         {
-            await Task.CompletedTask;
+            await using var context = _factory.CreateDbContext();
+
+            // Get tag by name.
+            var tag = await context.Tags.AsQueryable()
+                .Where(t => t.Name == tagName)
+                .FirstOrDefaultAsync();
+
+            tag.Content = tagContent;
+            context.Tags.Update(tag);
+
+            try
+            {
+                await context.SaveChangesAsync();
+                await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
+            }
+            catch
+            {
+                await ReplyAsync($"Error updating tag `{tagName}`.");
+                throw;
+            }
         }
 
         [Command("get")]
@@ -67,7 +87,7 @@ namespace Asuka.Modules.Tags
         {
             await using var context = _factory.CreateDbContext();
 
-            // Get tag by name.
+            // Get content from tag by name.
             string content = await context.Tags.AsQueryable()
                 .Where(t => t.Name == tagName)
                 .Select(t => t.Content)
@@ -88,7 +108,25 @@ namespace Asuka.Modules.Tags
         [Remarks("Remove a tag from the server.")]
         public async Task RemoveAsync(string tagName)
         {
-            await Task.CompletedTask;
+            await using var context = _factory.CreateDbContext();
+
+            // Get tag by name.
+            var tag = await context.Tags.AsQueryable()
+                .Where(t => t.Name == tagName)
+                .FirstOrDefaultAsync();
+
+            context.Tags.Remove(tag);
+
+            try
+            {
+                await context.SaveChangesAsync();
+                await ReplyAsync($"Removed tag `{tag.Name}`.");
+            }
+            catch
+            {
+                await ReplyAsync($"Error removing tag `{tagName}`.");
+                throw;
+            }
         }
 
         [Command("list")]
@@ -96,7 +134,17 @@ namespace Asuka.Modules.Tags
         [Remarks("List all tags from the server.")]
         public async Task ListAsync()
         {
-            await Task.CompletedTask;
+            await using var context = _factory.CreateDbContext();
+
+            // Get list of tags from this guild.
+            var tags = await context.Tags.AsQueryable()
+                .Where(tag => tag.GuildId == Context.Guild.Id)
+                .Select(tag => $"`{tag.Name}`")
+                .ToListAsync();
+
+            // Join list of tag names with comma.
+            string list = string.Join(", ", tags);
+            await ReplyAsync("Tags: " + list);
         }
 
         [Command("info")]
@@ -104,7 +152,30 @@ namespace Asuka.Modules.Tags
         [Remarks("Show info for a tag from the server.")]
         public async Task InfoAsync(string tagName)
         {
-            await Task.CompletedTask;
+            await using var context = _factory.CreateDbContext();
+
+            // Get tag by name.
+            var tag = await context.Tags.AsQueryable()
+                .Where(t => t.Name == tagName)
+                .FirstOrDefaultAsync();
+
+            if (tag == null)
+            {
+                await ReplyAsync($"Tag `{tagName}` does not exist in this server.");
+                return;
+            }
+
+            var embed = new EmbedBuilder()
+                .WithTitle(tag.Name)
+                .WithColor(Config.Value.EmbedColor)
+                .WithDescription(tag.Content)
+                .AddField("Added by", Context.Client.GetUser(tag.UserId).Mention)
+                .AddField("Usage count", tag.UsageCount)
+                .AddField("Created", tag.CreatedAt.GetValueOrDefault().ToString("U"))
+                .AddField("Last Updated", tag.UpdatedAt.GetValueOrDefault().ToString("U"))
+                .Build();
+
+            await ReplyAsync(embed: embed);
         }
     }
 }
