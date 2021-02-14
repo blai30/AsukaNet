@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6DE11CE-15A7-4C15-A5B3-054348222659}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
 		.env = .env
 		.gitignore = .gitignore
 		docker-compose.yml = docker-compose.yml
@@ -12,15 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka", "src\Asuka\Asuka.csproj", "{0FC9D60D-504E-455F-B90D-5476660C74E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Common", "src\Asuka.Common\Asuka.Common.csproj", "{99B5ED91-B160-4605-93C7-C24B6C8B5B1E}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Core", "src\Asuka.Core\Asuka.Core.csproj", "{5B02A340-AA0B-4992-924A-8F6855514EF9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Database", "src\Asuka.Database\Asuka.Database.csproj", "{ACEA074E-F93B-4785-B2BA-257DC7F704FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Extensions", "src\Asuka.Extensions\Asuka.Extensions.csproj", "{98D48BF8-38E6-4906-9CAE-064277564CEC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Tests", "tests\Asuka.Tests\Asuka.Tests.csproj", "{7F7BD0D1-8043-4374-B5D4-0FF5295E4884}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Common", "src\Asuka.Common\Asuka.Common.csproj", "{99B5ED91-B160-4605-93C7-C24B6C8B5B1E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asuka.Database", "src\Asuka.Database\Asuka.Database.csproj", "{ACEA074E-F93B-4785-B2BA-257DC7F704FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
