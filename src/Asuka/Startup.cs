@@ -3,7 +3,6 @@ using System.Data;
 using System.Net.Http;
 using Asuka.Configuration;
 using Asuka.Database;
-using Asuka.Database.Controllers;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
@@ -16,7 +15,7 @@ namespace Asuka
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; set; }
+        private IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
@@ -65,8 +64,7 @@ namespace Asuka
                 }))
 
                 // Data access.
-                .AddDbContext<AsukaDbContext>()
-                .AddTransient<AsukaDbController>()
+                .AddDbContextFactory<AsukaDbContext>()
 
                 // Http client for interfacing with Api requests.
                 .AddSingleton<HttpClient>()

@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Database.Controllers;
+using Asuka.Database;
 using Asuka.Database.Models;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Tags
@@ -14,14 +16,14 @@ namespace Asuka.Modules.Tags
     [RequireContext(ContextType.Guild)]
     public class TagModule : CommandModuleBase
     {
-        private readonly AsukaDbController _controller;
+        private readonly IDbContextFactory<AsukaDbContext> _factory;
 
         public TagModule(
             IOptions<DiscordOptions> config,
-            AsukaDbController controller) :
+            IDbContextFactory<AsukaDbContext> factory) :
             base(config)
         {
-            _controller = controller;
+            _factory = factory;
         }
 
         [Command("add")]
@@ -37,9 +39,11 @@ namespace Asuka.Modules.Tags
                 GuildId = Context.Guild.Id
             };
 
+            await using var context = _factory.CreateDbContext();
             try
             {
-                await _controller.AddAsync(tag);
+                await context.AddAsync(tag);
+                await context.SaveChangesAsync();
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
             catch
@@ -61,7 +65,12 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            var content = await _controller.GetTagAsync(tagName);
+            // string content = await _controller.GetTagAsync(tagName);
+            await using var context = _factory.CreateDbContext();
+            string content = await context.Tags.AsQueryable()
+                .Where(t => t.Name == tagName)
+                .Select(t => t.Content)
+                .FirstOrDefaultAsync();
 
             // No such tag exists in guild.
             if (string.IsNullOrEmpty(content))
