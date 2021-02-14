@@ -6,6 +6,6 @@
         public ulong GuildId { get; set; }
         public ulong MessageId { get; set; }
         public ulong RoleId { get; set; }
-        public string EmoteName { get; set; }
+        public string Emote { get; set; }
     }
 }
