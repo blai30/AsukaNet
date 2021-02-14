@@ -65,8 +65,9 @@ namespace Asuka.Modules.Tags
         [Remarks("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
-            // string content = await _controller.GetTagAsync(tagName);
             await using var context = _factory.CreateDbContext();
+
+            // Get tag by name.
             string content = await context.Tags.AsQueryable()
                 .Where(t => t.Name == tagName)
                 .Select(t => t.Content)
