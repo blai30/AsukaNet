@@ -63,7 +63,7 @@ namespace Asuka
                     IgnoreExtraArgs = true
                 }))
 
-                // Data access.
+                // Data access. Using factory for easy using statement and disposal.
                 .AddDbContextFactory<AsukaDbContext>()
 
                 // Http client for interfacing with Api requests.

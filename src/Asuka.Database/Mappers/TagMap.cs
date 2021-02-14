@@ -7,17 +7,13 @@ namespace Asuka.Database.Mappers
     /// <summary>
     /// Build Tag model for tags table.
     /// </summary>
-    public class TagEntityType : IEntityTypeConfiguration<Tag>
+    public class TagMap : IEntityTypeConfiguration<Tag>
     {
         public void Configure(EntityTypeBuilder<Tag> builder)
         {
-            builder.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp")
-                .ValueGeneratedOnAdd();
-
-            builder.Property(e => e.UpdatedAt)
-                .HasColumnType("timestamp")
-                .ValueGeneratedOnAddOrUpdate();
+            // Let database generate these values.
+            builder.Property(e => e.CreatedAt).ValueGeneratedOnAdd();
+            builder.Property(e => e.UpdatedAt).ValueGeneratedOnAddOrUpdate();
 
             builder.HasIndex(e => new { e.Name, e.GuildId }, "unique_per_guild").IsUnique();
         }
