@@ -3,9 +3,9 @@
     public class ReactionRole
     {
         public int Id { get; set; }
-        public ulong GuildSnowflake { get; set; }
-        public ulong MessageSnowflake { get; set; }
-        public ulong RoleSnowflake { get; set; }
+        public ulong GuildId { get; set; }
+        public ulong MessageId { get; set; }
+        public ulong RoleId { get; set; }
         public string Emote { get; set; }
     }
 }

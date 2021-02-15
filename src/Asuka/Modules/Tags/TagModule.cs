@@ -36,8 +36,8 @@ namespace Asuka.Modules.Tags
             {
                 Name = tagName,
                 Content = tagContent,
-                GuildSnowflake = Context.Guild.Id,
-                UserSnowflake = Context.User.Id
+                GuildId = Context.Guild.Id,
+                UserId = Context.User.Id
             };
 
             await using var context = _factory.CreateDbContext();
@@ -138,7 +138,7 @@ namespace Asuka.Modules.Tags
 
             // Get list of tags from this guild.
             var tags = await context.Tags.AsQueryable()
-                .Where(tag => tag.GuildSnowflake == Context.Guild.Id)
+                .Where(tag => tag.GuildId == Context.Guild.Id)
                 .Select(tag => $"`{tag.Name}`")
                 .ToListAsync();
 
@@ -169,7 +169,7 @@ namespace Asuka.Modules.Tags
                 .WithTitle(tag.Name)
                 .WithColor(Config.Value.EmbedColor)
                 .WithDescription(tag.Content)
-                .AddField("Added by", Context.Client.GetUser(tag.UserSnowflake).Mention)
+                .AddField("Added by", Context.Client.GetUser(tag.UserId).Mention)
                 .AddField("Usage count", tag.UsageCount)
                 .AddField("Created", tag.CreatedAt.GetValueOrDefault().ToString("U"))
                 .AddField("Last Updated", tag.UpdatedAt.GetValueOrDefault().ToString("U"))
