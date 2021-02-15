@@ -4,6 +4,7 @@ using Asuka.Configuration;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Roles
@@ -31,10 +32,11 @@ namespace Asuka.Modules.Roles
 
         public ReactionRoleModule(
             IOptions<DiscordOptions> config,
-            ReactionRoleService service) :
+            IServiceScopeFactory scopeFactory) :
             base(config)
         {
-            _service = service;
+            using var scope = scopeFactory.CreateScope();
+            _service = scope.ServiceProvider.GetService<ReactionRoleService>();
         }
 
         [Command("create")]
