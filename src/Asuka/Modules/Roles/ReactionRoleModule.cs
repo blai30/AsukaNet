@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
@@ -10,6 +11,7 @@ namespace Asuka.Modules.Roles
     [Group("reactionrole")]
     [Alias("rr")]
     [Remarks("Roles")]
+    [Summary("Manage reaction roles for the server.")]
     [RequireBotPermission(
         ChannelPermission.AddReactions |
         ChannelPermission.ManageMessages |
@@ -25,10 +27,14 @@ namespace Asuka.Modules.Roles
     [RequireContext(ContextType.Guild)]
     public class ReactionRoleModule : CommandModuleBase
     {
+        private readonly ReactionRoleService _service;
+
         public ReactionRoleModule(
-            IOptions<DiscordOptions> config) :
+            IOptions<DiscordOptions> config,
+            ReactionRoleService service) :
             base(config)
         {
+            _service = service;
         }
 
         [Command("create")]
