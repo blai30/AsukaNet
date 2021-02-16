@@ -47,11 +47,13 @@ namespace Asuka.Services
                 _discord.Value.Status.Game,
                 _discord.Value.Status.Activity));
 
+            _logger.LogInformation($"{GetType().Name} started");
             await Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation($"{GetType().Name} stopped");
             await Task.CompletedTask;
         }
     }
