@@ -131,5 +131,42 @@ namespace Asuka.Modules.Roles
                 throw;
             }
         }
+
+        [Command("edit")]
+        [Alias("e")]
+        [Remarks("reactionrole edit <messageId> <description>")]
+        [Summary("Edit a reaction role message with a new description.")]
+        public async Task EditAsync(IMessage message, [Remainder] string description = "")
+        {
+            // Must be a user message sent by the bot.
+            if (message.Author.Id != Context.Client.CurrentUser.Id ||
+                message is not IUserMessage original)
+            {
+                await ReplyAsync("That message is not mine to edit. *(੭*ˊᵕˋ)੭*ଘ");
+                return;
+            }
+
+            // Get embed from message.
+            var embed = original.Embeds.FirstOrDefault();
+            if (embed == null)
+            {
+                await ReplyAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻");
+                return;
+            }
+
+            // Edit the embed with the new description.
+            var edited = embed.ToEmbedBuilder()
+                .WithDescription(description)
+                .Build();
+
+            try
+            {
+                await original.ModifyAsync(properties => properties.Embed = edited);
+            }
+            catch
+            {
+                await ReplyAsync("Error editing reaction role message.");
+            }
+        }
     }
 }

@@ -56,7 +56,7 @@ namespace Asuka.Services
         {
             // Load custom command type readers. Must be done before loading modules.
             _commandService.AddTypeReader<IEmote>(new EmoteTypeReader<IEmote>());
-            _commandService.AddTypeReader<IMessage>(new Commands.Readers.MessageTypeReader<IMessage>());
+            _commandService.AddTypeReader<IMessage>(new Commands.Readers.MessageTypeReader<IMessage>(), true);
             _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
             _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
 
