@@ -81,8 +81,9 @@ namespace Asuka.Services
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
-            // Reaction must come from a guild user.
+            // Reaction must come from a guild user and not the bot.
             if (!(reaction.User.Value is SocketGuildUser user)) return;
+            if (reaction.User.Value == _client.CurrentUser) return;
             // Check if user already has the role.
             if (user.Roles.Any(r => r.Id == reactionRole.RoleId)) return;
 
@@ -129,6 +130,7 @@ namespace Asuka.Services
             if (reactionRole == null) return;
             // Reaction must come from a guild user.
             if (reaction.User.Value is not SocketGuildUser user) return;
+            if (reaction.User.Value == _client.CurrentUser) return;
             // Check if user has the role.
             if (user.Roles.All(r => r.Id != reactionRole.RoleId)) return;
 
@@ -141,6 +143,7 @@ namespace Asuka.Services
             catch (HttpException e)
             {
                 await channel.SendMessageAsync(
+                    e +
                     "Error removing role, make sure the role " +
                     "is lower than me in the server's roles list.");
                 return;

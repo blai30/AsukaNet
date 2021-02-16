@@ -55,7 +55,7 @@ namespace Asuka.Services
         public async Task StartAsync(CancellationToken stoppingToken)
         {
             // Load custom command type readers. Must be done before loading modules.
-            _commandService.AddTypeReader<IEmote>(new EmoteTypeReader());
+            _commandService.AddTypeReader<IEmote>(new EmoteTypeReader<IEmote>());
             _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
             _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
 

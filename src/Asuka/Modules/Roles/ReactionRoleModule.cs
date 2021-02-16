@@ -64,10 +64,8 @@ namespace Asuka.Modules.Roles
         [Alias("a")]
         [Remarks("reactionrole add <messageId> <:emoji:> <@role>")]
         [Summary("Add a reaction role to a reaction role message.")]
-        public async Task AddAsync(ulong messageId, IEmote emote, IRole role)
+        public async Task AddAsync(IMessage message, IEmote emote, IRole role)
         {
-            // Get referenced message by id.
-            var message = await Context.Channel.GetMessageAsync(messageId);
             if (message == null)
             {
                 await ReplyAsync("Reaction role message not found.");
@@ -92,8 +90,8 @@ namespace Asuka.Modules.Roles
             try
             {
                 await context.SaveChangesAsync();
-                _service.ReactionRoles.Add(reactionRole);
                 await message.AddReactionAsync(emote);
+                _service.ReactionRoles.Add(reactionRole);
                 await ReplyAsync($"Added reaction role {guildRole.Mention}.");
             }
             catch
@@ -107,9 +105,8 @@ namespace Asuka.Modules.Roles
         [Alias("r")]
         [Remarks("reactionrole remove <messageId> <@role>")]
         [Summary("Remove a reaction role from a reaction role message.")]
-        public async Task RemoveAsync(ulong messageId, IRole role)
+        public async Task RemoveAsync(IMessage message, IRole role)
         {
-            var message = await Context.Channel.GetMessageAsync(messageId);
         }
     }
 }
