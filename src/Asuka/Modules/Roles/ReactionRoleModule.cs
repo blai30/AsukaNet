@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -8,7 +8,6 @@ using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Roles
@@ -47,12 +46,13 @@ namespace Asuka.Modules.Roles
 
         [Command("create")]
         [Alias("c")]
-        [Remarks("reactionrole create")]
+        [Remarks("reactionrole create <description>")]
         [Summary("Create a reaction role message.")]
-        public async Task CreateAsync()
+        public async Task CreateAsync([Remainder] string description = "")
         {
             var embed = new EmbedBuilder()
                 .WithTitle("React to receive roles")
+                .WithDescription(description)
                 .WithColor(Config.Value.EmbedColor)
                 .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
                 .Build();
@@ -66,12 +66,6 @@ namespace Asuka.Modules.Roles
         [Summary("Add a reaction role to a reaction role message.")]
         public async Task AddAsync(IMessage message, IEmote emote, IRole role)
         {
-            if (message == null)
-            {
-                await ReplyAsync("Reaction role message not found.");
-                return;
-            }
-
             // Get emote string representation and guild role by role id.
             string emoteText = emote.GetStringRepresentation();
             var guildRole = Context.Guild.GetRole(role.Id);
@@ -87,12 +81,13 @@ namespace Asuka.Modules.Roles
             // Add reaction role to database.
             await using var context = _factory.CreateDbContext();
             await context.ReactionRoles.AddAsync(reactionRole);
+
             try
             {
                 await context.SaveChangesAsync();
                 await message.AddReactionAsync(emote);
                 _service.ReactionRoles.Add(reactionRole);
-                await ReplyAsync($"Added reaction role {guildRole.Mention}.");
+                await ReplyAsync($"Added reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
             catch
             {
@@ -107,6 +102,34 @@ namespace Asuka.Modules.Roles
         [Summary("Remove a reaction role from a reaction role message.")]
         public async Task RemoveAsync(IMessage message, IRole role)
         {
+            // Get guild role by role id.
+            var guildRole = Context.Guild.GetRole(role.Id);
+
+            await using var context = _factory.CreateDbContext();
+            // Get reaction role that references this message and role.
+            var reactionRole = await context.ReactionRoles.AsQueryable()
+                .Where(r => r.RoleId == role.Id && r.MessageId == message.Id)
+                .FirstOrDefaultAsync();
+            // Remove reaction role from database.
+            context.ReactionRoles.Remove(reactionRole);
+
+            // Parse emote or emoji.
+            IEmote reaction = Emote.TryParse(reactionRole.Emote, out var emote)
+                ? (IEmote) emote
+                : new Emoji(reactionRole.Emote);
+
+            try
+            {
+                await context.SaveChangesAsync();
+                await message.RemoveAllReactionsForEmoteAsync(reaction);
+                _service.ReactionRoles.Remove(reactionRole);
+                await ReplyAsync($"Removed reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
+            }
+            catch
+            {
+                await ReplyAsync("Could not remove reaction role.");
+                throw;
+            }
         }
     }
 }
