@@ -21,11 +21,14 @@ namespace Asuka.Modules.General
         [Remarks("ping")]
         public async Task PingAsync()
         {
-            var reply = await ReplyAsync("Pong! Latency: `... ms`. API: `... ms`.");
-            var latency = (reply.Timestamp - Context.Message.Timestamp).Milliseconds;
-            var botLatency = Context.Client.Latency;
+            const string text = "Pong! Latency: `{0} ms`. API: `{1} ms`.";
+
+            var reply = await ReplyAsync(string.Format(text, "...", "..."));
+            int latency = (reply.Timestamp - Context.Message.Timestamp).Milliseconds;
+            int botLatency = Context.Client.Latency;
+
             await reply.ModifyAsync(message =>
-                message.Content = $"Pong! Latency: `{latency} ms`. API: `{botLatency} ms`.");
+                message.Content = string.Format(text, latency, botLatency));
         }
     }
 }

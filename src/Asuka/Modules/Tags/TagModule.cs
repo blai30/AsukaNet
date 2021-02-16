@@ -29,15 +29,16 @@ namespace Asuka.Modules.Tags
 
         [Command("add")]
         [Alias("a", "create", "c")]
-        [Remarks("Create a new tag for the server.")]
+        [Remarks("tag add <name> <content>")]
+        [Summary("Create a new tag for the server.")]
         public async Task AddAsync(string tagName, string tagContent)
         {
             var tag = new Tag
             {
                 Name = tagName,
                 Content = tagContent,
-                UserId = Context.User.Id,
-                GuildId = Context.Guild.Id
+                GuildId = Context.Guild.Id,
+                UserId = Context.User.Id
             };
 
             await using var context = _factory.CreateDbContext();
@@ -55,7 +56,8 @@ namespace Asuka.Modules.Tags
 
         [Command("edit")]
         [Alias("e", "modify", "m")]
-        [Remarks("Edit an existing tag from the server.")]
+        [Remarks("tag edit <name> <content>")]
+        [Summary("Edit an existing tag from the server.")]
         public async Task EditAsync(string tagName, string tagContent)
         {
             await using var context = _factory.CreateDbContext();
@@ -82,7 +84,8 @@ namespace Asuka.Modules.Tags
 
         [Command("get")]
         [Alias("g", "fetch", "f")]
-        [Remarks("Get an existing tag from the server.")]
+        [Remarks("tag get <name>")]
+        [Summary("Get an existing tag from the server.")]
         public async Task GetAsync(string tagName)
         {
             await using var context = _factory.CreateDbContext();
@@ -105,7 +108,8 @@ namespace Asuka.Modules.Tags
 
         [Command("remove")]
         [Alias("r", "delete", "d")]
-        [Remarks("Remove a tag from the server.")]
+        [Remarks("tag remove <name>")]
+        [Summary("Remove a tag from the server.")]
         public async Task RemoveAsync(string tagName)
         {
             await using var context = _factory.CreateDbContext();
@@ -131,7 +135,8 @@ namespace Asuka.Modules.Tags
 
         [Command("list")]
         [Alias("l", "all")]
-        [Remarks("List all tags from the server.")]
+        [Remarks("tag list")]
+        [Summary("List all tags from the server.")]
         public async Task ListAsync()
         {
             await using var context = _factory.CreateDbContext();
@@ -149,7 +154,8 @@ namespace Asuka.Modules.Tags
 
         [Command("info")]
         [Alias("i", "stats")]
-        [Remarks("Show info for a tag from the server.")]
+        [Remarks("tag info <name>")]
+        [Summary("Show info for a tag from the server.")]
         public async Task InfoAsync(string tagName)
         {
             await using var context = _factory.CreateDbContext();

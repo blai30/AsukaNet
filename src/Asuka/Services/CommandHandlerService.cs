@@ -55,6 +55,7 @@ namespace Asuka.Services
         public async Task StartAsync(CancellationToken stoppingToken)
         {
             // Load custom command type readers. Must be done before loading modules.
+            _commandService.AddTypeReader<IEmote>(new EmoteTypeReader());
             _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
             _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
 
@@ -64,6 +65,7 @@ namespace Asuka.Services
             _client.MessageReceived += OnMessageReceivedAsync;
             _commandService.CommandExecuted += OnCommandExecutedAsync;
 
+            _logger.LogInformation($"{GetType().Name} started");
             await Task.CompletedTask;
         }
 
@@ -72,6 +74,7 @@ namespace Asuka.Services
             _client.MessageReceived -= OnMessageReceivedAsync;
             _commandService.CommandExecuted -= OnCommandExecutedAsync;
 
+            _logger.LogInformation($"{GetType().Name} stopped");
             await Task.CompletedTask;
         }
 

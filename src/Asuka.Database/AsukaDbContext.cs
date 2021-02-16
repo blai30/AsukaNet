@@ -11,6 +11,7 @@ namespace Asuka.Database
         private readonly IServiceScopeFactory _scopeFactory;
 
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<ReactionRole> ReactionRoles { get; set; }
 
         public AsukaDbContext(DbContextOptions<AsukaDbContext> options, IServiceScopeFactory scopeFactory) : base(options)
         {

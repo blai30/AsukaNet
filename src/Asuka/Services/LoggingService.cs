@@ -31,6 +31,7 @@ namespace Asuka.Services
             _client.Log += OnLogAsync<StartupService>;
             _commandService.Log += OnLogAsync<CommandHandlerService>;
 
+            _logger.LogInformation($"{GetType().Name} started");
             await Task.CompletedTask;
         }
 
@@ -40,6 +41,7 @@ namespace Asuka.Services
             _client.Log -= OnLogAsync<StartupService>;
             _commandService.Log -= OnLogAsync<CommandHandlerService>;
 
+            _logger.LogInformation($"{GetType().Name} stopped");
             await Task.CompletedTask;
         }
 

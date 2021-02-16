@@ -7,7 +7,10 @@ namespace Asuka.Commands.Readers
 {
     public class SKColorTypeReader : TypeReader
     {
-        public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        public override async Task<TypeReaderResult> ReadAsync(
+            ICommandContext context,
+            string input,
+            IServiceProvider services)
         {
             await Task.Yield();
 

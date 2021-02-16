@@ -1,5 +1,6 @@
-﻿using System.Net.Http;
-using System.Text.Json;
+﻿using System;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -7,7 +8,6 @@ using Asuka.Models.API.Urban;
 using Discord;
 using Discord.Commands;
 using Humanizer;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
@@ -17,16 +17,16 @@ namespace Asuka.Modules.Utility
     [Summary("Look up a word or phrase on Urban Dictionary.")]
     public class UrbanModule : CommandModuleBase
     {
-        private readonly HttpClient _client;
-
         private const string Uri = "https://api.urbandictionary.com/v0/define";
+
+        private readonly IHttpClientFactory _factory;
 
         public UrbanModule(
             IOptions<DiscordOptions> config,
-            HttpClient client) :
+            IHttpClientFactory factory) :
             base(config)
         {
-            _client = client;
+            _factory = factory;
         }
 
         [Command]
@@ -34,19 +34,21 @@ namespace Asuka.Modules.Utility
         public async Task UrbanAsync([Remainder] string term)
         {
             // Build query and send http request to urban api.
-            var query = QueryHelpers.AddQueryString(Uri, "term", term);
-            var streamTask = _client.GetStreamAsync(query);
+            using var client = _factory.CreateClient();
+            var builder = new UriBuilder(Uri)
+            {
+                Query = $"term={term}"
+            };
+            var results = await client.GetFromJsonAsync<UrbanList>(builder.Uri);
 
-            // Deserialize json response.
-            var results = await JsonSerializer.DeserializeAsync<UrbanList>(await streamTask);
-
-            // Term did not yield results.
+            // No entry found for given query.
             if (results?.UrbanEntries == null || results.UrbanEntries.Count <= 0)
             {
                 await ReplyAsync($"`{term.Truncate(32, "...")}` was not found in the Urban Dictionary.");
                 return;
             }
 
+            // Take the first result.
             var entry = results.UrbanEntries[0];
 
             var embed = new EmbedBuilder()
@@ -69,7 +71,7 @@ namespace Asuka.Modules.Utility
                     entry.Author)
                 .Build();
 
-            await ReplyAsync(query, embed: embed);
+            await ReplyAsync(embed: embed);
         }
     }
 }
