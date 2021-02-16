@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Net.Http;
 using Asuka.Configuration;
 using Asuka.Database;
 using Asuka.Services;
@@ -67,7 +66,7 @@ namespace Asuka
                 .AddDbContextFactory<AsukaDbContext>()
 
                 // Http client for interfacing with Api requests.
-                .AddSingleton<HttpClient>()
+                .AddHttpClient()
 
                 // Mathematics.
                 .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
