@@ -43,6 +43,8 @@ namespace Asuka.Services
             _client.ReactionAdded += OnReactionAdded;
             _client.ReactionRemoved += OnReactionRemoved;
             _client.MessageDeleted += OnMessageDeleted;
+
+            _logger.LogInformation($"{GetType().Name} started");
             return Task.CompletedTask;
         }
 
@@ -51,6 +53,8 @@ namespace Asuka.Services
             _client.ReactionAdded -= OnReactionAdded;
             _client.ReactionRemoved -= OnReactionRemoved;
             _client.MessageDeleted += OnMessageDeleted;
+
+            _logger.LogInformation($"{GetType().Name} stopped");
             return Task.CompletedTask;
         }
 
@@ -91,6 +95,7 @@ namespace Asuka.Services
             catch (HttpException e)
             {
                 await channel.SendMessageAsync(
+                    e +
                     "Error adding role, make sure the role " +
                     "is lower than me in the server's roles list.");
                 return;
