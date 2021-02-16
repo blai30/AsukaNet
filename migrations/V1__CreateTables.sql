@@ -1,8 +1,8 @@
 ﻿CREATE TABLE tags
 (
     id          INT             NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    name        CHAR(100)       NOT NULL,
-    content     CHAR(255)       NOT NULL,
+    name        VARCHAR(100)    NOT NULL,
+    content     VARCHAR(255)    NOT NULL,
     guild_id    BIGINT UNSIGNED NOT NULL,
     user_id     BIGINT UNSIGNED NOT NULL,
     usage_count INT             NOT NULL DEFAULT 0,
@@ -18,5 +18,5 @@ CREATE TABLE reaction_roles
     guild_id   BIGINT UNSIGNED NOT NULL,
     message_id BIGINT UNSIGNED NOT NULL,
     role_id    BIGINT UNSIGNED NOT NULL,
-    emote      CHAR(40)        NOT NULL
+    emote      VARCHAR(100)    NOT NULL
 );
