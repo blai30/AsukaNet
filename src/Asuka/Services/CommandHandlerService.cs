@@ -56,6 +56,7 @@ namespace Asuka.Services
         {
             // Load custom command type readers. Must be done before loading modules.
             _commandService.AddTypeReader<IEmote>(new EmoteTypeReader<IEmote>());
+            _commandService.AddTypeReader<IMessage>(new Commands.Readers.MessageTypeReader<IMessage>());
             _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
             _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
 
@@ -94,7 +95,7 @@ namespace Asuka.Services
             int argPos = 0;
             // TODO: Fetch custom set guild prefix from database.
             // Check if message has string prefix, only if it is not null.
-            var prefix = _config.Value.BotPrefix;
+            string prefix = _config.Value.BotPrefix;
             if (prefix != null && !message.HasStringPrefix(prefix, ref argPos))
             {
                 return;
