@@ -36,7 +36,6 @@ namespace Asuka
                 .AddOptions()
                 .Configure<TokenOptions>(Configuration.GetSection("Tokens"))
                 .Configure<DiscordOptions>(Configuration.GetSection("Discord"))
-                .Configure<DatabaseOptions>(Configuration.GetSection("Database"))
 
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
