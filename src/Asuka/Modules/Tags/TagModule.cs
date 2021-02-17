@@ -153,8 +153,8 @@ namespace Asuka.Modules.Tags
                 .WithDescription(tag.Content)
                 .AddField("Added by", Context.Client.GetUser(tag.UserId).Mention)
                 .AddField("Usage count", tag.UsageCount)
-                .AddField("Created", tag.CreatedAt.GetValueOrDefault().ToString("U"))
-                .AddField("Last Updated", tag.UpdatedAt.GetValueOrDefault().ToString("U"))
+                .AddField("Created", tag.CreatedAt.GetValueOrDefault().ToString("R"))
+                .AddField("Last used", tag.UpdatedAt.GetValueOrDefault().ToString("R"))
                 .Build();
 
             await ReplyAsync(embed: embed);
