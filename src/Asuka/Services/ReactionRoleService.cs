@@ -35,10 +35,10 @@ namespace Asuka.Services
             ReactionRoles = new List<ReactionRole>();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             // Populate list with data from database.
-            using var context = _factory.CreateDbContext();
+            await using var context = _factory.CreateDbContext();
             var reactionRoles = context.ReactionRoles.ToList();
             ReactionRoles.AddRange(reactionRoles);
 
@@ -50,10 +50,10 @@ namespace Asuka.Services
             _client.MessageDeleted += OnMessageDeleted;
 
             _logger.LogInformation($"{GetType().Name} started");
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             _client.ReactionAdded -= OnReactionAdded;
             _client.ReactionRemoved -= OnReactionRemoved;
@@ -63,7 +63,7 @@ namespace Asuka.Services
             _client.MessageDeleted -= OnMessageDeleted;
 
             _logger.LogInformation($"{GetType().Name} stopped");
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Asuka.Database;
 using Asuka.Database.Models;
+using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +19,16 @@ namespace Asuka.Modules.Tags
     public class TagModule : CommandModuleBase
     {
         private readonly IDbContextFactory<AsukaDbContext> _factory;
+        private readonly TagListenerService _service;
 
         public TagModule(
             IOptions<DiscordOptions> config,
-            IDbContextFactory<AsukaDbContext> factory) :
+            IDbContextFactory<AsukaDbContext> factory,
+            TagListenerService service) :
             base(config)
         {
             _factory = factory;
+            _service = service;
         }
 
         [Command("add")]
@@ -46,6 +50,7 @@ namespace Asuka.Modules.Tags
             try
             {
                 await context.SaveChangesAsync();
+                _service.Tags.Add(tag);
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
             catch
@@ -73,6 +78,7 @@ namespace Asuka.Modules.Tags
             try
             {
                 await context.SaveChangesAsync();
+                _service.UpdateTag(tag.Id, tag.Content);
                 await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
             }
             catch
@@ -80,30 +86,6 @@ namespace Asuka.Modules.Tags
                 await ReplyAsync($"Error updating tag `{tagName}`.");
                 throw;
             }
-        }
-
-        [Command("get")]
-        [Alias("g", "fetch", "f")]
-        [Remarks("tag get <name>")]
-        [Summary("Get an existing tag from the server.")]
-        public async Task GetAsync(string tagName)
-        {
-            await using var context = _factory.CreateDbContext();
-
-            // Get content from tag by name.
-            string content = await context.Tags.AsQueryable()
-                .Where(t => t.Name == tagName)
-                .Select(t => t.Content)
-                .FirstOrDefaultAsync();
-
-            // No such tag exists in guild.
-            if (string.IsNullOrEmpty(content))
-            {
-                await ReplyAsync($@"Tag `{tagName}` does not exist. .·´¯\`(>▂<)´¯\`·. ");
-                return;
-            }
-
-            await ReplyAsync(content);
         }
 
         [Command("remove")]
@@ -124,6 +106,7 @@ namespace Asuka.Modules.Tags
             try
             {
                 await context.SaveChangesAsync();
+                _service.Tags.Remove(tag);
                 await ReplyAsync($"Removed tag `{tag.Name}`.");
             }
             catch
@@ -139,13 +122,10 @@ namespace Asuka.Modules.Tags
         [Summary("List all tags from the server.")]
         public async Task ListAsync()
         {
-            await using var context = _factory.CreateDbContext();
-
             // Get list of tags from this guild.
-            var tags = await context.Tags.AsQueryable()
+            var tags = _service.Tags
                 .Where(tag => tag.GuildId == Context.Guild.Id)
-                .Select(tag => $"`{tag.Name}`")
-                .ToListAsync();
+                .Select(tag => $"`{tag.Name}`").ToList();
 
             // Join list of tag names with comma.
             string list = string.Join(", ", tags);
@@ -158,12 +138,8 @@ namespace Asuka.Modules.Tags
         [Summary("Show info for a tag from the server.")]
         public async Task InfoAsync(string tagName)
         {
-            await using var context = _factory.CreateDbContext();
-
             // Get tag by name.
-            var tag = await context.Tags.AsQueryable()
-                .Where(t => t.Name == tagName)
-                .FirstOrDefaultAsync();
+            var tag = _service.Tags.FirstOrDefault(t => t.Name == tagName);
 
             if (tag == null)
             {

@@ -75,6 +75,8 @@ namespace Asuka
                 // Background hosted services.
                 .AddHostedService<LoggingService>()
                 .AddHostedService<CommandHandlerService>()
+                .AddSingleton<TagListenerService>()
+                .AddHostedService(provider => provider.GetService<TagListenerService>())
                 .AddSingleton<ReactionRoleService>()
                 .AddHostedService(provider => provider.GetService<ReactionRoleService>())
                 .AddHostedService<StartupService>()
