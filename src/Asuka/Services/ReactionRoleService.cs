@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -21,8 +20,6 @@ namespace Asuka.Services
         private readonly IDbContextFactory<AsukaDbContext> _factory;
         private readonly DiscordSocketClient _client;
 
-        public List<ReactionRole> ReactionRoles { get; }
-
         public ReactionRoleService(
             ILogger<ReactionRoleService> logger,
             IDbContextFactory<AsukaDbContext> factory,
@@ -31,17 +28,10 @@ namespace Asuka.Services
             _logger = logger;
             _factory = factory;
             _client = client;
-
-            ReactionRoles = new List<ReactionRole>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            // Populate list with data from database.
-            await using var context = _factory.CreateDbContext();
-            var reactionRoles = context.ReactionRoles.ToList();
-            ReactionRoles.AddRange(reactionRoles);
-
             _client.ReactionAdded += OnReactionAdded;
             _client.ReactionRemoved += OnReactionRemoved;
             _client.ReactionsCleared += OnReactionsCleared;
@@ -78,8 +68,10 @@ namespace Asuka.Services
             ISocketMessageChannel channel,
             SocketReaction reaction)
         {
+            await using var context = _factory.CreateDbContext();
+
             // This event is not related to reaction roles.
-            if (ReactionRoles.All(r => r.MessageId != cachedMessage.Id))
+            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != cachedMessage.Id))
             {
                 return;
             }
@@ -87,11 +79,12 @@ namespace Asuka.Services
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
-            // Get reaction role from list.
-            var reactionRole = ReactionRoles
-                .FirstOrDefault(r =>
+            // Get reaction role.
+            var reactionRole = await context.ReactionRoles.AsQueryable()
+                .Where(r =>
                     r.MessageId == cachedMessage.Id &&
-                    r.Emote == emoteText);
+                    r.Emote == emoteText)
+                .FirstOrDefaultAsync();
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
@@ -131,8 +124,10 @@ namespace Asuka.Services
             ISocketMessageChannel channel,
             SocketReaction reaction)
         {
+            await using var context = _factory.CreateDbContext();
+
             // This event is not related to reaction roles.
-            if (ReactionRoles.All(r => r.MessageId != cachedMessage.Id))
+            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != cachedMessage.Id))
             {
                 return;
             }
@@ -140,11 +135,12 @@ namespace Asuka.Services
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
-            // Get reaction role from list.
-            var reactionRole = ReactionRoles
-                .FirstOrDefault(r =>
+            // Get reaction role.
+            var reactionRole = await context.ReactionRoles.AsQueryable()
+                .Where(r =>
                     r.MessageId == cachedMessage.Id &&
-                    r.Emote == emoteText);
+                    r.Emote == emoteText)
+                .FirstOrDefaultAsync();
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
@@ -203,8 +199,11 @@ namespace Asuka.Services
         /// <returns></returns>
         private async Task OnRoleDeleted(SocketRole role)
         {
+            await using var context = _factory.CreateDbContext();
+
             // Remove reaction roles from list.
-            var reactionRoles = ReactionRoles.Where(reactionRole => reactionRole.RoleId == role.Id).ToList();
+            var reactionRoles = await context.ReactionRoles.AsQueryable()
+                .Where(reactionRole => reactionRole.RoleId == role.Id).ToListAsync();
             foreach (var reactionRole in reactionRoles)
             {
                 // Parse emote or emoji.
@@ -246,8 +245,10 @@ namespace Asuka.Services
         /// <returns></returns>
         private async Task ClearReactionRoles(ulong messageId, ISocketMessageChannel channel, IEmote reaction = null)
         {
+            await using var context = _factory.CreateDbContext();
+
             // This event is not related to reaction roles.
-            if (ReactionRoles.All(r => r.MessageId != messageId))
+            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != messageId))
             {
                 return;
             }
@@ -258,13 +259,6 @@ namespace Asuka.Services
                 ? reactionRole => reactionRole.MessageId == messageId
                 : reactionRole => reactionRole.MessageId == messageId &&
                                   reactionRole.Emote == reaction.GetStringRepresentation();
-
-            Predicate<ReactionRole> predicate = expression.Compile().Invoke;
-
-            // Remove all reaction roles from the list that referenced the message.
-            ReactionRoles.RemoveAll(predicate);
-
-            await using var context = _factory.CreateDbContext();
 
             // Get and remove all rows that referenced the message from database.
             var rows = await context.ReactionRoles.AsQueryable()
