@@ -4,7 +4,6 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Asuka.Database;
 using Asuka.Database.Models;
-using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -32,16 +31,13 @@ namespace Asuka.Modules.Roles
     public class ReactionRoleModule : CommandModuleBase
     {
         private readonly IDbContextFactory<AsukaDbContext> _factory;
-        private readonly ReactionRoleService _service;
 
         public ReactionRoleModule(
             IOptions<DiscordOptions> config,
-            IDbContextFactory<AsukaDbContext> factory,
-            ReactionRoleService service) :
+            IDbContextFactory<AsukaDbContext> factory) :
             base(config)
         {
             _factory = factory;
-            _service = service;
         }
 
         [Command("make")]
@@ -87,7 +83,6 @@ namespace Asuka.Modules.Roles
             {
                 await context.SaveChangesAsync();
                 await message.AddReactionAsync(emote);
-                _service.ReactionRoles.Add(reactionRole);
                 await ReplyAsync($"Added reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
             catch
@@ -123,7 +118,6 @@ namespace Asuka.Modules.Roles
             {
                 await context.SaveChangesAsync();
                 await message.RemoveAllReactionsForEmoteAsync(reaction);
-                _service.ReactionRoles.Remove(reactionRole);
                 await ReplyAsync($"Removed reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
             catch

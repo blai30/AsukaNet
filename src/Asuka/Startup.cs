@@ -36,7 +36,6 @@ namespace Asuka
                 .AddOptions()
                 .Configure<TokenOptions>(Configuration.GetSection("Tokens"))
                 .Configure<DiscordOptions>(Configuration.GetSection("Discord"))
-                .Configure<DatabaseOptions>(Configuration.GetSection("Database"))
 
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
@@ -75,10 +74,8 @@ namespace Asuka
                 // Background hosted services.
                 .AddHostedService<LoggingService>()
                 .AddHostedService<CommandHandlerService>()
-                .AddSingleton<TagListenerService>()
-                .AddHostedService(provider => provider.GetService<TagListenerService>())
-                .AddSingleton<ReactionRoleService>()
-                .AddHostedService(provider => provider.GetService<ReactionRoleService>())
+                .AddHostedService<TagListenerService>()
+                .AddHostedService<ReactionRoleService>()
                 .AddHostedService<StartupService>()
                 ;
         }
