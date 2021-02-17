@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -73,6 +73,7 @@ namespace Asuka.Modules.Roles
             var reactionRole = new ReactionRole
             {
                 GuildId = Context.Guild.Id,
+                ChannelId = Context.Channel.Id,
                 MessageId = message.Id,
                 RoleId = guildRole.Id,
                 Emote = emoteText
