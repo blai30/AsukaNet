@@ -78,6 +78,12 @@ namespace Asuka.Services
             ISocketMessageChannel channel,
             SocketReaction reaction)
         {
+            // This event is not related to reaction roles.
+            if (ReactionRoles.All(r => r.MessageId != cachedMessage.Id))
+            {
+                return;
+            }
+
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
@@ -125,6 +131,12 @@ namespace Asuka.Services
             ISocketMessageChannel channel,
             SocketReaction reaction)
         {
+            // This event is not related to reaction roles.
+            if (ReactionRoles.All(r => r.MessageId != cachedMessage.Id))
+            {
+                return;
+            }
+
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
@@ -234,6 +246,12 @@ namespace Asuka.Services
         /// <returns></returns>
         private async Task ClearReactionRoles(ulong messageId, ISocketMessageChannel channel, IEmote reaction = null)
         {
+            // This event is not related to reaction roles.
+            if (ReactionRoles.All(r => r.MessageId != messageId))
+            {
+                return;
+            }
+
             // Condition to remove all reaction roles from a message if no reaction was specified,
             // otherwise only remove all reaction roles for that specific reaction.
             Expression<Func<ReactionRole, bool>> expression = reaction == null
