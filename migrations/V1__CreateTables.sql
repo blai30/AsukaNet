@@ -16,6 +16,7 @@ CREATE TABLE reaction_roles
 (
     id         INT             NOT NULL PRIMARY KEY AUTO_INCREMENT,
     guild_id   BIGINT UNSIGNED NOT NULL,
+    channel_id BIGINT UNSIGNED NOT NULL,
     message_id BIGINT UNSIGNED NOT NULL,
     role_id    BIGINT UNSIGNED NOT NULL,
     emote      VARCHAR(100)    NOT NULL

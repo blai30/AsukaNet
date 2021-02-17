@@ -44,11 +44,11 @@ namespace Asuka.Modules.Roles
             _service = service;
         }
 
-        [Command("create")]
-        [Alias("c")]
-        [Remarks("reactionrole create <description>")]
+        [Command("make")]
+        [Alias("m", "setup")]
+        [Remarks("reactionrole make <description>")]
         [Summary("Create a reaction role message.")]
-        public async Task CreateAsync([Remainder] string description = "")
+        public async Task MakeAsync([Remainder] string description = "")
         {
             var embed = new EmbedBuilder()
                 .WithTitle("React to receive roles")
@@ -73,6 +73,7 @@ namespace Asuka.Modules.Roles
             var reactionRole = new ReactionRole
             {
                 GuildId = Context.Guild.Id,
+                ChannelId = Context.Channel.Id,
                 MessageId = message.Id,
                 RoleId = guildRole.Id,
                 Emote = emoteText
@@ -134,9 +135,9 @@ namespace Asuka.Modules.Roles
 
         [Command("edit")]
         [Alias("e")]
-        [Remarks("reactionrole edit <messageId> <description>")]
-        [Summary("Edit a reaction role message with a new description.")]
-        public async Task EditAsync(IMessage message, [Remainder] string description = "")
+        [Remarks("reactionrole edit <messageId> \"<title>\" <description>")]
+        [Summary("Edit a reaction role message with a new title and description. Titles with spaces must be wrapped in quotes.")]
+        public async Task EditAsync(IMessage message, string title = "", [Remainder] string description = "")
         {
             // Must be a user message sent by the bot.
             if (message.Author.Id != Context.Client.CurrentUser.Id ||
@@ -156,6 +157,7 @@ namespace Asuka.Modules.Roles
 
             // Edit the embed with the new description.
             var edited = embed.ToEmbedBuilder()
+                .WithTitle(title)
                 .WithDescription(description)
                 .Build();
 
@@ -167,6 +169,15 @@ namespace Asuka.Modules.Roles
             {
                 await ReplyAsync("Error editing reaction role message.");
             }
+        }
+
+        [Command("clear")]
+        [Alias("c")]
+        [Remarks("reactionrole clear [messageId]")]
+        [Summary("Clears all reaction roles from a message.")]
+        public async Task ClearAsync(IMessage message)
+        {
+            await message.RemoveAllReactionsAsync();
         }
     }
 }
