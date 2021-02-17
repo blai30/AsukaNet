@@ -27,7 +27,7 @@ namespace Asuka.Modules.Fun
         public async Task FlipCoinAsync()
         {
             // Generates a random number 0 or 1.
-            var coin = _random.Next(2);
+            int coin = _random.Next(2);
             await ReplyAsync(coin == 0 ? ":coin: **Heads!**" : ":coin: **Tails!**");
         }
     }

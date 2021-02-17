@@ -14,7 +14,7 @@ namespace Asuka.Modules.General
     [Summary("View all commands or help info for a specific command.")]
     public class HelpModule : CommandModuleBase
     {
-        private CommandService _commandService;
+        private readonly CommandService _commandService;
 
         public HelpModule(
             IOptions<DiscordOptions> config,
@@ -42,8 +42,10 @@ namespace Asuka.Modules.General
             foreach (var command in module.Commands)
             {
                 // Use command remarks as usage.
-                if (string.IsNullOrWhiteSpace(command.Remarks)) continue;
-                usage += $"`{command.Remarks}`\n";
+                if (!string.IsNullOrWhiteSpace(command.Remarks))
+                {
+                    usage += $"`{command.Remarks}`\n";
+                }
             }
 
             // List of command aliases separated by a comma.
@@ -73,7 +75,7 @@ namespace Asuka.Modules.General
         private async Task DefaultHelpAsync()
         {
             var clientUser = Context.Client.CurrentUser;
-            var avatarUrl = clientUser.GetAvatarUrl();
+            string avatarUrl = clientUser.GetAvatarUrl();
 
             string[] links =
             {
@@ -105,13 +107,10 @@ namespace Asuka.Modules.General
                     .OrderBy(s => s);
 
             // Get a list of command names from each category.
-            foreach (var category in moduleCategories)
+            foreach (string category in moduleCategories)
             {
                 // Skip any empty categories.
-                if (string.IsNullOrWhiteSpace(category))
-                {
-                    continue;
-                }
+                if (string.IsNullOrWhiteSpace(category)) continue;
 
                 // Get a sorted collection of command names,
                 // wrapped in code block markdown.
@@ -122,7 +121,7 @@ namespace Asuka.Modules.General
                         .OrderBy(s => s);
 
                 // Combine command names separated by a comma into a single string.
-                var commands = string.Join(", ", commandList);
+                string commands = string.Join(", ", commandList);
                 embed.AddField(category, commands);
             }
 

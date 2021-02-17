@@ -101,7 +101,7 @@ namespace Asuka.Modules.Utility
             var stream = surface.Snapshot().Encode().AsStream();
 
             // Use hex code as filename but omit the pound sign.
-            var fileName = $"{raw:X6}.png";
+            string fileName = $"{raw:X6}.png";
 
             // Construct embed with color information and thumbnail.
             var embed = new EmbedBuilder()

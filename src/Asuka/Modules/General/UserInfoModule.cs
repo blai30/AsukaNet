@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.General
 {
     [Group("userinfo")]
+    [Alias("user")]
     [Remarks("General")]
     [Summary("Display information about a user or self.")]
     public class UserInfoModule : CommandModuleBase
@@ -24,7 +25,7 @@ namespace Asuka.Modules.General
         {
             // Use self if no user was specified.
             user ??= Context.User;
-            var avatarUrl = user.GetAvatarUrl();
+            string avatarUrl = user.GetAvatarUrl();
 
             var embed = new EmbedBuilder()
                 .WithTitle("Icon direct link")

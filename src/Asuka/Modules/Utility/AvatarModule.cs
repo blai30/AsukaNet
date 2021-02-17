@@ -23,7 +23,7 @@ namespace Asuka.Modules.Utility
         public async Task AvatarAsync(IUser user = null)
         {
             user ??= Context.User;
-            var avatarUrl = user.GetAvatarUrl(size: 4096);
+            string avatarUrl = user.GetAvatarUrl(size: 4096);
 
             // Construct embed with avatar image and direct link.
             var embed = new EmbedBuilder()

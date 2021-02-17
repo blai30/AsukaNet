@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Modules.General
 {
     [Group("serverinfo")]
+    [Alias("server")]
     [Remarks("General")]
     [Summary("Display information about the server.")]
     [RequireContext(ContextType.Guild)]
@@ -30,7 +31,7 @@ namespace Asuka.Modules.General
             var voiceChannels = guild.VoiceChannels;
             var emotes = guild.Emotes;
             var roles = guild.Roles;
-            var guildIconUrl = guild.IconUrl;
+            string guildIconUrl = guild.IconUrl;
 
             // Sort collection of roles to print alphabetically.
             var roleList = roles.Select(role => role.Name).ToList();
