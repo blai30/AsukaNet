@@ -37,7 +37,7 @@ namespace Asuka.Modules.General
                 return;
             }
 
-            // List the module usage examples using the command remarks.
+            // List the module usage examples using the command remarks if defined.
             string usage = string.Empty;
             foreach (var command in module.Commands)
             {
@@ -67,9 +67,9 @@ namespace Asuka.Modules.General
         }
 
         /// <summary>
-        /// Builds the default help embed for the bot that lists all available commands
-        /// separated by categories. Shows the user how to execute commands and provides
-        /// some useful links about the bot.
+        ///     Builds the default help embed for the bot that lists all available commands
+        ///     separated by categories. Shows the user how to execute commands and provides
+        ///     some useful links about the bot.
         /// </summary>
         /// <returns></returns>
         private async Task DefaultHelpAsync()
@@ -79,8 +79,7 @@ namespace Asuka.Modules.General
 
             string[] links =
             {
-                $"[Invite me]({Config.Value.InviteUrl})",
-                $"[Invite me]({Config.Value.InviteUrl})"
+                $"[Invite me]({Config.Value.InviteUrl})", $"[Invite me]({Config.Value.InviteUrl})"
             };
 
             // Initialize embed builder with basic info.
@@ -100,11 +99,10 @@ namespace Asuka.Modules.General
 
             // Get a sorted collection of command categories using
             // the module's remarks attribute as the category name.
-            var moduleCategories =
-                _commandService.Modules
-                    .Select(module => module.Remarks)
-                    .Distinct()
-                    .OrderBy(s => s);
+            var moduleCategories = _commandService.Modules
+                .Select(module => module.Remarks)
+                .Distinct()
+                .OrderBy(s => s);
 
             // Get a list of command names from each category.
             foreach (string category in moduleCategories)

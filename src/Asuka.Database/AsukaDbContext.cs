@@ -10,13 +10,14 @@ namespace Asuka.Database
     {
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public DbSet<Tag> Tags { get; set; }
-        public DbSet<ReactionRole> ReactionRoles { get; set; }
-
-        public AsukaDbContext(DbContextOptions<AsukaDbContext> options, IServiceScopeFactory scopeFactory) : base(options)
+        public AsukaDbContext(DbContextOptions<AsukaDbContext> options, IServiceScopeFactory scopeFactory) :
+            base(options)
         {
             _scopeFactory = scopeFactory;
         }
+
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ReactionRole> ReactionRoles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -26,9 +27,7 @@ namespace Asuka.Database
                 .GetConnectionString("Docker");
 
             optionsBuilder
-                .UseMySql(
-                    connectionString,
-                    ServerVersion.AutoDetect(connectionString))
+                .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
                 // Map PascalCase POCO properties to snake_case MySQL tables and columns.
                 .UseSnakeCaseNamingConvention();
         }

@@ -12,18 +12,18 @@ namespace Asuka.Services
 {
     public class TagListenerService : IHostedService
     {
-        private readonly ILogger<TagListenerService> _logger;
-        private readonly IDbContextFactory<AsukaDbContext> _factory;
         private readonly DiscordSocketClient _client;
+        private readonly IDbContextFactory<AsukaDbContext> _factory;
+        private readonly ILogger<TagListenerService> _logger;
 
         public TagListenerService(
-            ILogger<TagListenerService> logger,
+            DiscordSocketClient client,
             IDbContextFactory<AsukaDbContext> factory,
-            DiscordSocketClient client)
+            ILogger<TagListenerService> logger)
         {
-            _logger = logger;
-            _factory = factory;
             _client = client;
+            _factory = factory;
+            _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
