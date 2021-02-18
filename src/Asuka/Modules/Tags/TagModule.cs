@@ -64,11 +64,9 @@ namespace Asuka.Modules.Tags
 
             // Get tag by name.
             var tag = await context.Tags.AsQueryable()
-                .Where(t => t.Name == tagName)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(t => t.Name == tagName);
 
             tag.Content = tagContent;
-            context.Tags.Update(tag);
 
             try
             {
@@ -118,7 +116,7 @@ namespace Asuka.Modules.Tags
             await using var context = _factory.CreateDbContext();
 
             // Get list of tags from this guild.
-            var tags = await context.Tags.AsQueryable()
+            var tags = await context.Tags.AsNoTracking()
                 .Where(tag => tag.GuildId == Context.Guild.Id)
                 .Select(tag => $"`{tag.Name}`")
                 .ToListAsync();
@@ -137,9 +135,8 @@ namespace Asuka.Modules.Tags
             await using var context = _factory.CreateDbContext();
 
             // Get tag by name.
-            var tag = await context.Tags.AsQueryable()
-                .Where(t => t.Name == tagName)
-                .FirstOrDefaultAsync();
+            var tag = await context.Tags.AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Name == tagName);
 
             if (tag == null)
             {

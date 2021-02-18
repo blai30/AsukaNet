@@ -71,7 +71,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != cachedMessage.Id))
+            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id))
             {
                 return;
             }
@@ -80,11 +80,10 @@ namespace Asuka.Services
             if (string.IsNullOrEmpty(emoteText)) return;
 
             // Get reaction role.
-            var reactionRole = await context.ReactionRoles.AsQueryable()
-                .Where(r =>
+            var reactionRole = await context.ReactionRoles.AsNoTracking()
+                .FirstOrDefaultAsync(r =>
                     r.MessageId == cachedMessage.Id &&
-                    r.Emote == emoteText)
-                .FirstOrDefaultAsync();
+                    r.Emote == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
@@ -127,7 +126,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != cachedMessage.Id))
+            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id))
             {
                 return;
             }
@@ -136,11 +135,10 @@ namespace Asuka.Services
             if (string.IsNullOrEmpty(emoteText)) return;
 
             // Get reaction role.
-            var reactionRole = await context.ReactionRoles.AsQueryable()
-                .Where(r =>
+            var reactionRole = await context.ReactionRoles.AsNoTracking()
+                .FirstOrDefaultAsync(r =>
                     r.MessageId == cachedMessage.Id &&
-                    r.Emote == emoteText)
-                .FirstOrDefaultAsync();
+                    r.Emote == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
@@ -202,7 +200,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // Remove reaction roles from list.
-            var reactionRoles = await context.ReactionRoles.AsQueryable()
+            var reactionRoles = await context.ReactionRoles.AsNoTracking()
                 .Where(reactionRole => reactionRole.RoleId == role.Id).ToListAsync();
             foreach (var reactionRole in reactionRoles)
             {
@@ -238,6 +236,7 @@ namespace Asuka.Services
 
         /// <summary>
         /// Remove all reaction roles from the database for a specific reaction or all reactions from a message.
+        /// TODO: This method uses another DbContext when called from the other event handler methods.
         /// </summary>
         /// <param name="messageId">Id of the message to clear reactions from</param>
         /// <param name="channel">Channel in which the message is referenced</param>
