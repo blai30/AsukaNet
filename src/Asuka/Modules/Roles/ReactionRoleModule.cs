@@ -104,15 +104,15 @@ namespace Asuka.Modules.Roles
             await using var context = _factory.CreateDbContext();
             // Get reaction role that references this message and role.
             var reactionRole = await context.ReactionRoles.AsQueryable()
-                .Where(r => r.RoleId == role.Id && r.MessageId == message.Id)
-                .FirstOrDefaultAsync();
-            // Remove reaction role from database.
-            context.ReactionRoles.Remove(reactionRole);
+                .FirstOrDefaultAsync(r => r.RoleId == role.Id && r.MessageId == message.Id);
 
             // Parse emote or emoji.
             IEmote reaction = Emote.TryParse(reactionRole.Emote, out var emote)
                 ? (IEmote) emote
                 : new Emoji(reactionRole.Emote);
+
+            // Remove reaction role from database.
+            context.ReactionRoles.Remove(reactionRole);
 
             try
             {
