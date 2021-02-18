@@ -11,18 +11,18 @@ namespace Asuka.Services
 {
     public class LoggingService : IHostedService
     {
-        private readonly ILogger<LoggingService> _logger;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
+        private readonly ILogger<LoggingService> _logger;
 
         public LoggingService(
-            ILogger<LoggingService> logger,
             DiscordSocketClient client,
-            CommandService commandService)
+            CommandService commandService,
+            ILogger<LoggingService> logger)
         {
-            _logger = logger;
             _client = client;
             _commandService = commandService;
+            _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken stoppingToken)

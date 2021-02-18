@@ -50,7 +50,8 @@ namespace Asuka.Modules.Tags
             }
             catch
             {
-                await ReplyAsync($"Error adding `{tagName}`, either a tag with the same name already exists or the input parameters are invalid.");
+                await ReplyAsync(
+                    $"Error adding `{tagName}`, either a tag with the same name already exists or the input parameters are invalid.");
             }
         }
 

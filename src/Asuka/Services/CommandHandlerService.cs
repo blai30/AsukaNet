@@ -15,40 +15,40 @@ using SkiaSharp;
 namespace Asuka.Services
 {
     /// <summary>
-    /// Service to handle command execution from user sent messages.
+    ///     Service to handle command execution from user sent messages.
     /// </summary>
     public class CommandHandlerService : IHostedService
     {
-        private readonly ILogger<CommandHandlerService> _logger;
-        private readonly IServiceProvider _provider;
-        private readonly IOptions<DiscordOptions> _config;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
+        private readonly IOptions<DiscordOptions> _config;
+        private readonly ILogger<CommandHandlerService> _logger;
+        private readonly IServiceProvider _provider;
 
         /// <summary>
-        /// Injected automatically from the service provider.
+        ///     Injected automatically from the service provider.
         /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="provider"></param>
-        /// <param name="config"></param>
         /// <param name="client"></param>
         /// <param name="commandService"></param>
+        /// <param name="config"></param>
+        /// <param name="logger"></param>
+        /// <param name="provider"></param>
         public CommandHandlerService(
-            ILogger<CommandHandlerService> logger,
-            IServiceProvider provider,
-            IOptions<DiscordOptions> config,
             DiscordSocketClient client,
-            CommandService commandService)
+            CommandService commandService,
+            IOptions<DiscordOptions> config,
+            ILogger<CommandHandlerService> logger,
+            IServiceProvider provider)
         {
-            _logger = logger;
-            _provider = provider;
-            _config = config;
             _client = client;
             _commandService = commandService;
+            _config = config;
+            _logger = logger;
+            _provider = provider;
         }
 
         /// <summary>
-        /// Initialize service at start. Load command type readers and modules.
+        ///     Initialize service at start. Load command type readers and modules.
         /// </summary>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
@@ -80,7 +80,7 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Checks message if it is a command then executes it.
+        ///     Checks message if it is a command then executes it.
         /// </summary>
         /// <param name="socketMessage"></param>
         /// <returns></returns>
@@ -96,17 +96,12 @@ namespace Asuka.Services
             // TODO: Fetch custom set guild prefix from database.
             // Check if message has string prefix, only if it is not null.
             string prefix = _config.Value.BotPrefix;
-            if (prefix != null && !message.HasStringPrefix(prefix, ref argPos))
-            {
-                return;
-            }
+            if (prefix != null && !message.HasStringPrefix(prefix, ref argPos)) return;
 
             // Check if message has bot mention prefix and was not invoked by a bot.
             if (!message.HasMentionPrefix(_client.CurrentUser, ref argPos) &&
                 !message.Author.IsBot)
-            {
                 return;
-            }
 
             // Create a WebSocket-based command context based on the message.
             var context = new SocketCommandContext(_client, message);
@@ -115,13 +110,16 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Callback for command execution. Reply with error if command fails execution.
+        ///     Callback for command execution. Reply with error if command fails execution.
         /// </summary>
         /// <param name="command"></param>
         /// <param name="context"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        private async Task OnCommandExecutedAsync(
+            Optional<CommandInfo> command,
+            ICommandContext context,
+            IResult result)
         {
             if (!command.IsSpecified || result.IsSuccess) return;
 

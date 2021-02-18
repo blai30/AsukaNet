@@ -21,13 +21,9 @@ namespace Asuka.Commands.Readers
                 info.Aliases.Any(alias => alias.ToUpperInvariant() == moduleName));
 
             // Module is invalid.
-            if (module == null)
-            {
-                return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed,
-                    $"Module `{input}` does not exist. UwU"));
-            }
-
-            return Task.FromResult(TypeReaderResult.FromSuccess(module));
+            return Task.FromResult(module == null
+                ? TypeReaderResult.FromError(CommandError.ParseFailed, $"Module `{input}` does not exist. UwU")
+                : TypeReaderResult.FromSuccess(module));
         }
     }
 }

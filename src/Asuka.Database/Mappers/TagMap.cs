@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Asuka.Database.Mappers
 {
     /// <summary>
-    /// Build Tag model for tags table.
+    ///     Build Tag model for tags table.
     /// </summary>
     public class TagMap : IEntityTypeConfiguration<Tag>
     {
@@ -15,7 +15,12 @@ namespace Asuka.Database.Mappers
             builder.Property(e => e.CreatedAt).ValueGeneratedOnAdd();
             builder.Property(e => e.UpdatedAt).ValueGeneratedOnAddOrUpdate();
 
-            builder.HasIndex(e => new { e.Name, e.GuildId }, "unique_per_guild").IsUnique();
+            builder.HasIndex(e => new
+                {
+                    e.Name,
+                    e.GuildId
+                }, "unique_per_guild")
+                .IsUnique();
         }
     }
 }

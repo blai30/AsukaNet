@@ -47,8 +47,7 @@ namespace Asuka.Modules.General
                 .WithFooter($"Created: {guild.CreatedAt:R}")
                 .AddField(
                     "ID",
-                    guild.Id,
-                    false)
+                    guild.Id)
                 .AddField(
                     "Region",
                     guild.VoiceRegionId,

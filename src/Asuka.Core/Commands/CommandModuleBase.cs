@@ -10,16 +10,12 @@ namespace Asuka.Commands
     {
         protected readonly IOptions<DiscordOptions> Config;
 
+        protected CommandModuleBase(IOptions<DiscordOptions> config) => Config = config;
+
         protected override void BeforeExecute(CommandInfo command)
         {
             base.BeforeExecute(command);
             Context.Channel.TriggerTypingAsync();
-        }
-
-        protected CommandModuleBase(
-            IOptions<DiscordOptions> config)
-        {
-            Config = config;
         }
 
         protected async Task ReplyInlineAsync(

@@ -11,25 +11,25 @@ using Microsoft.Extensions.Options;
 namespace Asuka.Services
 {
     /// <summary>
-    /// Starts the client and logs into discord using bot token.
+    ///     Starts the client and logs into discord using bot token.
     /// </summary>
     public class StartupService : IHostedService
     {
+        private readonly DiscordSocketClient _client;
+        private readonly IOptions<DiscordOptions> _discord;
         private readonly ILogger<StartupService> _logger;
         private readonly IOptions<TokenOptions> _tokens;
-        private readonly IOptions<DiscordOptions> _discord;
-        private readonly DiscordSocketClient _client;
 
         public StartupService(
-            ILogger<StartupService> logger,
-            IOptions<TokenOptions> tokens,
+            DiscordSocketClient client,
             IOptions<DiscordOptions> discord,
-            DiscordSocketClient client)
+            ILogger<StartupService> logger,
+            IOptions<TokenOptions> tokens)
         {
+            _client = client;
+            _discord = discord;
             _logger = logger;
             _tokens = tokens;
-            _discord = discord;
-            _client = client;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

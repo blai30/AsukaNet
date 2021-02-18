@@ -12,8 +12,8 @@ namespace Asuka.Configuration
     }
 
     /// <summary>
-    /// Status object from appsettings.json.
-    /// Name of class/struct and properties must match.
+    ///     Status object from appsettings.json.
+    ///     Name of class/struct and properties must match.
     /// </summary>
     public struct Status
     {

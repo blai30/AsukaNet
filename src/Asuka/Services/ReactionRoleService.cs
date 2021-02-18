@@ -16,18 +16,18 @@ namespace Asuka.Services
 {
     public class ReactionRoleService : IHostedService
     {
-        private readonly ILogger<ReactionRoleService> _logger;
-        private readonly IDbContextFactory<AsukaDbContext> _factory;
         private readonly DiscordSocketClient _client;
+        private readonly IDbContextFactory<AsukaDbContext> _factory;
+        private readonly ILogger<ReactionRoleService> _logger;
 
         public ReactionRoleService(
-            ILogger<ReactionRoleService> logger,
+            DiscordSocketClient client,
             IDbContextFactory<AsukaDbContext> factory,
-            DiscordSocketClient client)
+            ILogger<ReactionRoleService> logger)
         {
-            _logger = logger;
-            _factory = factory;
             _client = client;
+            _factory = factory;
+            _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -57,7 +57,7 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Adds a role to a user when a reaction was added.
+        ///     Adds a role to a user when a reaction was added.
         /// </summary>
         /// <param name="cachedMessage">Message from which a reaction was added</param>
         /// <param name="channel">Channel where the message is from</param>
@@ -71,10 +71,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id))
-            {
-                return;
-            }
+            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id)) return;
 
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
@@ -112,7 +109,7 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Removes a role from a user when a reaction was removed.
+        ///     Removes a role from a user when a reaction was removed.
         /// </summary>
         /// <param name="cachedMessage">Message from which a reaction was removed</param>
         /// <param name="channel">Channel where the message is from</param>
@@ -126,10 +123,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id))
-            {
-                return;
-            }
+            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id)) return;
 
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
@@ -167,31 +161,38 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Remove all reaction roles from the database that referenced the message when all reactions from the message get cleared.
+        ///     Remove all reaction roles from the database that referenced the message when all reactions from the message get
+        ///     cleared.
         /// </summary>
         /// <param name="cachedMessage">Message whose reactions got cleared</param>
         /// <param name="channel">Channel in which the reactions of the message was cleared</param>
         /// <returns></returns>
-        private async Task OnReactionsCleared(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel)
+        private async Task OnReactionsCleared(
+            Cacheable<IUserMessage, ulong> cachedMessage,
+            ISocketMessageChannel channel)
         {
             await ClearReactionRoles(cachedMessage.Id, channel);
         }
 
         /// <summary>
-        /// Remove all reactions to a specific emote from the database that referenced the message when its reactions was cleared.
+        ///     Remove all reactions to a specific emote from the database that referenced the message when its reactions was
+        ///     cleared.
         /// </summary>
         /// <param name="cachedMessage">Message whose reaction got cleared</param>
         /// <param name="channel">Channel in which the reaction of the message was cleared</param>
         /// <param name="reaction">Reaction that was cleared</param>
         /// <returns></returns>
-        private async Task OnReactionsRemovedForEmote(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, IEmote reaction)
+        private async Task OnReactionsRemovedForEmote(
+            Cacheable<IUserMessage, ulong> cachedMessage,
+            ISocketMessageChannel channel,
+            IEmote reaction)
         {
             await ClearReactionRoles(cachedMessage.Id, channel, reaction);
         }
 
         /// <summary>
-        /// Remove reaction roles from the list and database when a guild deletes a role.
-        /// Clears reactions from all messages that referenced the deleted role.
+        ///     Remove reaction roles from the list and database when a guild deletes a role.
+        ///     Clears reactions from all messages that referenced the deleted role.
         /// </summary>
         /// <param name="role">Deleted role</param>
         /// <returns></returns>
@@ -201,7 +202,9 @@ namespace Asuka.Services
 
             // Remove reaction roles from list.
             var reactionRoles = await context.ReactionRoles.AsNoTracking()
-                .Where(reactionRole => reactionRole.RoleId == role.Id).ToListAsync();
+                .Where(reactionRole => reactionRole.RoleId == role.Id)
+                .ToListAsync();
+
             foreach (var reactionRole in reactionRoles)
             {
                 // Parse emote or emoji.
@@ -223,8 +226,8 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// When a message is deleted, all reaction roles that referenced that message
-        /// will get removed from the database and cleaned out of the list.
+        ///     When a message is deleted, all reaction roles that referenced that message
+        ///     will get removed from the database and cleaned out of the list.
         /// </summary>
         /// <param name="cachedMessage">Deleted message</param>
         /// <param name="channel">Channel in which the message was deleted</param>
@@ -235,8 +238,8 @@ namespace Asuka.Services
         }
 
         /// <summary>
-        /// Remove all reaction roles from the database for a specific reaction or all reactions from a message.
-        /// TODO: This method uses another DbContext when called from the other event handler methods.
+        ///     Remove all reaction roles from the database for a specific reaction or all reactions from a message.
+        ///     TODO: This method uses another DbContext when called from the other event handler methods.
         /// </summary>
         /// <param name="messageId">Id of the message to clear reactions from</param>
         /// <param name="channel">Channel in which the message is referenced</param>
@@ -247,10 +250,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != messageId))
-            {
-                return;
-            }
+            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != messageId)) return;
 
             // Condition to remove all reaction roles from a message if no reaction was specified,
             // otherwise only remove all reaction roles for that specific reaction.
@@ -260,18 +260,18 @@ namespace Asuka.Services
                                   reactionRole.Emote == reaction.GetStringRepresentation();
 
             // Get and remove all rows that referenced the message from database.
-            var rows = await context.ReactionRoles.AsQueryable()
+            var reactionRoles = await context.ReactionRoles.AsQueryable()
                 .Where(expression)
                 .ToListAsync();
 
-            if (!rows.Any()) return;
+            if (!reactionRoles.Any()) return;
 
-            context.ReactionRoles.RemoveRange(rows);
+            context.ReactionRoles.RemoveRange(reactionRoles);
             try
             {
                 await context.SaveChangesAsync();
                 _logger.LogTrace(
-                    $"Removed {rows.Count} reaction roles from message ({messageId}), channel ({channel.Id})");
+                    $"Removed {reactionRoles.Count} reaction roles from message ({messageId}), channel ({channel.Id})");
             }
             catch
             {

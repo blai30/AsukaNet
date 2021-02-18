@@ -43,7 +43,8 @@ namespace Asuka.Modules.Utility
             var type = typeof(SKColors);
 
             // Get color by keyword color name using reflection.
-            FieldInfo info = type.GetField(keywords,
+            FieldInfo info = type.GetField(
+                keywords,
                 BindingFlags.IgnoreCase |
                 BindingFlags.Instance |
                 BindingFlags.Public |
