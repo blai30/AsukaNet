@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Authors>Brian Lai</Authors>
     </PropertyGroup>
 
@@ -12,8 +12,8 @@
 
     <ItemGroup>
       <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.1.21102.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0-preview.1.21102.2" />
       <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0-alpha.2" />
     </ItemGroup>
 
