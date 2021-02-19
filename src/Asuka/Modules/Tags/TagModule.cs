@@ -91,8 +91,7 @@ namespace Asuka.Modules.Tags
 
             // Get tag by name.
             var tag = await context.Tags.AsQueryable()
-                .Where(t => t.Name == tagName)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(t => t.Name == tagName);
 
             context.Tags.Remove(tag);
 
