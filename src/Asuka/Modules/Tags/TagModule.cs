@@ -7,6 +7,7 @@ using Asuka.Database.Models;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Tags
@@ -21,8 +22,9 @@ namespace Asuka.Modules.Tags
 
         public TagModule(
             IOptions<DiscordOptions> config,
+            ILogger<TagModule> logger,
             IDbContextFactory<AsukaDbContext> factory) :
-            base(config)
+            base(config, logger)
         {
             _factory = factory;
         }
@@ -55,32 +57,6 @@ namespace Asuka.Modules.Tags
             }
         }
 
-        [Command("edit")]
-        [Alias("e", "modify", "m")]
-        [Remarks("tag edit <name> <content>")]
-        [Summary("Edit an existing tag from the server.")]
-        public async Task EditAsync(string tagName, string tagContent)
-        {
-            await using var context = _factory.CreateDbContext();
-
-            // Get tag by name.
-            var tag = await context.Tags.AsQueryable()
-                .FirstOrDefaultAsync(t => t.Name == tagName);
-
-            tag.Content = tagContent;
-
-            try
-            {
-                await context.SaveChangesAsync();
-                await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
-            }
-            catch
-            {
-                await ReplyAsync($"Error updating tag `{tagName}`.");
-                throw;
-            }
-        }
-
         [Command("remove")]
         [Alias("r", "delete", "d")]
         [Remarks("tag remove <name>")]
@@ -103,6 +79,32 @@ namespace Asuka.Modules.Tags
             catch
             {
                 await ReplyAsync($"Error removing tag `{tagName}`.");
+                throw;
+            }
+        }
+
+        [Command("edit")]
+        [Alias("e", "modify", "m")]
+        [Remarks("tag edit <name> <content>")]
+        [Summary("Edit an existing tag from the server.")]
+        public async Task EditAsync(string tagName, string tagContent)
+        {
+            await using var context = _factory.CreateDbContext();
+
+            // Get tag by name.
+            var tag = await context.Tags.AsQueryable()
+                .FirstOrDefaultAsync(t => t.Name == tagName);
+
+            tag.Content = tagContent;
+
+            try
+            {
+                await context.SaveChangesAsync();
+                await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
+            }
+            catch
+            {
+                await ReplyAsync($"Error updating tag `{tagName}`.");
                 throw;
             }
         }

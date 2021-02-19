@@ -3,6 +3,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
@@ -13,8 +14,9 @@ namespace Asuka.Modules.Utility
     public class AvatarModule : CommandModuleBase
     {
         public AvatarModule(
-            IOptions<DiscordOptions> config) :
-            base(config)
+            IOptions<DiscordOptions> config,
+            ILogger<AvatarModule> logger) :
+            base(config, logger)
         {
         }
 

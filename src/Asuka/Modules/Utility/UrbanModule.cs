@@ -8,6 +8,7 @@ using Asuka.Models.API.Urban;
 using Discord;
 using Discord.Commands;
 using Humanizer;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
@@ -23,8 +24,9 @@ namespace Asuka.Modules.Utility
 
         public UrbanModule(
             IOptions<DiscordOptions> config,
+            ILogger<UrbanModule> logger,
             IHttpClientFactory factory) :
-            base(config)
+            base(config, logger)
         {
             _factory = factory;
         }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility
@@ -18,8 +19,9 @@ namespace Asuka.Modules.Utility
 
         public CalculateModule(
             IOptions<DiscordOptions> config,
+            ILogger<CalculateModule> logger,
             DataTable dataTable) :
-            base(config)
+            base(config, logger)
         {
             _dataTable = dataTable;
         }

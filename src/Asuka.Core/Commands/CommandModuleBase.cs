@@ -2,15 +2,21 @@
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Commands
 {
     public abstract class CommandModuleBase : ModuleBase<SocketCommandContext>
     {
-        protected readonly IOptions<DiscordOptions> Config;
+        protected CommandModuleBase(IOptions<DiscordOptions> config, ILogger<CommandModuleBase> logger)
+        {
+            Config = config;
+            Logger = logger;
+        }
 
-        protected CommandModuleBase(IOptions<DiscordOptions> config) => Config = config;
+        protected IOptions<DiscordOptions> Config { get; }
+        protected ILogger<CommandModuleBase> Logger { get; }
 
         protected override void BeforeExecute(CommandInfo command)
         {

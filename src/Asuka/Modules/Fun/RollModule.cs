@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Fun
@@ -16,8 +17,9 @@ namespace Asuka.Modules.Fun
 
         public RollModule(
             IOptions<DiscordOptions> config,
+            ILogger<RollModule> logger,
             Random random) :
-            base(config)
+            base(config, logger)
         {
             _random = random;
         }

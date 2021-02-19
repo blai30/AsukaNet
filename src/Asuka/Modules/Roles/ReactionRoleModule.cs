@@ -7,6 +7,7 @@ using Asuka.Database.Models;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Roles
@@ -34,8 +35,9 @@ namespace Asuka.Modules.Roles
 
         public ReactionRoleModule(
             IOptions<DiscordOptions> config,
+            ILogger<ReactionRoleModule> logger,
             IDbContextFactory<AsukaDbContext> factory) :
-            base(config)
+            base(config, logger)
         {
             _factory = factory;
         }

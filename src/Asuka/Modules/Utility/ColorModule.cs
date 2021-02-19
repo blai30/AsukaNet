@@ -7,6 +7,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
 
@@ -18,8 +19,9 @@ namespace Asuka.Modules.Utility
     public class ColorModule : CommandModuleBase
     {
         public ColorModule(
-            IOptions<DiscordOptions> config) :
-            base(config)
+            IOptions<DiscordOptions> config,
+            ILogger<ColorModule> logger) :
+            base(config, logger)
         {
         }
 

@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General
@@ -18,8 +19,9 @@ namespace Asuka.Modules.General
 
         public HelpModule(
             IOptions<DiscordOptions> config,
+            ILogger<HelpModule> logger,
             CommandService commandService) :
-            base(config)
+            base(config, logger)
         {
             _commandService = commandService;
         }

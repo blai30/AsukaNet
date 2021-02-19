@@ -3,6 +3,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General
@@ -14,8 +15,9 @@ namespace Asuka.Modules.General
     public class UserInfoModule : CommandModuleBase
     {
         public UserInfoModule(
-            IOptions<DiscordOptions> config) :
-            base(config)
+            IOptions<DiscordOptions> config,
+            ILogger<UserInfoModule> logger) :
+            base(config, logger)
         {
         }
 

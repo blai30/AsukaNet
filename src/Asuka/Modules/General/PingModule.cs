@@ -2,6 +2,7 @@
 using Asuka.Commands;
 using Asuka.Configuration;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General
@@ -12,8 +13,9 @@ namespace Asuka.Modules.General
     public class PingModule : CommandModuleBase
     {
         public PingModule(
-            IOptions<DiscordOptions> config) :
-            base(config)
+            IOptions<DiscordOptions> config,
+            ILogger<PingModule> logger) :
+            base(config, logger)
         {
         }
 
