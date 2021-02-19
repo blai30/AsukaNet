@@ -79,7 +79,8 @@ namespace Asuka.Modules.General
 
             string[] links =
             {
-                $"[Invite me]({Config.Value.InviteUrl})", $"[Invite me]({Config.Value.InviteUrl})"
+                $"[Invite me]({Config.Value.InviteUrl})",
+                $"[Invite me]({Config.Value.InviteUrl})"
             };
 
             // Initialize embed builder with basic info.

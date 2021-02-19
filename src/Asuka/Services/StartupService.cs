@@ -37,7 +37,8 @@ namespace Asuka.Services
             string token = _tokens.Value.Discord;
             if (string.IsNullOrWhiteSpace(token))
             {
-                throw new Exception("Enter bot token into the `appsettings.json` file found in the application's root directory.");
+                throw new Exception(
+                    "Enter bot token into the `appsettings.json` file found in the application's root directory.");
             }
 
             // Login to the discord client using bot token.
