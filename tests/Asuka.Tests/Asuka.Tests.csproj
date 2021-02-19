@@ -9,9 +9,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentAssertions" Version="5.10.3" />
         <PackageReference Include="NUnit" Version="3.13.1" />
         <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.0-preview-20210127-04" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Asuka.Common\Asuka.Common.csproj" />
+      <ProjectReference Include="..\..\src\Asuka.Core\Asuka.Core.csproj" />
+      <ProjectReference Include="..\..\src\Asuka.Database\Asuka.Database.csproj" />
+      <ProjectReference Include="..\..\src\Asuka.Extensions\Asuka.Extensions.csproj" />
     </ItemGroup>
 
 </Project>
