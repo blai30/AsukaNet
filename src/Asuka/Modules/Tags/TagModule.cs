@@ -6,6 +6,7 @@ using Asuka.Database;
 using Asuka.Database.Models;
 using Discord;
 using Discord.Commands;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -35,6 +36,18 @@ namespace Asuka.Modules.Tags
         [Summary("Create a new tag for the server.")]
         public async Task AddAsync(string tagName, string tagContent)
         {
+            if (tagName.Length > 100)
+            {
+                await ReplyAsync("Tag name must be 100 characters or less.");
+                return;
+            }
+
+            if (tagContent.Length > 255)
+            {
+                await ReplyAsync("Tag content must be 255 characters or less.");
+                return;
+            }
+
             var tag = new Tag
             {
                 Name = tagName,
@@ -53,7 +66,7 @@ namespace Asuka.Modules.Tags
             catch
             {
                 await ReplyAsync(
-                    $"Error adding `{tagName}`, either a tag with the same name already exists or the input parameters are invalid.");
+                    $"Error adding `{tagName.Truncate(20, "...")}`, either a tag with the same name already exists or the input parameters are invalid.");
             }
         }
 
@@ -78,7 +91,7 @@ namespace Asuka.Modules.Tags
             }
             catch
             {
-                await ReplyAsync($"Error removing tag `{tagName}`.");
+                await ReplyAsync($"Error removing tag `{tagName.Truncate(20, "...")}`.");
                 throw;
             }
         }
@@ -104,7 +117,7 @@ namespace Asuka.Modules.Tags
             }
             catch
             {
-                await ReplyAsync($"Error updating tag `{tagName}`.");
+                await ReplyAsync($"Error updating tag `{tagName.Truncate(20, "...")}`.");
                 throw;
             }
         }
@@ -142,7 +155,7 @@ namespace Asuka.Modules.Tags
 
             if (tag == null)
             {
-                await ReplyAsync($"Tag `{tagName}` does not exist in this server.");
+                await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
                 return;
             }
 

@@ -66,6 +66,12 @@ namespace Asuka.Modules.Roles
         {
             // Get emote string representation and guild role by role id.
             string emoteText = emote.GetStringRepresentation();
+            if (emoteText.Length > 100)
+            {
+                await ReplyAsync("Emote has too many characters.");
+                return;
+            }
+
             var guildRole = Context.Guild.GetRole(role.Id);
 
             var reactionRole = new ReactionRole
