@@ -44,6 +44,8 @@ namespace Asuka.Services
 
         private async Task OnMessageReceived(SocketMessage socketMessage)
         {
+            // TODO: Currently executes query on EVERY message received.
+
             await using var context = _factory.CreateDbContext();
 
             // Ensure the message is from a user or bot and not a system message.
@@ -57,9 +59,7 @@ namespace Asuka.Services
 
             if (tag != null)
             {
-                // Update usage count.
                 tag.UsageCount++;
-                context.Tags.Update(tag);
 
                 try
                 {
