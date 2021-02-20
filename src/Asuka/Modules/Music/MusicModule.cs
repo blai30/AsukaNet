@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Victoria;
@@ -37,14 +38,14 @@ namespace Asuka.Modules.Music
         {
             if (_lavaNode.HasPlayer(Context.Guild))
             {
-                await ReplyAsync("I'm already connected to a voice channel!");
+                await ReplyAsync("I'm already connected to a voice channel in this server.");
                 return;
             }
 
-            var voiceState = Context.User as IVoiceState;
-            if (voiceState?.VoiceChannel == null)
+            if (Context.User is not IVoiceState voiceState ||
+                voiceState.VoiceChannel == null)
             {
-                await ReplyAsync("You must be connected to a voice channel!");
+                await ReplyAsync("You must be connected to a voice channel.");
                 return;
             }
 
@@ -84,7 +85,7 @@ namespace Asuka.Modules.Music
                 if (searchResponse.LoadStatus == LoadStatus.LoadFailed ||
                     searchResponse.LoadStatus == LoadStatus.NoMatches)
                 {
-                    await ReplyAsync($"I wasn't able to find anything for `{query}`.");
+                    await ReplyAsync($"I wasn't able to find anything for `{query.Truncate(50, "...")}`.");
                     return;
                 }
 
