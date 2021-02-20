@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Victoria;
 
 namespace Asuka
 {
@@ -71,9 +72,15 @@ namespace Asuka
                 .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
                 .AddSingleton<DataTable>()
 
+                .AddLavaNode(config =>
+                {
+                    config.SelfDeaf = false;
+                })
+
                 // Background hosted services.
                 .AddHostedService<LoggingService>()
                 .AddHostedService<CommandHandlerService>()
+                .AddHostedService<AudioService>()
                 .AddHostedService<TagListenerService>()
                 .AddHostedService<ReactionRoleService>()
                 .AddHostedService<StartupService>()
