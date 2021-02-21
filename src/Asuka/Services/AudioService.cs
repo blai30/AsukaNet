@@ -64,15 +64,7 @@ namespace Asuka.Services
             var player = args.Player;
 
             // Announce the track that will play.
-            string artwork = await args.Track.FetchArtworkAsync();
-            var embed = new EmbedBuilder()
-                .WithTitle(args.Track.Title)
-                .WithUrl(args.Track.Url)
-                .WithAuthor("Playing")
-                .WithDescription(args.Track.Duration.ToString("c"))
-                .WithColor(_config.Value.EmbedColor)
-                .WithThumbnailUrl(artwork)
-                .Build();
+            var embed = await BuildTrackEmbed("Playing", args.Track, _config.Value.EmbedColor);
 
             _logger.LogTrace($"Playing: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
             await player.TextChannel.SendMessageAsync(embed: embed);
@@ -88,15 +80,11 @@ namespace Asuka.Services
             var player = args.Player;
 
             // Announce the track that ended and how many more tracks in the queue.
-            string artwork = await args.Track.FetchArtworkAsync();
-            var embed = new EmbedBuilder()
-                .WithTitle(args.Track.Title)
-                .WithUrl(args.Track.Url)
-                .WithAuthor(args.Reason.ToString())
-                .WithDescription($"`{player.Queue.Count}` track(s) left in the queue.")
-                .WithColor(_config.Value.EmbedColor)
-                .WithThumbnailUrl(artwork)
-                .Build();
+            var embed = await BuildTrackEmbed(
+                args.Reason.ToString(),
+                args.Track,
+                _config.Value.EmbedColor,
+                $"`{player.Queue.Count}` track(s) left in the queue.");
 
             _logger.LogTrace($"{args.Reason}: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
             await player.TextChannel.SendMessageAsync(embed: embed);
@@ -110,6 +98,27 @@ namespace Asuka.Services
 
             // Play next track in the queue.
             await player.PlayAsync(track);
+        }
+
+        public static async Task<Embed> BuildTrackEmbed(string status, LavaTrack track, uint embedColor)
+        {
+            var result = await BuildTrackEmbed(status, track, embedColor, track.Duration.ToString("c"));
+            return result;
+        }
+
+        public static async Task<Embed> BuildTrackEmbed(string status, LavaTrack track, uint embedColor, string description)
+        {
+            string artwork = await track.FetchArtworkAsync();
+            var embed = new EmbedBuilder()
+                .WithTitle(track.Title)
+                .WithUrl(track.Url)
+                .WithAuthor(status)
+                .WithDescription(description)
+                .WithColor(embedColor)
+                .WithThumbnailUrl(artwork)
+                .Build();
+
+            return embed;
         }
     }
 }
