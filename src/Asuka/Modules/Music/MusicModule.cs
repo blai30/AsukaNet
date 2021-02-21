@@ -46,6 +46,10 @@ namespace Asuka.Modules.Music
             await TryJoinAsync();
         }
 
+        [Command("leave")]
+        [Alias("l")]
+        [Remarks("music leave")]
+        [Summary("Leave the currently playing voice channel.")]
         public async Task LeaveAsync()
         {
         }
@@ -99,8 +103,19 @@ namespace Asuka.Modules.Music
                 {
                     player.Queue.Enqueue(track);
 
+                    // Announce the track that was enqueued.
+                    string artwork = await track.FetchArtworkAsync();
+                    var embed = new EmbedBuilder()
+                        .WithTitle(track.Title)
+                        .WithUrl(track.Url)
+                        .WithAuthor("Enqueued")
+                        .WithDescription(track.Duration.ToString("c"))
+                        .WithColor(Config.Value.EmbedColor)
+                        .WithThumbnailUrl(artwork)
+                        .Build();
+
                     Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
-                    await ReplyAsync($"Enqueued: `{track.Title}` at position `{player.Queue.Count}`.");
+                    await ReplyAsync(embed: embed);
                 }
                 else
                 {
@@ -114,18 +129,33 @@ namespace Asuka.Modules.Music
             }
         }
 
+        [Command("pause")]
+        [Remarks("music pause")]
+        [Summary("Pause the currently playing track.")]
         public async Task PauseAsync()
         {
         }
 
+        [Command("queue")]
+        [Alias("q")]
+        [Remarks("music queue")]
+        [Summary("View the current music queue.")]
         public async Task QueueAsync()
         {
         }
 
+        [Command("skip")]
+        [Alias("s")]
+        [Remarks("music skip")]
+        [Summary("Skips the currently playing track.")]
         public async Task SkipAsync()
         {
         }
 
+        [Command("clear")]
+        [Alias("c")]
+        [Remarks("music clear")]
+        [Summary("Clears the music queue.")]
         public async Task ClearAsync()
         {
         }
