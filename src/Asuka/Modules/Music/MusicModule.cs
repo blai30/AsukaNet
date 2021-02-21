@@ -109,7 +109,7 @@ namespace Asuka.Modules.Music
                         .WithTitle(track.Title)
                         .WithUrl(track.Url)
                         .WithAuthor("Enqueued")
-                        .WithDescription($"Duration: {track.Duration:c}")
+                        .WithDescription(track.Duration.ToString("c"))
                         .WithColor(Config.Value.EmbedColor)
                         .WithThumbnailUrl(artwork)
                         .Build();

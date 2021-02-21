@@ -69,7 +69,7 @@ namespace Asuka.Services
                 .WithTitle(args.Track.Title)
                 .WithUrl(args.Track.Url)
                 .WithAuthor("Playing")
-                .WithDescription($"Duration: {args.Track.Duration:c}")
+                .WithDescription(args.Track.Duration.ToString("c"))
                 .WithColor(_config.Value.EmbedColor)
                 .WithThumbnailUrl(artwork)
                 .Build();
