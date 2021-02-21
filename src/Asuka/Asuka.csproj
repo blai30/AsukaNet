@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <LangVersion>9.0</LangVersion>
         <OutputType>Exe</OutputType>
         <Authors>Brian Lai</Authors>
-        <Description>Discord bot written in .NET 6 using Discord.Net.</Description>
+        <Description>Discord bot written in .NET 5 using Discord.Net.</Description>
         <AssemblyName>Asuka</AssemblyName>
         <RootNamespace>Asuka</RootNamespace>
         <Nullable>disable</Nullable>
