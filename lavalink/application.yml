@@ -1,15 +1,16 @@
 server: # REST and WS server
   port: 2333
-  address: localhost
+  address: 127.0.0.1
 lavalink:
   server:
-    password: "admin072898"
+    password: "youshallnotpass"
     sources:
       youtube: true
       bandcamp: true
       soundcloud: true
       twitch: false
-      vimeo: false
+      vimeo: true
+      mixer: true
       http: true
       local: false
     bufferDurationMs: 400
