@@ -29,6 +29,7 @@
         <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
         <PackageReference Include="SkiaSharp" Version="2.80.2" />
         <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.80.2" />
+        <PackageReference Include="Victoria" Version="5.1.11" />
     </ItemGroup>
 
     <ItemGroup>
