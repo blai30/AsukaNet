@@ -105,7 +105,10 @@ namespace Asuka.Modules.Music
                     player.Queue.Enqueue(track);
 
                     // Announce the track that was enqueued.
-                    var embed = await AudioService.BuildTrackEmbed("Enqueued", track, Config.Value.EmbedColor);
+                    var embed = await AudioService.BuildTrackEmbed(
+                        $"Enqueued #{player.Queue.Count + 1}",
+                        track,
+                        Config.Value.EmbedColor);
 
                     Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
                     await ReplyAsync(embed: embed);
