@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -104,15 +105,7 @@ namespace Asuka.Modules.Music
                     player.Queue.Enqueue(track);
 
                     // Announce the track that was enqueued.
-                    string artwork = await track.FetchArtworkAsync();
-                    var embed = new EmbedBuilder()
-                        .WithTitle(track.Title)
-                        .WithUrl(track.Url)
-                        .WithAuthor("Enqueued")
-                        .WithDescription(track.Duration.ToString("c"))
-                        .WithColor(Config.Value.EmbedColor)
-                        .WithThumbnailUrl(artwork)
-                        .Build();
+                    var embed = await AudioService.BuildTrackEmbed("Enqueued", track, Config.Value.EmbedColor);
 
                     Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
                     await ReplyAsync(embed: embed);
@@ -172,7 +165,15 @@ namespace Asuka.Modules.Music
             try
             {
                 await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                await ReplyAsync($"Joined voice channel: `{user.VoiceChannel.Name}`.");
+
+                var embed = new EmbedBuilder()
+                    .WithTitle(user.VoiceChannel.Name)
+                    .WithAuthor("Joined")
+                    .WithDescription($"{user.VoiceChannel.Bitrate / 1000} kbps")
+                    .WithColor(Config.Value.EmbedColor)
+                    .Build();
+
+                await ReplyAsync(embed: embed);
             }
             catch (Exception e)
             {
