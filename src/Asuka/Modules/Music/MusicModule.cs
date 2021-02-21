@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -42,8 +43,8 @@ namespace Asuka.Modules.Music
                 return;
             }
 
-            if (Context.User is not IVoiceState voiceState ||
-                voiceState.VoiceChannel == null)
+            if (Context.User is not IVoiceState user ||
+                user.VoiceChannel == null)
             {
                 await ReplyAsync("You must be connected to a voice channel.");
                 return;
@@ -51,11 +52,12 @@ namespace Asuka.Modules.Music
 
             try
             {
-                await _lavaNode.JoinAsync(voiceState.VoiceChannel, Context.Channel as ITextChannel);
-                await ReplyAsync($"Joined {voiceState.VoiceChannel.Name}!");
+                await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
+                await ReplyAsync($"Joined {user.VoiceChannel.Name}!");
             }
             catch (Exception e)
             {
+                Logger.LogError(e.ToString());
                 await ReplyAsync(e.Message);
             }
         }
@@ -64,78 +66,70 @@ namespace Asuka.Modules.Music
         [Alias("p")]
         [Remarks("music play <query>")]
         [Summary("Play music in a voice channel.")]
-        public async Task PlayAsync([Remainder] string searchQuery)
+        public async Task PlayAsync([Remainder] string searchQuery = "")
         {
+            if (Context.User is not IVoiceState user ||
+                user.VoiceChannel == null)
+            {
+                await ReplyAsync("You must be connected to a voice channel.");
+                return;
+            }
+
+            bool connected = _lavaNode.TryGetPlayer(Context.Guild, out var player);
+            if (connected && user.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You must be in the same voice channel.");
+                return;
+            }
+
+            if (!connected)
+            {
+                try
+                {
+                    await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
+                    await ReplyAsync($"Joined {user.VoiceChannel.Name}!");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e.ToString());
+                    await ReplyAsync(e.Message);
+                }
+            }
+
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
-                await ReplyAsync("Please provide search terms.");
+                await ReplyAsync("Please provide a query.");
                 return;
             }
 
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            try
             {
-                await ReplyAsync("I'm not connected to a voice channel.");
-                return;
-            }
+                // var search = Uri.IsWellFormedUriString(searchQuery, UriKind.Absolute)
+                //     ? await _lavaNode.SearchAsync(searchQuery)
+                //     : await _lavaNode.SearchYouTubeAsync(searchQuery);
+                var search = await _lavaNode.SearchYouTubeAsync(searchQuery);
 
-            string[] queries = searchQuery.Split(' ');
-            foreach (string query in queries)
-            {
-                var searchResponse = await _lavaNode.SearchAsync(query);
-                if (searchResponse.LoadStatus == LoadStatus.LoadFailed ||
-                    searchResponse.LoadStatus == LoadStatus.NoMatches)
+                if (search.LoadStatus == LoadStatus.NoMatches)
                 {
-                    await ReplyAsync($"I wasn't able to find anything for `{query.Truncate(50, "...")}`.");
+                    await ReplyAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
                     return;
                 }
 
-                var player = _lavaNode.GetPlayer(Context.Guild);
+                // TODO: Interactive select from list.
+                var track = search.Tracks[0];
 
-                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+                // Bot is already playing music or paused but still has remaining tracks, enqueue new track.
+                if (player.Track != null && player.PlayerState is PlayerState.Playing || player.PlayerState is PlayerState.Paused)
                 {
-                    if (!string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
-                    {
-                        foreach (var track in searchResponse.Tracks)
-                        {
-                            player.Queue.Enqueue(track);
-                        }
-
-                        await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
-                    }
-                    else
-                    {
-                        var track = searchResponse.Tracks[0];
-                        player.Queue.Enqueue(track);
-                        await ReplyAsync($"Enqueued: {track.Title}");
-                    }
+                    player.Queue.Enqueue(track);
+                    Logger.LogTrace($"Enqueued {track.Title} in {Context.Guild.Name}");
+                    await ReplyAsync($"Enqueued `{track.Title}`.");
                 }
-                else
-                {
-                    var track = searchResponse.Tracks[0];
-
-                    if (!string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
-                    {
-                        for (int i = 0; i < searchResponse.Tracks.Count; i++)
-                        {
-                            if (i == 0)
-                            {
-                                await player.PlayAsync(track);
-                                await ReplyAsync($"Now Playing: {track.Title}");
-                            }
-                            else
-                            {
-                                player.Queue.Enqueue(searchResponse.Tracks[i]);
-                            }
-                        }
-
-                        await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
-                    }
-                    else
-                    {
-                        await player.PlayAsync(track);
-                        await ReplyAsync($"Now Playing: {track.Title}");
-                    }
-                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                await ReplyAsync(e.Message);
             }
         }
     }
