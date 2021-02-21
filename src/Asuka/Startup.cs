@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Victoria;
 
@@ -37,6 +38,7 @@ namespace Asuka
                 .AddOptions()
                 .Configure<TokenOptions>(Configuration.GetSection("Tokens"))
                 .Configure<DiscordOptions>(Configuration.GetSection("Discord"))
+                .Configure<LavaConfig>(Configuration.GetSection("Lavalink"))
 
                 // Discord client.
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
@@ -62,6 +64,10 @@ namespace Asuka
                     IgnoreExtraArgs = true
                 }))
 
+                // Audio server using Lavalink.
+                .AddSingleton(provider => provider.GetService<IOptions<LavaConfig>>()?.Value)
+                .AddSingleton<LavaNode>()
+
                 // Data access. Using factory for easy using statement and disposal.
                 .AddDbContextFactory<AsukaDbContext>()
 
@@ -71,11 +77,6 @@ namespace Asuka
                 // Mathematics.
                 .AddSingleton(new Random(Guid.NewGuid().GetHashCode()))
                 .AddSingleton<DataTable>()
-
-                .AddLavaNode(config =>
-                {
-                    config.SelfDeaf = false;
-                })
 
                 // Background hosted services.
                 .AddHostedService<LoggingService>()

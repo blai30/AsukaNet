@@ -17,6 +17,7 @@ services:
     # dependent service(s) fully initialize
     depends_on:
       - db
+      - lavalink
 
   db:
     container_name: db
@@ -47,3 +48,14 @@ services:
       FLYWAY_SCHEMAS: ${DB_SCHEMA}
     depends_on:
       - db
+
+  lavalink:
+    container_name: lavalink
+    image: fredboat/lavalink:dev
+    restart: always
+    env_file:
+      - .env
+    environment:
+      LAVALINK_SERVER_PASSWORD: ${LAVALINK_PASSWORD}
+      SERVER_PORT: ${LAVALINK_PORT}
+      SERVER_HOST: ${LAVALINK_HOST}

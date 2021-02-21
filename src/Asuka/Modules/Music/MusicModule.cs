@@ -142,7 +142,7 @@ namespace Asuka.Modules.Music
             try
             {
                 await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                await ReplyAsync($"Joined {user.VoiceChannel.Name}!");
+                await ReplyAsync($"Joined voice channel: `{user.VoiceChannel.Name}`.");
             }
             catch (Exception e)
             {
