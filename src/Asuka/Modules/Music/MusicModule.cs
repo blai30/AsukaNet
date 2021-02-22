@@ -149,17 +149,17 @@ namespace Asuka.Modules.Music
                 return;
             }
 
+            var state = player.PlayerState;
+            if (state is not PlayerState.Playing && state is not PlayerState.Paused)
+            {
+                return;
+            }
+
+            var track = player.Track;
+            string status = string.Empty;
+
             try
             {
-                var track = player.Track;
-                var state = player.PlayerState;
-                string status = string.Empty;
-
-                if (state is not PlayerState.Playing && state is not PlayerState.Paused)
-                {
-                    return;
-                }
-
                 // Pause currently playing track if player is playing or resume player if paused.
                 if (state is PlayerState.Playing)
                 {
@@ -172,28 +172,28 @@ namespace Asuka.Modules.Music
                     await player.ResumeAsync();
                     status = "Resuming";
                 }
-
-                string position = track.Position.ToString("hh\\:mm\\:ss");
-                string duration = track.Duration.ToString("hh\\:mm\\:ss");
-
-                string artwork = await track.FetchArtworkAsync();
-                var embed = new EmbedBuilder()
-                    .WithTitle(track.Title)
-                    .WithUrl(track.Url)
-                    .WithAuthor(status)
-                    .WithDescription($"{position} / {duration}")
-                    .WithColor(Config.Value.EmbedColor)
-                    .WithThumbnailUrl(artwork)
-                    .Build();
-
-                Logger.LogTrace($"{status}: {track.Title} in {Context.Guild}");
-                await ReplyAsync(embed: embed);
             }
             catch (Exception e)
             {
                 Logger.LogError(e.ToString());
                 await ReplyAsync(e.Message);
             }
+
+            string position = track.Position.ToString("hh\\:mm\\:ss");
+            string duration = track.Duration.ToString("hh\\:mm\\:ss");
+
+            string artwork = await track.FetchArtworkAsync();
+            var embed = new EmbedBuilder()
+                .WithTitle(track.Title)
+                .WithUrl(track.Url)
+                .WithAuthor(status)
+                .WithDescription($"{position} / {duration}")
+                .WithColor(Config.Value.EmbedColor)
+                .WithThumbnailUrl(artwork)
+                .Build();
+
+            Logger.LogTrace($"{status}: {track.Title} in {Context.Guild}");
+            await ReplyAsync(embed: embed);
         }
 
         [Command("queue")]
