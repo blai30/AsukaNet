@@ -99,9 +99,7 @@ namespace Asuka.Services
             catch (HttpException e)
             {
                 await channel.SendMessageAsync(
-                    e +
-                    "Error adding role, make sure the role " +
-                    "is lower than me in the server's roles list.");
+                    $"{e.Message}\nError adding role, make sure the role is lower than me in the server's roles list.");
                 return;
             }
 
@@ -151,9 +149,7 @@ namespace Asuka.Services
             catch (HttpException e)
             {
                 await channel.SendMessageAsync(
-                    e +
-                    "Error removing role, make sure the role " +
-                    "is lower than me in the server's roles list.");
+                    $"{e.Message}\nError removing role, make sure the role is lower than me in the server's roles list.");
                 return;
             }
 
@@ -271,7 +267,7 @@ namespace Asuka.Services
             {
                 await context.SaveChangesAsync();
                 _logger.LogTrace(
-                    $"Removed {reactionRoles.Count} reaction roles from message ({messageId}), channel ({channel.Id})");
+                    $"Removed {reactionRoles.Count.ToString()} reaction roles from message ({messageId.ToString()}), channel ({channel.Id.ToString()})");
             }
             catch
             {

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -105,10 +104,15 @@ namespace Asuka.Modules.Music
                     player.Queue.Enqueue(track);
 
                     // Announce the track that was enqueued.
-                    var embed = await AudioService.BuildTrackEmbed(
-                        $"Enqueued #{player.Queue.Count + 1}",
-                        track,
-                        Config.Value.EmbedColor);
+                    string artwork = await track.FetchArtworkAsync();
+                    var embed = new EmbedBuilder()
+                        .WithTitle(track.Title)
+                        .WithUrl(track.Url)
+                        .WithAuthor($"Enqueued #{(player.Queue.Count + 1).ToString()}")
+                        .WithDescription(track.Duration.ToString("c"))
+                        .WithColor(Config.Value.EmbedColor)
+                        .WithThumbnailUrl(artwork)
+                        .Build();
 
                     Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
                     await ReplyAsync(embed: embed);
@@ -126,10 +130,70 @@ namespace Asuka.Modules.Music
         }
 
         [Command("pause")]
+        [Alias("resume")]
         [Remarks("music pause")]
-        [Summary("Pause the currently playing track.")]
+        [Summary("Pause the currently playing track or resume playing.")]
         public async Task PauseAsync()
         {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+
+            if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You must be in the same voice channel.");
+                return;
+            }
+
+            try
+            {
+                var track = player.Track;
+                var state = player.PlayerState;
+                string status = string.Empty;
+
+                if (state is not PlayerState.Playing && state is not PlayerState.Paused)
+                {
+                    return;
+                }
+
+                // Pause currently playing track if player is playing or resume player if paused.
+                if (state is PlayerState.Playing)
+                {
+                    await player.PauseAsync();
+                    status = "Pausing";
+                }
+
+                if (state is PlayerState.Paused)
+                {
+                    await player.ResumeAsync();
+                    status = "Resuming";
+                }
+
+                string position = track.Position.ToString("hh\\:mm\\:ss");
+                string duration = track.Duration.ToString("hh\\:mm\\:ss");
+
+                string artwork = await track.FetchArtworkAsync();
+                var embed = new EmbedBuilder()
+                    .WithTitle(track.Title)
+                    .WithUrl(track.Url)
+                    .WithAuthor(status)
+                    .WithDescription($"{position} / {duration}")
+                    .WithColor(Config.Value.EmbedColor)
+                    .WithThumbnailUrl(artwork)
+                    .Build();
+
+                Logger.LogTrace($"{status}: {track.Title} in {Context.Guild}");
+                await ReplyAsync(embed: embed);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                await ReplyAsync(e.Message);
+            }
         }
 
         [Command("queue")]
@@ -146,6 +210,53 @@ namespace Asuka.Modules.Music
         [Summary("Skips the currently playing track.")]
         public async Task SkipAsync()
         {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+
+            if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You must be in the same voice channel.");
+                return;
+            }
+
+            try
+            {
+                // Skip current track if there are more in the queue or stop track if only one.
+                var currentTrack = player.Track;
+                int queueCount = player.Queue.Count;
+                if (queueCount > 1)
+                {
+                    await player.SkipAsync();
+                }
+                else if (player.PlayerState is PlayerState.Playing || player.PlayerState is PlayerState.Paused)
+                {
+                    await player.StopAsync();
+                }
+
+                // Announce skipped track.
+                string artwork = await currentTrack.FetchArtworkAsync();
+                var embed = new EmbedBuilder()
+                    .WithTitle(currentTrack.Title)
+                    .WithUrl(currentTrack.Url)
+                    .WithAuthor("Skipping")
+                    .WithDescription($"`{queueCount.ToString()}` track(s) left in the queue.")
+                    .WithColor(Config.Value.EmbedColor)
+                    .WithThumbnailUrl(artwork)
+                    .Build();
+
+                Logger.LogTrace($"Skipped: {currentTrack.Title} in {Context.Guild}");
+                await ReplyAsync(embed: embed);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                await ReplyAsync(e.Message);
+            }
         }
 
         [Command("clear")]
@@ -159,7 +270,7 @@ namespace Asuka.Modules.Music
         private async Task TryJoinAsync()
         {
             if (Context.User is not IVoiceState user ||
-                user.VoiceChannel == null)
+                user.VoiceChannel is null)
             {
                 await ReplyAsync("You must be connected to a voice channel.");
                 return;
@@ -169,13 +280,15 @@ namespace Asuka.Modules.Music
             {
                 await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
 
+                int bitrateKb = user.VoiceChannel.Bitrate / 1000;
                 var embed = new EmbedBuilder()
                     .WithTitle(user.VoiceChannel.Name)
                     .WithAuthor("Joined")
-                    .WithDescription($"{user.VoiceChannel.Bitrate / 1000} kbps")
+                    .WithDescription($"{bitrateKb.ToString()} kbps")
                     .WithColor(Config.Value.EmbedColor)
                     .Build();
 
+                Logger.LogTrace($"Joined: {user.VoiceChannel.Name} in {Context.Guild}");
                 await ReplyAsync(embed: embed);
             }
             catch (Exception e)
@@ -183,14 +296,6 @@ namespace Asuka.Modules.Music
                 Logger.LogError(e.ToString());
                 await ReplyAsync(e.Message);
             }
-        }
-
-        private async Task EnqueueAsync()
-        {
-        }
-
-        private async Task DequeueAsync()
-        {
         }
     }
 }

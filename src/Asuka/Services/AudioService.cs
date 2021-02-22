@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
@@ -62,12 +64,26 @@ namespace Asuka.Services
         private async Task OnTrackStarted(TrackStartEventArgs args)
         {
             var player = args.Player;
+            var track = args.Track;
 
             // Announce the track that will play.
-            var embed = await BuildTrackEmbed("Playing", args.Track, _config.Value.EmbedColor);
+            string artwork = await track.FetchArtworkAsync();
+            var embed = new EmbedBuilder()
+                .WithTitle(track.Title)
+                .WithUrl(track.Url)
+                .WithAuthor("Playing")
+                .WithDescription(track.Duration.ToString("c"))
+                .WithColor(_config.Value.EmbedColor)
+                .WithThumbnailUrl(artwork);
+
+            if (player.Queue.Count > 1)
+            {
+                var nextTrack = player.Queue.Last();
+                embed.WithFooter($"UP NEXT: {nextTrack.Title}");
+            }
 
             _logger.LogTrace($"Playing: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
-            await player.TextChannel.SendMessageAsync(embed: embed);
+            await player.TextChannel.SendMessageAsync(embed: embed.Build());
         }
 
         private async Task OnTrackEnded(TrackEndedEventArgs args)
@@ -78,47 +94,32 @@ namespace Asuka.Services
             }
 
             var player = args.Player;
+            var track = args.Track;
 
             // Announce the track that ended and how many more tracks in the queue.
-            var embed = await BuildTrackEmbed(
-                args.Reason.ToString(),
-                args.Track,
-                _config.Value.EmbedColor,
-                $"`{player.Queue.Count}` track(s) left in the queue.");
-
-            _logger.LogTrace($"{args.Reason}: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
-            await player.TextChannel.SendMessageAsync(embed: embed);
-
-            // Check next track in the queue or leave voice channel if queue is empty.
-            if (!player.Queue.TryDequeue(out var track))
-            {
-                await _lavaNode.LeaveAsync(player.VoiceChannel);
-                return;
-            }
-
-            // Play next track in the queue.
-            await player.PlayAsync(track);
-        }
-
-        public static async Task<Embed> BuildTrackEmbed(string status, LavaTrack track, uint embedColor)
-        {
-            var result = await BuildTrackEmbed(status, track, embedColor, track.Duration.ToString("c"));
-            return result;
-        }
-
-        public static async Task<Embed> BuildTrackEmbed(string status, LavaTrack track, uint embedColor, string description)
-        {
             string artwork = await track.FetchArtworkAsync();
             var embed = new EmbedBuilder()
                 .WithTitle(track.Title)
                 .WithUrl(track.Url)
-                .WithAuthor(status)
-                .WithDescription(description)
-                .WithColor(embedColor)
+                .WithAuthor("Finished")
+                .WithDescription($"`{player.Queue.Count.ToString()}` track(s) left in the queue.")
+                .WithColor(_config.Value.EmbedColor)
                 .WithThumbnailUrl(artwork)
                 .Build();
 
-            return embed;
+            _logger.LogTrace($"Finished: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
+            await player.TextChannel.SendMessageAsync(embed: embed);
+
+            // Check next track in the queue or leave voice channel if queue is empty.
+            if (!player.Queue.TryDequeue(out var nextTrack))
+            {
+                await Task.Delay(TimeSpan.FromSeconds(60))
+                    .ContinueWith(_ => _lavaNode.LeaveAsync(player.VoiceChannel));
+                return;
+            }
+
+            // Play next track in the queue.
+            await player.PlayAsync(nextTrack);
         }
     }
 }
