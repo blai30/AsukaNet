@@ -224,12 +224,18 @@ namespace Asuka.Modules.Music
                 return;
             }
 
+            if (player.Track is null)
+            {
+                await ReplyAsync("Nothing to skip.");
+                return;
+            }
+
             try
             {
                 // Skip current track if there are more in the queue or stop track if only one.
                 var currentTrack = player.Track;
                 int queueCount = player.Queue.Count;
-                if (queueCount > 1)
+                if (queueCount >= 1)
                 {
                     await player.SkipAsync();
                 }

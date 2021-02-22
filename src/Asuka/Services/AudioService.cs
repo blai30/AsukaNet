@@ -76,12 +76,6 @@ namespace Asuka.Services
                 .WithColor(_config.Value.EmbedColor)
                 .WithThumbnailUrl(artwork);
 
-            if (player.Queue.Count > 1)
-            {
-                var nextTrack = player.Queue.Last();
-                embed.WithFooter($"UP NEXT: {nextTrack.Title}");
-            }
-
             _logger.LogTrace($"Playing: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
             await player.TextChannel.SendMessageAsync(embed: embed.Build());
         }
