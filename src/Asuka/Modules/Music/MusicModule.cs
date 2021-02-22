@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -36,7 +37,7 @@ namespace Asuka.Modules.Music
         [Summary("Join a voice channel in the server.")]
         public async Task JoinAsync()
         {
-            // TODO: Join if playing but kicked from voice channel.
+            // TODO: Music join if playing but kicked from voice channel.
             if (_lavaNode.HasPlayer(Context.Guild))
             {
                 await ReplyAsync("I'm already playing in a voice channel in this server.");
@@ -52,6 +53,48 @@ namespace Asuka.Modules.Music
         [Summary("Leave the currently playing voice channel.")]
         public async Task LeaveAsync()
         {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+
+            if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You must be in the same voice channel.");
+                return;
+            }
+
+            try
+            {
+                // Stop playing and leave.
+                if (player.PlayerState is PlayerState.Playing)
+                {
+                    await player.StopAsync();
+                }
+
+                var channel = player.VoiceChannel;
+                await _lavaNode.LeaveAsync(channel);
+
+                Logger.LogTrace($"Left: {channel.Name} in {Context.Guild}");
+
+                int bitrateKb = channel.Bitrate / 1000;
+                var embed = new EmbedBuilder()
+                    .WithTitle(channel.Name)
+                    .WithAuthor("Left")
+                    .WithDescription($"{bitrateKb.ToString()} kbps")
+                    .WithColor(Config.Value.EmbedColor)
+                    .Build();
+
+                await ReplyAsync(embed: embed);
+            }
+            catch (InvalidOperationException e)
+            {
+                Logger.LogError(e.ToString());
+                await ReplyAsync(e.Message);
+            }
         }
 
         [Command("play")]
@@ -93,7 +136,7 @@ namespace Asuka.Modules.Music
                     return;
                 }
 
-                // TODO: Interactive select from list.
+                // TODO: Music enqueue interactive select from list.
                 var track = search.Tracks[0];
 
                 // Player is already playing or paused but still has remaining tracks, enqueue new track.
@@ -202,6 +245,35 @@ namespace Asuka.Modules.Music
         [Summary("View the current music queue.")]
         public async Task QueueAsync()
         {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+
+            if (player.Queue.Count <= 0)
+            {
+                await ReplyAsync("Nothing in the queue.");
+                return;
+            }
+
+            // TODO: Music queue interactive pagination.
+            var tracks = player.Queue
+                .Take(10)
+                .Select((track, index) => $"{(index + 1).ToString()}. `{track.Title}`")
+                .ToList();
+            string list = string.Join("\n", tracks);
+
+            var embed = new EmbedBuilder()
+                .WithTitle($"{player.Queue.Count.ToString()} tracks left")
+                .WithAuthor("Queue")
+                .WithDescription(list.Truncate(2048, "..."))
+                .WithColor(Config.Value.EmbedColor)
+                .Build();
+
+            await ReplyAsync(embed: embed);
         }
 
         [Command("skip")]
@@ -271,6 +343,44 @@ namespace Asuka.Modules.Music
         [Summary("Clears the music queue.")]
         public async Task ClearAsync()
         {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+
+            if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You must be in the same voice channel.");
+                return;
+            }
+
+            if (player.Queue.Count <= 0)
+            {
+                await ReplyAsync("Nothing in the queue to clear.");
+                return;
+            }
+
+            try
+            {
+                int count = player.Queue.Count;
+                player.Queue.Clear();
+
+                var embed = new EmbedBuilder()
+                    .WithAuthor("Cleared")
+                    .WithDescription($"`{count.ToString()}` track(s) removed from the queue.")
+                    .WithColor(Config.Value.EmbedColor)
+                    .Build();
+
+                await ReplyAsync(embed: embed);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                await ReplyAsync(e.Message);
+            }
         }
 
         private async Task TryJoinAsync()
