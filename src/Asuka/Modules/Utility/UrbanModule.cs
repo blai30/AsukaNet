@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
@@ -7,6 +6,7 @@ using Asuka.Configuration;
 using Asuka.Models.API.Urban;
 using Discord;
 using Discord.Commands;
+using Flurl;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,7 +18,7 @@ namespace Asuka.Modules.Utility
     [Summary("Look up a word or phrase on Urban Dictionary.")]
     public class UrbanModule : CommandModuleBase
     {
-        private const string Uri = "https://api.urbandictionary.com/v0/define";
+        private const string Uri = "https://api.urbandictionary.com/v0";
 
         private readonly IHttpClientFactory _factory;
 
@@ -36,12 +36,13 @@ namespace Asuka.Modules.Utility
         public async Task UrbanAsync([Remainder] string term)
         {
             // Build query and send http request to urban api.
+            string query = Uri
+                .AppendPathSegment("define")
+                .SetQueryParam("term", term);
+
+            // Send request and get JSON response.
             using var client = _factory.CreateClient();
-            var builder = new UriBuilder(Uri)
-            {
-                Query = $"term={term}"
-            };
-            var results = await client.GetFromJsonAsync<UrbanList>(builder.Uri);
+            var results = await client.GetFromJsonAsync<UrbanList>(query);
 
             // No entry found for given query.
             if (results?.UrbanEntries == null || results.UrbanEntries.Count <= 0)
@@ -58,10 +59,9 @@ namespace Asuka.Modules.Utility
                 .WithUrl(entry.Permalink)
                 .WithColor(0xefff00)
                 .WithAuthor("Urban Dictionary")
-                .WithDescription($"Written on: {entry.WrittenOn:R}")
+                .WithDescription($"Written on: {entry.WrittenOn.ToString("R")}")
                 .WithFooter(
-                    $"👍 {entry.ThumbsUp}\n" +
-                    $"👎 {entry.ThumbsDown}")
+                    $"👍 {entry.ThumbsUp.ToString()}\n👎 {entry.ThumbsDown.ToString()}")
                 .AddField(
                     "Definition",
                     entry.Definition.Truncate(1024, "..."))
