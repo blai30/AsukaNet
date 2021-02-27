@@ -61,7 +61,7 @@ namespace Asuka.Modules.Tags
             };
 
             await using var context = _factory.CreateDbContext();
-            await context.AddAsync(tag);
+            await context.Tags.AddAsync(tag);
             try
             {
                 await context.SaveChangesAsync();
@@ -94,7 +94,7 @@ namespace Asuka.Modules.Tags
             }
 
             await using var context = _factory.CreateDbContext();
-            // Get tag from database by id using the tag from dictionary.
+            // Get from database by id using the value from dictionary.
             var entity = await context.Tags.AsQueryable()
                 .FirstOrDefaultAsync(t => t.Id == tag.Id);
 
@@ -132,7 +132,7 @@ namespace Asuka.Modules.Tags
             }
 
             await using var context = _factory.CreateDbContext();
-            // Get tag from database by id using the tag from dictionary.
+            // Get from database by id using the value from dictionary.
             var entity = await context.Tags.AsQueryable()
                 .FirstOrDefaultAsync(t => t.Id == tag.Id);
 
