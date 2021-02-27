@@ -1,7 +1,9 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Database;
+using Asuka.Database.Models;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
@@ -26,8 +28,15 @@ namespace Asuka.Services
             _logger = logger;
         }
 
+        public Dictionary<int, Tag> Tags { get; private set; }
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            // Fetch all from database and store in dictionary for fast access.
+            await using var context = _factory.CreateDbContext();
+            Tags = await context.Tags.AsNoTracking()
+                .ToDictionaryAsync(tag => tag.Id, cancellationToken);
+
             _client.MessageReceived += OnMessageReceived;
 
             _logger.LogInformation($"{GetType().Name} started");
@@ -44,35 +53,41 @@ namespace Asuka.Services
 
         private async Task OnMessageReceived(SocketMessage socketMessage)
         {
-            // TODO: Currently executes query on EVERY message received.
-
-            await using var context = _factory.CreateDbContext();
-
             // Ensure the message is from a user or bot and not a system message.
             if (!(socketMessage is SocketUserMessage message)) return;
+            // Ensure message is from a guild channel.
+            if (!(message.Channel is SocketGuildChannel guildChannel)) return;
             // Ignore self.
             if (message.Author.Id == _client.CurrentUser.Id) return;
 
-            var tag = await context.Tags.AsQueryable()
-                .FirstOrDefaultAsync(t =>
-                    string.Equals(t.Name, socketMessage.Content, StringComparison.CurrentCultureIgnoreCase));
+            // Get tag from dictionary by guild id and name.
+            var tag = Tags.Values
+                .FirstOrDefault(t =>
+                    t.GuildId == guildChannel.Guild.Id &&
+                    t.Name == message.Content);
 
-            if (tag != null)
+            if (tag == null) return;
+
+            await using var context = _factory.CreateDbContext();
+            // Update usage count for both the tag object from dictionary and the entry in the database.
+            var entity = await context.Tags
+                .AsQueryable()
+                .FirstOrDefaultAsync(t => t.Id == tag.Id);
+
+            entity.UsageCount++;
+            tag.UsageCount++;
+
+            try
             {
-                tag.UsageCount++;
-
-                try
-                {
-                    await context.SaveChangesAsync();
-                }
-                catch
-                {
-                    _logger.LogError($"Error updating usage count for tag {tag.Name}, id ({tag.Id})");
-                    throw;
-                }
-
-                await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
+                await context.SaveChangesAsync();
             }
+            catch
+            {
+                _logger.LogError($"Error updating usage count for tag {tag.Name}, id ({tag.Id})");
+                throw;
+            }
+
+            await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
         }
     }
 }

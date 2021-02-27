@@ -82,8 +82,10 @@ namespace Asuka
                 .AddHostedService<LoggingService>()
                 .AddHostedService<CommandHandlerService>()
                 .AddHostedService<AudioService>()
-                .AddHostedService<TagListenerService>()
-                .AddHostedService<ReactionRoleService>()
+                .AddSingleton<TagListenerService>()
+                .AddHostedService(provider => provider.GetService<TagListenerService>())
+                .AddSingleton<ReactionRoleService>()
+                .AddHostedService(provider => provider.GetService<ReactionRoleService>())
                 .AddHostedService<StartupService>()
                 ;
         }
