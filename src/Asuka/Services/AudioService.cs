@@ -15,15 +15,15 @@ namespace Asuka.Services
     public class AudioService : IHostedService
     {
         private readonly DiscordSocketClient _client;
+        private readonly IOptions<DiscordOptions> _config;
         private readonly LavaNode _lavaNode;
         private readonly ILogger<AudioService> _logger;
-        private readonly IOptions<DiscordOptions> _config;
 
         public AudioService(
             DiscordSocketClient client,
+            IOptions<DiscordOptions> config,
             LavaNode lavaNode,
-            ILogger<AudioService> logger,
-            IOptions<DiscordOptions> config)
+            ILogger<AudioService> logger)
         {
             _client = client;
             _lavaNode = lavaNode;

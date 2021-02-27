@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -30,8 +31,15 @@ namespace Asuka.Services
             _logger = logger;
         }
 
+        public Dictionary<int, ReactionRole> ReactionRoles { get; private set; }
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            // Fetch all from database and store in dictionary for fast access.
+            await using var context = _factory.CreateDbContext();
+            ReactionRoles = await context.ReactionRoles.AsNoTracking()
+                .ToDictionaryAsync(reactionRole => reactionRole.Id, cancellationToken);
+
             _client.ReactionAdded += OnReactionAdded;
             _client.ReactionRemoved += OnReactionRemoved;
             _client.ReactionsCleared += OnReactionsCleared;
@@ -68,25 +76,31 @@ namespace Asuka.Services
             ISocketMessageChannel channel,
             SocketReaction reaction)
         {
-            await using var context = _factory.CreateDbContext();
+            // Reaction must come from a guild user and not the bot.
+            if (reaction.User.Value is not SocketGuildUser user) return;
+            if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
+            // Ensure message is from a guild channel.
+            if (!(channel is SocketGuildChannel guildChannel)) return;
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id)) return;
+            if (ReactionRoles.Values.All(r =>
+                r.GuildId == guildChannel.Guild.Id &&
+                r.MessageId != cachedMessage.Id))
+            {
+                return;
+            }
 
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
             // Get reaction role.
-            var reactionRole = await context.ReactionRoles.AsNoTracking()
-                .FirstOrDefaultAsync(r =>
+            var reactionRole = ReactionRoles.Values
+                .FirstOrDefault(r =>
                     r.MessageId == cachedMessage.Id &&
                     r.Emote == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
-            // Reaction must come from a guild user and not the bot.
-            if (reaction.User.Value is not SocketGuildUser user) return;
-            if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
             // Check if user already has the role.
             if (user.Roles.Any(r => r.Id == reactionRole.RoleId)) return;
 
@@ -118,25 +132,31 @@ namespace Asuka.Services
             ISocketMessageChannel channel,
             SocketReaction reaction)
         {
-            await using var context = _factory.CreateDbContext();
+            // Reaction must come from a guild user and not the bot.
+            if (reaction.User.Value is not SocketGuildUser user) return;
+            if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
+            // Ensure message is from a guild channel.
+            if (!(channel is SocketGuildChannel guildChannel)) return;
 
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsNoTracking().AllAsync(r => r.MessageId != cachedMessage.Id)) return;
+            if (ReactionRoles.Values.All(r =>
+                r.GuildId == guildChannel.Guild.Id &&
+                r.MessageId != cachedMessage.Id))
+            {
+                return;
+            }
 
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
             // Get reaction role.
-            var reactionRole = await context.ReactionRoles.AsNoTracking()
-                .FirstOrDefaultAsync(r =>
+            var reactionRole = ReactionRoles.Values
+                .FirstOrDefault(r =>
                     r.MessageId == cachedMessage.Id &&
                     r.Emote == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
-            // Reaction must come from a guild user and not the bot.
-            if (reaction.User.Value is not SocketGuildUser user) return;
-            if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
             // Check if user has the role.
             if (user.Roles.All(r => r.Id != reactionRole.RoleId)) return;
 
@@ -217,7 +237,7 @@ namespace Asuka.Services
                 await message.RemoveAllReactionsForEmoteAsync(reaction);
 
                 // Prevent hitting rate limit.
-                Thread.Sleep(100);
+                await Task.Delay(1000);
             }
         }
 
@@ -245,8 +265,16 @@ namespace Asuka.Services
         {
             await using var context = _factory.CreateDbContext();
 
+            // Ensure message is from a guild channel.
+            if (!(channel is SocketGuildChannel guildChannel)) return;
+
             // This event is not related to reaction roles.
-            if (await context.ReactionRoles.AsQueryable().AllAsync(r => r.MessageId != messageId)) return;
+            if (ReactionRoles.Values.All(r =>
+                r.GuildId == guildChannel.Guild.Id &&
+                r.MessageId != messageId))
+            {
+                return;
+            }
 
             // Condition to remove all reaction roles from a message if no reaction was specified,
             // otherwise only remove all reaction roles for that specific reaction.
@@ -260,12 +288,18 @@ namespace Asuka.Services
                 .Where(expression)
                 .ToListAsync();
 
-            if (!reactionRoles.Any()) return;
-
             context.ReactionRoles.RemoveRange(reactionRoles);
             try
             {
                 await context.SaveChangesAsync();
+
+                // Remove from dictionary by id key.
+                var keys = reactionRoles.Select(r => r.Id).ToList();
+                foreach (int key in keys)
+                {
+                    ReactionRoles.Remove(key);
+                }
+
                 _logger.LogTrace(
                     $"Removed {reactionRoles.Count.ToString()} reaction roles from message ({messageId.ToString()}), channel ({channel.Id.ToString()})");
             }

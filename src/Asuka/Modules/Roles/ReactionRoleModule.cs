@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Asuka.Database;
 using Asuka.Database.Models;
+using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -32,14 +33,17 @@ namespace Asuka.Modules.Roles
     public class ReactionRoleModule : CommandModuleBase
     {
         private readonly IDbContextFactory<AsukaDbContext> _factory;
+        private readonly ReactionRoleService _service;
 
         public ReactionRoleModule(
             IOptions<DiscordOptions> config,
             ILogger<ReactionRoleModule> logger,
-            IDbContextFactory<AsukaDbContext> factory) :
+            IDbContextFactory<AsukaDbContext> factory,
+            ReactionRoleService service) :
             base(config, logger)
         {
             _factory = factory;
+            _service = service;
         }
 
         [Command("make")]
@@ -90,6 +94,7 @@ namespace Asuka.Modules.Roles
             try
             {
                 await context.SaveChangesAsync();
+                _service.ReactionRoles.Add(reactionRole.Id, reactionRole);
                 await message.AddReactionAsync(emote);
                 await ReplyAsync($"Added reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
@@ -111,20 +116,31 @@ namespace Asuka.Modules.Roles
 
             await using var context = _factory.CreateDbContext();
             // Get reaction role that references this message and role.
-            var reactionRole = await context.ReactionRoles.AsQueryable()
-                .FirstOrDefaultAsync(r => r.RoleId == role.Id && r.MessageId == message.Id);
+            var reactionRole = _service.ReactionRoles.Values
+                .FirstOrDefault(r => r.RoleId == role.Id && r.MessageId == message.Id);
+
+            if (reactionRole == null)
+            {
+                await ReplyAsync("Could not find that reaction role.");
+                return;
+            }
 
             // Parse emote or emoji.
             IEmote reaction = Emote.TryParse(reactionRole.Emote, out var emote)
                 ? (IEmote) emote
                 : new Emoji(reactionRole.Emote);
 
+            // Get from database by id using the value from dictionary.
+            var entity = await context.ReactionRoles.AsQueryable()
+                .FirstOrDefaultAsync(r => r.Id == reactionRole.Id);
+
             // Remove reaction role from database.
-            context.ReactionRoles.Remove(reactionRole);
+            context.ReactionRoles.Remove(entity);
 
             try
             {
                 await context.SaveChangesAsync();
+                _service.ReactionRoles.Remove(reactionRole.Id);
                 await message.RemoveAllReactionsForEmoteAsync(reaction);
                 await ReplyAsync($"Removed reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }

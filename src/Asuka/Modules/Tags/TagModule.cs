@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Asuka.Database;
 using Asuka.Database.Models;
+using Asuka.Services;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -20,14 +21,17 @@ namespace Asuka.Modules.Tags
     public class TagModule : CommandModuleBase
     {
         private readonly IDbContextFactory<AsukaDbContext> _factory;
+        private readonly TagListenerService _service;
 
         public TagModule(
             IOptions<DiscordOptions> config,
             ILogger<TagModule> logger,
-            IDbContextFactory<AsukaDbContext> factory) :
+            IDbContextFactory<AsukaDbContext> factory,
+            TagListenerService service) :
             base(config, logger)
         {
             _factory = factory;
+            _service = service;
         }
 
         [Command("add")]
@@ -57,10 +61,11 @@ namespace Asuka.Modules.Tags
             };
 
             await using var context = _factory.CreateDbContext();
-            await context.AddAsync(tag);
+            await context.Tags.AddAsync(tag);
             try
             {
                 await context.SaveChangesAsync();
+                _service.Tags.Add(tag.Id, tag);
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
             catch
@@ -76,18 +81,30 @@ namespace Asuka.Modules.Tags
         [Summary("Remove a tag from the server.")]
         public async Task RemoveAsync(string tagName)
         {
+            var tag = _service.Tags.Values
+                .FirstOrDefault(t =>
+                    t.GuildId == Context.Guild.Id &&
+                    t.Name == tagName);
+
+            // Tag does not exist.
+            if (tag == null)
+            {
+                await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
+                return;
+            }
+
             await using var context = _factory.CreateDbContext();
+            // Get from database by id using the value from dictionary.
+            var entity = await context.Tags.AsQueryable()
+                .FirstOrDefaultAsync(t => t.Id == tag.Id);
 
-            // Get tag by name.
-            var tag = await context.Tags.AsQueryable()
-                .FirstOrDefaultAsync(t => t.Name == tagName);
-
-            context.Tags.Remove(tag);
+            context.Tags.Remove(entity);
 
             try
             {
                 await context.SaveChangesAsync();
-                await ReplyAsync($"Removed tag `{tag.Name}`.");
+                _service.Tags.Remove(tag.Id);
+                await ReplyAsync($"Removed tag `{entity.Name}`.");
             }
             catch
             {
@@ -102,17 +119,30 @@ namespace Asuka.Modules.Tags
         [Summary("Edit an existing tag from the server.")]
         public async Task EditAsync(string tagName, string tagContent)
         {
-            await using var context = _factory.CreateDbContext();
+            var tag = _service.Tags.Values
+                .FirstOrDefault(t =>
+                    t.GuildId == Context.Guild.Id &&
+                    t.Name == tagName);
 
-            // Get tag by name.
-            var tag = await context.Tags.AsQueryable()
-                .FirstOrDefaultAsync(t => t.Name == tagName);
+            // Tag does not exist.
+            if (tag == null)
+            {
+                await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
+                return;
+            }
+
+            await using var context = _factory.CreateDbContext();
+            // Get from database by id using the value from dictionary.
+            var entity = await context.Tags.AsQueryable()
+                .FirstOrDefaultAsync(t => t.Id == tag.Id);
 
             tag.Content = tagContent;
+            entity.Content = tagContent;
 
             try
             {
                 await context.SaveChangesAsync();
+                _service.Tags[tag.Id] = tag;
                 await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
             }
             catch
@@ -128,13 +158,11 @@ namespace Asuka.Modules.Tags
         [Summary("List all tags from the server.")]
         public async Task ListAsync()
         {
-            await using var context = _factory.CreateDbContext();
-
             // Get list of tags from this guild.
-            var tags = await context.Tags.AsNoTracking()
-                .Where(tag => tag.GuildId == Context.Guild.Id)
-                .Select(tag => $"`{tag.Name}`")
-                .ToListAsync();
+            var tags = _service.Tags.Values
+                .Where(t => t.GuildId == Context.Guild.Id)
+                .Select(t => $"`{t.Name}`")
+                .ToList();
 
             // Join list of tag names with comma.
             string list = string.Join(", ", tags);
@@ -147,12 +175,12 @@ namespace Asuka.Modules.Tags
         [Summary("Show info for a tag from the server.")]
         public async Task InfoAsync(string tagName)
         {
-            await using var context = _factory.CreateDbContext();
+            var tag = _service.Tags.Values
+                .FirstOrDefault(t =>
+                    t.GuildId == Context.Guild.Id &&
+                    t.Name == tagName);
 
-            // Get tag by name.
-            var tag = await context.Tags.AsNoTracking()
-                .FirstOrDefaultAsync(t => t.Name == tagName);
-
+            // Tag does not exist.
             if (tag == null)
             {
                 await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
@@ -164,7 +192,7 @@ namespace Asuka.Modules.Tags
                 .WithColor(Config.Value.EmbedColor)
                 .WithDescription(tag.Content)
                 .AddField("Added by", Context.Client.GetUser(tag.UserId).Mention)
-                .AddField("Usage count", tag.UsageCount)
+                .AddField("Usage count", tag.UsageCount.ToString())
                 .AddField("Created", tag.CreatedAt.GetValueOrDefault().ToString("R"))
                 .AddField("Last used", tag.UpdatedAt.GetValueOrDefault().ToString("R"))
                 .Build();
