@@ -88,7 +88,19 @@ namespace Asuka.Services
                 throw;
             }
 
-            await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
+            // Respond to tag with content and optional reaction.
+            using (message.Channel.EnterTypingState())
+            {
+                await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
+
+                if (string.IsNullOrEmpty(tag.Reaction)) return;
+                // Parse emote or emoji.
+                IEmote reaction = Emote.TryParse(tag.Reaction, out var emote)
+                    ? (IEmote) emote
+                    : new Emoji(tag.Reaction);
+
+                await message.AddReactionAsync(reaction);
+            }
         }
     }
 }

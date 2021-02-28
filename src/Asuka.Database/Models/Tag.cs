@@ -7,6 +7,7 @@ namespace Asuka.Database.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string Content { get; set; }
+        public string Reaction { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public int UsageCount { get; set; }

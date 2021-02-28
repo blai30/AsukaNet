@@ -97,7 +97,7 @@ namespace Asuka.Services
             var reactionRole = ReactionRoles.Values
                 .FirstOrDefault(r =>
                     r.MessageId == cachedMessage.Id &&
-                    r.Emote == emoteText);
+                    r.Reaction == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
@@ -153,7 +153,7 @@ namespace Asuka.Services
             var reactionRole = ReactionRoles.Values
                 .FirstOrDefault(r =>
                     r.MessageId == cachedMessage.Id &&
-                    r.Emote == emoteText);
+                    r.Reaction == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole == null) return;
@@ -224,9 +224,9 @@ namespace Asuka.Services
             foreach (var reactionRole in reactionRoles)
             {
                 // Parse emote or emoji.
-                IEmote reaction = Emote.TryParse(reactionRole.Emote, out var emote)
+                IEmote reaction = Emote.TryParse(reactionRole.Reaction, out var emote)
                     ? (IEmote) emote
-                    : new Emoji(reactionRole.Emote);
+                    : new Emoji(reactionRole.Reaction);
 
                 var channel = _client.GetChannel(reactionRole.ChannelId) as ISocketMessageChannel;
                 if (channel == null) continue;
@@ -281,7 +281,7 @@ namespace Asuka.Services
             Expression<Func<ReactionRole, bool>> expression = reaction == null
                 ? reactionRole => reactionRole.MessageId == messageId
                 : reactionRole => reactionRole.MessageId == messageId &&
-                                  reactionRole.Emote == reaction.GetStringRepresentation();
+                                  reactionRole.Reaction == reaction.GetStringRepresentation();
 
             // Get and remove all rows that referenced the message from database.
             var reactionRoles = await context.ReactionRoles.AsQueryable()

@@ -84,7 +84,7 @@ namespace Asuka.Modules.Roles
                 ChannelId = Context.Channel.Id,
                 MessageId = message.Id,
                 RoleId = guildRole.Id,
-                Emote = emoteText
+                Reaction = emoteText
             };
 
             // Add reaction role to database.
@@ -126,9 +126,9 @@ namespace Asuka.Modules.Roles
             }
 
             // Parse emote or emoji.
-            IEmote reaction = Emote.TryParse(reactionRole.Emote, out var emote)
+            IEmote reaction = Emote.TryParse(reactionRole.Reaction, out var emote)
                 ? (IEmote) emote
-                : new Emoji(reactionRole.Emote);
+                : new Emoji(reactionRole.Reaction);
 
             // Get from database by id using the value from dictionary.
             var entity = await context.ReactionRoles.AsQueryable()
