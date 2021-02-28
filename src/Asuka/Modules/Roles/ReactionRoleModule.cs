@@ -87,7 +87,7 @@ namespace Asuka.Modules.Roles
                 Reaction = emoteText
             };
 
-            // Add reaction role to database.
+            // Add reaction role to dictionary and database.
             await using var context = _factory.CreateDbContext();
             await context.ReactionRoles.AddAsync(reactionRole);
 
@@ -114,7 +114,6 @@ namespace Asuka.Modules.Roles
             // Get guild role by role id.
             var guildRole = Context.Guild.GetRole(role.Id);
 
-            await using var context = _factory.CreateDbContext();
             // Get reaction role that references this message and role.
             var reactionRole = _service.ReactionRoles.Values
                 .FirstOrDefault(r => r.RoleId == role.Id && r.MessageId == message.Id);
@@ -130,12 +129,9 @@ namespace Asuka.Modules.Roles
                 ? (IEmote) emote
                 : new Emoji(reactionRole.Reaction);
 
-            // Get from database by id using the value from dictionary.
-            var entity = await context.ReactionRoles.AsQueryable()
-                .FirstOrDefaultAsync(r => r.Id == reactionRole.Id);
-
-            // Remove reaction role from database.
-            context.ReactionRoles.Remove(entity);
+            // Remove from dictionary and database. Context remove will use id.
+            await using var context = _factory.CreateDbContext();
+            context.ReactionRoles.Remove(reactionRole);
 
             try
             {

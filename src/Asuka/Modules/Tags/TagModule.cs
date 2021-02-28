@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
@@ -36,7 +37,7 @@ namespace Asuka.Modules.Tags
 
         [Command("add")]
         [Alias("a", "create", "c")]
-        [Remarks("tag add <name> <content>")]
+        [Remarks("tag add <name> <content> [:reaction:]")]
         [Summary("Create a new tag for the server.")]
         public async Task AddAsync(string tagName, string tagContent, IEmote reaction = null)
         {
@@ -61,6 +62,7 @@ namespace Asuka.Modules.Tags
                 UserId = Context.User.Id
             };
 
+            // Add to dictionary and database.
             await using var context = _factory.CreateDbContext();
             await context.Tags.AddAsync(tag);
             try
@@ -85,7 +87,7 @@ namespace Asuka.Modules.Tags
             var tag = _service.Tags.Values
                 .FirstOrDefault(t =>
                     t.GuildId == Context.Guild.Id &&
-                    t.Name == tagName);
+                    string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
 
             // Tag does not exist.
             if (tag == null)
@@ -94,18 +96,15 @@ namespace Asuka.Modules.Tags
                 return;
             }
 
+            // Remove from dictionary and database. Context remove will use id.
             await using var context = _factory.CreateDbContext();
-            // Get from database by id using the value from dictionary.
-            var entity = await context.Tags.AsQueryable()
-                .FirstOrDefaultAsync(t => t.Id == tag.Id);
-
-            context.Tags.Remove(entity);
+            context.Tags.Remove(tag);
 
             try
             {
                 await context.SaveChangesAsync();
                 _service.Tags.Remove(tag.Id);
-                await ReplyAsync($"Removed tag `{entity.Name}`.");
+                await ReplyAsync($"Removed tag `{tag.Name}`.");
             }
             catch
             {
@@ -116,14 +115,14 @@ namespace Asuka.Modules.Tags
 
         [Command("edit")]
         [Alias("e", "modify", "m")]
-        [Remarks("tag edit <name> <content>")]
+        [Remarks("tag edit <name> <content> [:reaction:]")]
         [Summary("Edit an existing tag from the server.")]
-        public async Task EditAsync(string tagName, string tagContent)
+        public async Task EditAsync(string tagName, string tagContent, IEmote reaction = null)
         {
             var tag = _service.Tags.Values
                 .FirstOrDefault(t =>
                     t.GuildId == Context.Guild.Id &&
-                    t.Name == tagName);
+                    string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
 
             // Tag does not exist.
             if (tag == null)
@@ -132,13 +131,15 @@ namespace Asuka.Modules.Tags
                 return;
             }
 
+            // Update values in dictionary and database.
             await using var context = _factory.CreateDbContext();
-            // Get from database by id using the value from dictionary.
-            var entity = await context.Tags.AsQueryable()
-                .FirstOrDefaultAsync(t => t.Id == tag.Id);
 
             tag.Content = tagContent;
-            entity.Content = tagContent;
+            tag.Reaction = reaction?.ToString();
+
+            context.Tags.Attach(tag);
+            context.Entry(tag).Property(t => t.Content).IsModified = true;
+            context.Entry(tag).Property(t => t.Reaction).IsModified = true;
 
             try
             {
@@ -179,7 +180,7 @@ namespace Asuka.Modules.Tags
             var tag = _service.Tags.Values
                 .FirstOrDefault(t =>
                     t.GuildId == Context.Guild.Id &&
-                    t.Name == tagName);
+                    string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
 
             // Tag does not exist.
             if (tag == null)
