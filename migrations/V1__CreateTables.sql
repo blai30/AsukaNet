@@ -3,6 +3,7 @@
     id          INT             NOT NULL PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(100)    NOT NULL,
     content     VARCHAR(255)    NOT NULL,
+    reaction    VARCHAR(100),
     guild_id    BIGINT UNSIGNED NOT NULL,
     user_id     BIGINT UNSIGNED NOT NULL,
     usage_count INT             NOT NULL DEFAULT 0,
@@ -19,5 +20,5 @@ CREATE TABLE reaction_roles
     channel_id BIGINT UNSIGNED NOT NULL,
     message_id BIGINT UNSIGNED NOT NULL,
     role_id    BIGINT UNSIGNED NOT NULL,
-    emote      VARCHAR(100)    NOT NULL
+    reaction   VARCHAR(100)    NOT NULL
 );

@@ -38,7 +38,7 @@ namespace Asuka.Modules.Tags
         [Alias("a", "create", "c")]
         [Remarks("tag add <name> <content>")]
         [Summary("Create a new tag for the server.")]
-        public async Task AddAsync(string tagName, string tagContent)
+        public async Task AddAsync(string tagName, string tagContent, IEmote reaction = null)
         {
             if (tagName.Length > 100)
             {
@@ -56,6 +56,7 @@ namespace Asuka.Modules.Tags
             {
                 Name = tagName,
                 Content = tagContent,
+                Reaction = reaction?.ToString(),
                 GuildId = Context.Guild.Id,
                 UserId = Context.User.Id
             };

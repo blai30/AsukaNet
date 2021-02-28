@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,7 +65,7 @@ namespace Asuka.Services
             var tag = Tags.Values
                 .FirstOrDefault(t =>
                     t.GuildId == guildChannel.Guild.Id &&
-                    t.Name == message.Content);
+                    string.Equals(t.Name, message.Content, StringComparison.CurrentCultureIgnoreCase));
 
             if (tag == null) return;
 
@@ -87,7 +88,19 @@ namespace Asuka.Services
                 throw;
             }
 
-            await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
+            // Respond to tag with content and optional reaction.
+            using (message.Channel.EnterTypingState())
+            {
+                await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
+
+                if (string.IsNullOrEmpty(tag.Reaction)) return;
+                // Parse emote or emoji.
+                IEmote reaction = Emote.TryParse(tag.Reaction, out var emote)
+                    ? (IEmote) emote
+                    : new Emoji(tag.Reaction);
+
+                await message.AddReactionAsync(reaction);
+            }
         }
     }
 }
