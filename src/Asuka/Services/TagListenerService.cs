@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Asuka.Database;
 using Asuka.Database.Models;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -89,17 +90,24 @@ namespace Asuka.Services
             }
 
             // Respond to tag with content and optional reaction.
-            using (message.Channel.EnterTypingState())
+            using IDisposable typingState = message.Channel.EnterTypingState();
+            await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
+
+            if (string.IsNullOrEmpty(tag.Reaction)) return;
+            // Parse emote or emoji.
+            IEmote reaction = Emote.TryParse(tag.Reaction, out var emote)
+                ? (IEmote) emote
+                : new Emoji(tag.Reaction);
+
+            // Add reaction will error when adding a reaction that cannot be parsed.
+            try
             {
-                await message.ReplyAsync(tag.Content, allowedMentions: AllowedMentions.None);
-
-                if (string.IsNullOrEmpty(tag.Reaction)) return;
-                // Parse emote or emoji.
-                IEmote reaction = Emote.TryParse(tag.Reaction, out var emote)
-                    ? (IEmote) emote
-                    : new Emoji(tag.Reaction);
-
                 await message.AddReactionAsync(reaction);
+            }
+            catch (HttpException e)
+            {
+                _logger.LogTrace(e.Message);
+                _logger.LogTrace($"Could not add reaction for tag: {tag.Name}");
             }
         }
     }
