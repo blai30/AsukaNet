@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,7 +65,7 @@ namespace Asuka.Services
             var tag = Tags.Values
                 .FirstOrDefault(t =>
                     t.GuildId == guildChannel.Guild.Id &&
-                    t.Name == message.Content);
+                    string.Equals(t.Name, message.Content, StringComparison.CurrentCultureIgnoreCase));
 
             if (tag == null) return;
 
