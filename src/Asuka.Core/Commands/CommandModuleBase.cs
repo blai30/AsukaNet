@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
@@ -21,7 +22,7 @@ namespace Asuka.Commands
         protected override void BeforeExecute(CommandInfo command)
         {
             base.BeforeExecute(command);
-            Context.Channel.TriggerTypingAsync();
+            using IDisposable typing = Context.Channel.EnterTypingState();
         }
 
         protected async Task ReplyInlineAsync(
