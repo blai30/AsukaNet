@@ -12,17 +12,22 @@ namespace Asuka
 
         private static async Task MainAsync(string[] args)
         {
-            Console.WriteLine(DateTime.UtcNow);
+            Console.WriteLine(DateTime.UtcNow.ToString("R"));
             Console.WriteLine(Environment.ProcessId);
             await CreateHostBuilder(args).Build().RunAsync();
         }
 
         // Typical ASP.NET host builder pattern but for console app without the web.
         // TODO: Official support planned for .NET 6.0.
-        private static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host
+        private static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var host = Host
                 .CreateDefaultBuilder(args)
                 .UseSerilog()
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                ;
+
+            return host;
+        }
     }
 }
