@@ -1,13 +1,17 @@
 version: '3.8'
 
 volumes:
+  asuka:
   mysql-db-data:
+  lavalink:
 
 services:
   asuka:
     container_name: asuka
     image: asuka
     restart: always
+    volumes:
+      - asuka
     env_file:
       - .env
     build:
@@ -53,6 +57,8 @@ services:
     container_name: lavalink
     image: fredboat/lavalink:dev
     restart: always
+    volumes:
+      - lavalink
     env_file:
       - .env
     environment:
