@@ -46,10 +46,10 @@ namespace Asuka.Modules.General
                 .WithDescription($"Owner: {guild.Owner.Mention}")
                 .WithColor(Config.Value.EmbedColor)
                 .WithThumbnailUrl(guildIconUrl)
-                .WithFooter($"Created: {guild.CreatedAt:R}")
+                .WithFooter($"Created: {guild.CreatedAt.ToString("R")}")
                 .AddField(
                     "ID",
-                    guild.Id)
+                    guild.Id.ToString())
                 .AddField(
                     "Region",
                     guild.VoiceRegionId,
@@ -60,22 +60,22 @@ namespace Asuka.Modules.General
                     true)
                 .AddField(
                     "Members",
-                    guild.MemberCount,
+                    guild.MemberCount.ToString(),
                     true)
                 .AddField(
                     "Channels",
-                    $"{textChannels.Count} text\n" +
-                    $"{voiceChannels.Count} voice",
+                    $"{textChannels.Count.ToString()} text\n" +
+                    $"{voiceChannels.Count.ToString()} voice",
                     true)
                 .AddField(
                     "Emotes",
-                    $"{emotes.Select(emote => !emote.Animated).Count()} static\n" +
-                    $"{emotes.Select(emote => emote.Animated).Count()} animated",
+                    $"{emotes.Count(emote => !emote.Animated).ToString()} static\n" +
+                    $"{emotes.Count(emote => emote.Animated).ToString()} animated",
                     true)
                 .AddField(
                     "Premium",
-                    $"Level {(int) guild.PremiumTier}\n" +
-                    $"{guild.PremiumSubscriptionCount} boosts",
+                    $"Level {((int) guild.PremiumTier).ToString()}\n" +
+                    $"{guild.PremiumSubscriptionCount.ToString()} boosts",
                     true)
                 .AddField(
                     "Roles",
