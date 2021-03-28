@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
@@ -35,18 +36,18 @@ namespace Asuka.Modules.General
                 .WithAuthor(user.ToString(), avatarUrl)
                 .WithColor(Config.Value.EmbedColor)
                 .WithThumbnailUrl(avatarUrl)
-                .WithFooter($"Created: {user.CreatedAt:R}")
+                .WithFooter($"Created: {user.CreatedAt.ToString("R")}")
                 .AddField(
                     "ID",
-                    user.Id,
+                    user.Id.ToString(),
                     true)
                 .AddField(
                     "Bot",
-                    user.IsBot,
+                    user.IsBot.ToString(),
                     true)
                 .AddField(
                     "Presence",
-                    user.Status,
+                    Enum.GetName(user.Status),
                     true)
                 .Build();
 

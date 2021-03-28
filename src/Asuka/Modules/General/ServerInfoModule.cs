@@ -56,7 +56,7 @@ namespace Asuka.Modules.General
                     true)
                 .AddField(
                     "Max Bitrate",
-                    guild.MaxBitrate + " kbps",
+                    $"{guild.MaxBitrate.ToString()} kbps",
                     true)
                 .AddField(
                     "Members",
@@ -64,18 +64,15 @@ namespace Asuka.Modules.General
                     true)
                 .AddField(
                     "Channels",
-                    $"{textChannels.Count.ToString()} text\n" +
-                    $"{voiceChannels.Count.ToString()} voice",
+                    $"{textChannels.Count.ToString()} text\n{voiceChannels.Count.ToString()} voice",
                     true)
                 .AddField(
                     "Emotes",
-                    $"{emotes.Count(emote => !emote.Animated).ToString()} static\n" +
-                    $"{emotes.Count(emote => emote.Animated).ToString()} animated",
+                    $"{emotes.Count(emote => !emote.Animated).ToString()} static\n{emotes.Count(emote => emote.Animated).ToString()} animated",
                     true)
                 .AddField(
                     "Premium",
-                    $"Level {((int) guild.PremiumTier).ToString()}\n" +
-                    $"{guild.PremiumSubscriptionCount.ToString()} boosts",
+                    $"Level {((int) guild.PremiumTier).ToString()}\n{guild.PremiumSubscriptionCount.ToString()} boosts",
                     true)
                 .AddField(
                     "Roles",

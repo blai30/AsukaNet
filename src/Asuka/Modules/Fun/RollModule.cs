@@ -30,7 +30,7 @@ namespace Asuka.Modules.Fun
         {
             // Generates a random number 0 or 1.
             int die = _random.Next(1, sides + 1);
-            await ReplyAsync($":game_die: Rolled **{die}** from {sides}-sided die.");
+            await ReplyAsync($":game_die: Rolled **{die.ToString()}** from {sides.ToString()}-sided die.");
         }
     }
 }
