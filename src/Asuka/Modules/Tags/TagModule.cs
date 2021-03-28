@@ -168,7 +168,7 @@ namespace Asuka.Modules.Tags
 
             // Join list of tag names with comma.
             string list = string.Join(", ", tags);
-            await ReplyAsync("Tags: " + list);
+            await ReplyAsync($"Tags: {list}");
         }
 
         [Command("info")]

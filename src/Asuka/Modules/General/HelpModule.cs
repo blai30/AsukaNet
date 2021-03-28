@@ -39,16 +39,10 @@ namespace Asuka.Modules.General
                 return;
             }
 
-            // List the module usage examples using the command remarks if defined.
-            string usage = string.Empty;
-            foreach (var command in module.Commands)
-            {
-                // Use command remarks as usage.
-                if (!string.IsNullOrWhiteSpace(command.Remarks))
-                {
-                    usage += $"`{command.Remarks}`\n";
-                }
-            }
+            // List the module usage examples using the command remarks as usage if defined.
+            string usage = module.Commands
+                .Where(command => !string.IsNullOrWhiteSpace(command.Remarks))
+                .Aggregate(string.Empty, (current, command) => $"{current}`{command.Remarks}`\n");
 
             // List of command aliases separated by a comma.
             var aliases = module.Aliases.Select(alias => $"`{alias}`");

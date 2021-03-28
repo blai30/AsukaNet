@@ -25,12 +25,12 @@ namespace Asuka.Modules.General
         {
             const string text = "Pong! Latency: `{0} ms`. API: `{1} ms`.";
 
-            var reply = await ReplyAsync(string.Format(text, "...", "..."));
+            var reply = await ReplyAsync(string.Format(text, "... ms", "... ms"));
             int latency = (reply.Timestamp - Context.Message.Timestamp).Milliseconds;
             int botLatency = Context.Client.Latency;
 
             await reply.ModifyAsync(message =>
-                message.Content = string.Format(text, latency, botLatency));
+                message.Content = string.Format(text, latency.ToString(), botLatency.ToString()));
         }
     }
 }

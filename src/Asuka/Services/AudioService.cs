@@ -73,10 +73,11 @@ namespace Asuka.Services
                 .WithAuthor("Playing")
                 .WithDescription(track.Duration.ToString("c"))
                 .WithColor(_config.Value.EmbedColor)
-                .WithThumbnailUrl(artwork);
+                .WithThumbnailUrl(artwork)
+                .Build();
 
             _logger.LogTrace($"Playing: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
-            await player.TextChannel.SendMessageAsync(embed: embed.Build());
+            await player.TextChannel.SendMessageAsync(embed: embed);
         }
 
         private async Task OnTrackEnded(TrackEndedEventArgs args)

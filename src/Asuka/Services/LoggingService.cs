@@ -49,7 +49,7 @@ namespace Asuka.Services
         {
             var logger = Log.ForContext<T>();
             logger.Information($"Client logged in as {_client.CurrentUser}");
-            logger.Information($"Listening in {_client.Guilds.Count} guilds");
+            logger.Information($"Listening in {_client.Guilds.Count.ToString()} guilds");
 
             return Task.CompletedTask;
         }
