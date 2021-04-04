@@ -60,7 +60,6 @@ namespace Asuka.Modules.Music
             }
 
             var player = _lavaNode.GetPlayer(Context.Guild);
-
             if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
             {
                 await ReplyAsync("You must be in the same voice channel.");
@@ -110,7 +109,6 @@ namespace Asuka.Modules.Music
             }
 
             var player = _lavaNode.GetPlayer(Context.Guild);
-
             if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
             {
                 await ReplyAsync("You must be in the same voice channel.");
@@ -151,7 +149,7 @@ namespace Asuka.Modules.Music
                     var embed = new EmbedBuilder()
                         .WithTitle(track.Title)
                         .WithUrl(track.Url)
-                        .WithAuthor($"Enqueued #{(player.Queue.Count + 1).ToString()}")
+                        .WithAuthor($"Enqueued #{player.Queue.Count.ToString()}")
                         .WithDescription(track.Duration.ToString("c"))
                         .WithColor(Config.Value.EmbedColor)
                         .WithThumbnailUrl(artwork)
@@ -185,7 +183,6 @@ namespace Asuka.Modules.Music
             }
 
             var player = _lavaNode.GetPlayer(Context.Guild);
-
             if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
             {
                 await ReplyAsync("You must be in the same voice channel.");
@@ -239,43 +236,6 @@ namespace Asuka.Modules.Music
             await ReplyAsync(embed: embed);
         }
 
-        [Command("queue")]
-        [Alias("q")]
-        [Remarks("music queue")]
-        [Summary("View the current music queue.")]
-        public async Task QueueAsync()
-        {
-            if (!_lavaNode.HasPlayer(Context.Guild))
-            {
-                await ReplyAsync("Currently not playing.");
-                return;
-            }
-
-            var player = _lavaNode.GetPlayer(Context.Guild);
-
-            if (player.Queue.Count <= 0)
-            {
-                await ReplyAsync("Nothing in the queue.");
-                return;
-            }
-
-            // TODO: Music queue interactive pagination.
-            var tracks = player.Queue
-                .Take(10)
-                .Select((track, index) => $"{(index + 1).ToString()}. `{track.Title}`")
-                .ToList();
-            string list = string.Join("\n", tracks);
-
-            var embed = new EmbedBuilder()
-                .WithTitle($"{player.Queue.Count.ToString()} tracks left")
-                .WithAuthor("Queue")
-                .WithDescription(list.Truncate(2048, "..."))
-                .WithColor(Config.Value.EmbedColor)
-                .Build();
-
-            await ReplyAsync(embed: embed);
-        }
-
         [Command("skip")]
         [Alias("s")]
         [Remarks("music skip")]
@@ -289,7 +249,6 @@ namespace Asuka.Modules.Music
             }
 
             var player = _lavaNode.GetPlayer(Context.Guild);
-
             if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
             {
                 await ReplyAsync("You must be in the same voice channel.");
@@ -337,6 +296,86 @@ namespace Asuka.Modules.Music
             }
         }
 
+        [Command("remove")]
+        [Alias("r")]
+        [Remarks("music remove <index>")]
+        [Summary("Removes a track from the queue by index.")]
+        public async Task RemoveAsync(int index)
+        {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+            if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
+            {
+                await ReplyAsync("You must be in the same voice channel.");
+                return;
+            }
+
+            try
+            {
+                var track = player.Queue.RemoveAt(index - 1);
+
+                // Announce the track that was removed.
+                string artwork = await track.FetchArtworkAsync();
+                var embed = new EmbedBuilder()
+                    .WithTitle(track.Title)
+                    .WithUrl(track.Url)
+                    .WithAuthor($"Removed #{index.ToString()}")
+                    .WithDescription(track.Duration.ToString("c"))
+                    .WithColor(Config.Value.EmbedColor)
+                    .WithThumbnailUrl(artwork)
+                    .Build();
+
+                Logger.LogTrace($"Removed: {track.Title} in {Context.Guild.Name}");
+                await ReplyAsync(embed: embed);
+            }
+            catch (Exception)
+            {
+                Logger.LogTrace($"Failed removing track at index {index.ToString()} in {Context.Guild.Name}");
+                await ReplyAsync($"No track in queue at index {index.ToString()}.");
+            }
+        }
+
+        [Command("queue")]
+        [Alias("q")]
+        [Remarks("music queue")]
+        [Summary("View the current music queue.")]
+        public async Task QueueAsync()
+        {
+            if (!_lavaNode.HasPlayer(Context.Guild))
+            {
+                await ReplyAsync("Currently not playing.");
+                return;
+            }
+
+            var player = _lavaNode.GetPlayer(Context.Guild);
+            if (player.Queue.Count <= 0)
+            {
+                await ReplyAsync("Nothing in the queue.");
+                return;
+            }
+
+            // TODO: Music queue interactive pagination.
+            var tracks = player.Queue
+                .Take(10)
+                .Select((track, index) => $"{(index + 1).ToString()}. `{track.Title}`")
+                .ToList();
+            string list = string.Join("\n", tracks);
+
+            var embed = new EmbedBuilder()
+                .WithTitle($"{player.Queue.Count.ToString()} tracks left")
+                .WithAuthor("Queue")
+                .WithDescription(list.Truncate(2048, "..."))
+                .WithColor(Config.Value.EmbedColor)
+                .Build();
+
+            await ReplyAsync(embed: embed);
+        }
+
         [Command("clear")]
         [Alias("c")]
         [Remarks("music clear")]
@@ -350,7 +389,6 @@ namespace Asuka.Modules.Music
             }
 
             var player = _lavaNode.GetPlayer(Context.Guild);
-
             if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
             {
                 await ReplyAsync("You must be in the same voice channel.");
