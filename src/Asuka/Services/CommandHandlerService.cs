@@ -87,7 +87,7 @@ namespace Asuka.Services
         private async Task OnMessageReceivedAsync(SocketMessage socketMessage)
         {
             // Ensure the message is from a user or bot and not a system message.
-            if (!(socketMessage is SocketUserMessage message)) return;
+            if (socketMessage is not SocketUserMessage message) return;
 
             // Ignore self.
             if (message.Author.Id == _client.CurrentUser.Id) return;
@@ -96,11 +96,11 @@ namespace Asuka.Services
             // TODO: Fetch custom set guild prefix from database.
             // Check if message has string prefix, only if it is not null.
             string prefix = _config.Value.BotPrefix;
-            if (prefix != null && !message.HasStringPrefix(prefix, ref argPos)) return;
+            if (!string.IsNullOrEmpty(prefix) && !message.HasStringPrefix(prefix, ref argPos)) return;
 
             // Check if message has bot mention prefix and was not invoked by a bot.
-            if (!message.HasMentionPrefix(_client.CurrentUser, ref argPos) &&
-                !message.Author.IsBot)
+            if (message.HasMentionPrefix(_client.CurrentUser, ref argPos) is false &&
+                message.Author.IsBot is false)
                 return;
 
             // Create a WebSocket-based command context based on the message.
@@ -121,7 +121,7 @@ namespace Asuka.Services
             ICommandContext context,
             IResult result)
         {
-            if (!command.IsSpecified || result.IsSuccess) return;
+            if (command.IsSpecified is false || result.IsSuccess) return;
 
             // Command not successful, reply with error.
             await context.Message.ReplyAsync(result.ToString(), allowedMentions: AllowedMentions.None);

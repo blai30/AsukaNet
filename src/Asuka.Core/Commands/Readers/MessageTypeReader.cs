@@ -25,10 +25,10 @@ namespace Asuka.Commands.Readers
             if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id) &&
                 await context.Channel.GetMessageAsync(id).ConfigureAwait(false) is T msg)
             {
-                return TypeReaderResult.FromSuccess(msg);
+                return await Task.FromResult(TypeReaderResult.FromSuccess(msg));
             }
 
-            return TypeReaderResult.FromError(CommandError.ObjectNotFound, "Message not found.");
+            return await Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, "Message not found."));
         }
     }
 }

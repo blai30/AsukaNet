@@ -56,9 +56,9 @@ namespace Asuka.Services
         private async Task OnMessageReceived(SocketMessage socketMessage)
         {
             // Ensure the message is from a user or bot and not a system message.
-            if (!(socketMessage is SocketUserMessage message)) return;
+            if (socketMessage is not SocketUserMessage message) return;
             // Ensure message is from a guild channel.
-            if (!(message.Channel is SocketGuildChannel guildChannel)) return;
+            if (message.Channel is not SocketGuildChannel guildChannel) return;
             // Ignore self.
             if (message.Author.Id == _client.CurrentUser.Id) return;
 
@@ -68,7 +68,7 @@ namespace Asuka.Services
                     t.GuildId == guildChannel.Guild.Id &&
                     string.Equals(t.Name, message.Content, StringComparison.CurrentCultureIgnoreCase));
 
-            if (tag == null) return;
+            if (tag is null) return;
 
             await using var context = _factory.CreateDbContext();
             // Update usage count for both the tag object from dictionary and the entry in the database.

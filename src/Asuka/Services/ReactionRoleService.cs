@@ -80,7 +80,7 @@ namespace Asuka.Services
             if (reaction.User.Value is not SocketGuildUser user) return;
             if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
             // Ensure message is from a guild channel.
-            if (!(channel is SocketGuildChannel guildChannel)) return;
+            if (channel is not SocketGuildChannel guildChannel) return;
 
             // This event is not related to reaction roles.
             if (ReactionRoles.Values.All(r =>
@@ -100,7 +100,7 @@ namespace Asuka.Services
                     r.Reaction == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
-            if (reactionRole == null) return;
+            if (reactionRole is null) return;
             // Check if user already has the role.
             if (user.Roles.Any(r => r.Id == reactionRole.RoleId)) return;
 
@@ -136,7 +136,7 @@ namespace Asuka.Services
             if (reaction.User.Value is not SocketGuildUser user) return;
             if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
             // Ensure message is from a guild channel.
-            if (!(channel is SocketGuildChannel guildChannel)) return;
+            if (channel is not SocketGuildChannel guildChannel) return;
 
             // This event is not related to reaction roles.
             if (ReactionRoles.Values.All(r =>
@@ -156,7 +156,7 @@ namespace Asuka.Services
                     r.Reaction == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
-            if (reactionRole == null) return;
+            if (reactionRole is null) return;
             // Check if user has the role.
             if (user.Roles.All(r => r.Id != reactionRole.RoleId)) return;
 
@@ -229,7 +229,7 @@ namespace Asuka.Services
                     : new Emoji(reactionRole.Reaction);
 
                 var channel = _client.GetChannel(reactionRole.ChannelId) as ISocketMessageChannel;
-                if (channel == null) continue;
+                if (channel is null) continue;
 
                 // Clear reactions from message, this will trigger the OnReactionsRemovedForEmote event
                 // which will handle the removal of reaction roles from the list and database.
@@ -266,7 +266,7 @@ namespace Asuka.Services
             await using var context = _factory.CreateDbContext();
 
             // Ensure message is from a guild channel.
-            if (!(channel is SocketGuildChannel guildChannel)) return;
+            if (channel is not SocketGuildChannel guildChannel) return;
 
             // This event is not related to reaction roles.
             if (ReactionRoles.Values.All(r =>
@@ -278,7 +278,7 @@ namespace Asuka.Services
 
             // Condition to remove all reaction roles from a message if no reaction was specified,
             // otherwise only remove all reaction roles for that specific reaction.
-            Expression<Func<ReactionRole, bool>> expression = reaction == null
+            Expression<Func<ReactionRole, bool>> expression = reaction is null
                 ? reactionRole => reactionRole.MessageId == messageId
                 : reactionRole => reactionRole.MessageId == messageId &&
                                   reactionRole.Reaction == reaction.GetStringRepresentation();

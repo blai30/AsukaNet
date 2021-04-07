@@ -90,7 +90,7 @@ namespace Asuka.Modules.Tags
                     string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
 
             // Tag does not exist.
-            if (tag == null)
+            if (tag is null)
             {
                 await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
                 return;
@@ -125,7 +125,7 @@ namespace Asuka.Modules.Tags
                     string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
 
             // Tag does not exist.
-            if (tag == null)
+            if (tag is null)
             {
                 await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
                 return;
@@ -183,7 +183,7 @@ namespace Asuka.Modules.Tags
                     string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
 
             // Tag does not exist.
-            if (tag == null)
+            if (tag is null)
             {
                 await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
                 return;

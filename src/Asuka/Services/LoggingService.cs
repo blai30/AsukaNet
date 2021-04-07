@@ -45,16 +45,16 @@ namespace Asuka.Services
             await Task.CompletedTask;
         }
 
-        private Task OnReadyAsync<T>() where T : IHostedService
+        private async Task OnReadyAsync<T>() where T : IHostedService
         {
             var logger = Log.ForContext<T>();
             logger.Information($"Client logged in as {_client.CurrentUser}");
             logger.Information($"Listening in {_client.Guilds.Count.ToString()} guilds");
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
-        private Task OnLogAsync<T>(LogMessage log) where T : IHostedService
+        private async Task OnLogAsync<T>(LogMessage log) where T : IHostedService
         {
             var logger = Log.ForContext<T>();
             string message = $"{log.Exception?.ToString() ?? log.Message}";
@@ -84,7 +84,7 @@ namespace Asuka.Services
                     break;
             }
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
     }
 }

@@ -36,9 +36,9 @@ namespace Asuka.Commands
             await Context.Message.ReplyAsync(message, isTTS, embed, allowedMentions, options).ConfigureAwait(false);
         }
 
-        protected Task ReplyReactionAsync(IEmote emote)
+        protected async Task ReplyReactionAsync(IEmote emote)
         {
-            return Context.Message.AddReactionAsync(emote);
+            await Context.Message.AddReactionAsync(emote);
         }
     }
 }

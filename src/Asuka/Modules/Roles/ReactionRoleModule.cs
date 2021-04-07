@@ -118,7 +118,7 @@ namespace Asuka.Modules.Roles
             var reactionRole = _service.ReactionRoles.Values
                 .FirstOrDefault(r => r.RoleId == role.Id && r.MessageId == message.Id);
 
-            if (reactionRole == null)
+            if (reactionRole is null)
             {
                 await ReplyAsync("Could not find that reaction role.");
                 return;
@@ -164,7 +164,7 @@ namespace Asuka.Modules.Roles
 
             // Get embed from message.
             var embed = original.Embeds.FirstOrDefault();
-            if (embed == null)
+            if (embed is null)
             {
                 await ReplyAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻");
                 return;
