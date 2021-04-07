@@ -53,7 +53,7 @@ namespace Asuka.Modules.Music
         [Summary("Leave the currently playing voice channel.")]
         public async Task LeaveAsync()
         {
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await ReplyAsync("Currently not playing.");
                 return;
@@ -103,7 +103,7 @@ namespace Asuka.Modules.Music
         public async Task PlayAsync([Remainder] string searchQuery = "")
         {
             // Join if not playing.
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await TryJoinAsync();
             }
@@ -128,7 +128,7 @@ namespace Asuka.Modules.Music
                     ? await _lavaNode.SearchAsync(searchQuery)
                     : await _lavaNode.SearchYouTubeAsync(searchQuery);
 
-                if (search.LoadStatus is LoadStatus.NoMatches || search.LoadStatus is LoadStatus.LoadFailed)
+                if (search.LoadStatus is LoadStatus.NoMatches or LoadStatus.LoadFailed)
                 {
                     await ReplyAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
                     return;
@@ -138,9 +138,8 @@ namespace Asuka.Modules.Music
                 var track = search.Tracks[0];
 
                 // Player is already playing or paused but still has remaining tracks, enqueue new track.
-                if (player.Track != null &&
-                    player.PlayerState is PlayerState.Playing ||
-                    player.PlayerState is PlayerState.Paused)
+                if (player.Track is not null &&
+                    player.PlayerState is PlayerState.Playing or PlayerState.Paused)
                 {
                     player.Queue.Enqueue(track);
 
@@ -176,7 +175,7 @@ namespace Asuka.Modules.Music
         [Summary("Pause the currently playing track or resume playing.")]
         public async Task PauseAsync()
         {
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await ReplyAsync("Currently not playing.");
                 return;
@@ -190,7 +189,7 @@ namespace Asuka.Modules.Music
             }
 
             var state = player.PlayerState;
-            if (state is not PlayerState.Playing && state is not PlayerState.Paused)
+            if (state is not PlayerState.Playing and not PlayerState.Paused)
             {
                 return;
             }
@@ -242,7 +241,7 @@ namespace Asuka.Modules.Music
         [Summary("Skips the currently playing track.")]
         public async Task SkipAsync()
         {
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await ReplyAsync("Currently not playing.");
                 return;
@@ -302,7 +301,7 @@ namespace Asuka.Modules.Music
         [Summary("Removes a track from the queue by index.")]
         public async Task RemoveAsync(int index)
         {
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await ReplyAsync("Currently not playing.");
                 return;
@@ -346,7 +345,7 @@ namespace Asuka.Modules.Music
         [Summary("View the current music queue.")]
         public async Task QueueAsync()
         {
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await ReplyAsync("Currently not playing.");
                 return;
@@ -382,7 +381,7 @@ namespace Asuka.Modules.Music
         [Summary("Clears the music queue.")]
         public async Task ClearAsync()
         {
-            if (!_lavaNode.HasPlayer(Context.Guild))
+            if (_lavaNode.HasPlayer(Context.Guild) is false)
             {
                 await ReplyAsync("Currently not playing.");
                 return;

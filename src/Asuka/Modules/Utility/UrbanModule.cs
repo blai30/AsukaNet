@@ -45,7 +45,7 @@ namespace Asuka.Modules.Utility
             var results = await client.GetFromJsonAsync<UrbanList>(query);
 
             // No entry found for given query.
-            if (results?.UrbanEntries == null || results.UrbanEntries.Count <= 0)
+            if (results?.UrbanEntries is null || results.UrbanEntries.Count <= 0)
             {
                 await ReplyAsync($"`{term.Truncate(32, "...")}` was not found in the Urban Dictionary.");
                 return;

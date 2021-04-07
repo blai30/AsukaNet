@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.Hosting.Extensions
                     new[]
                     {
                         typeof(IConfiguration)
-                    }) != null;
+                    }) is not null;
 
                 // Create a TStartup instance based on ctor.
                 var startUpObj = hasConfigCtor

@@ -83,7 +83,7 @@ namespace Asuka.Modules.Utility
             color = color.WithAlpha(0xFF);
 
             // Get raw uint32 value from color by extracting rgb values.
-            uint raw = (uint) ((color.Red << 16) | (color.Green << 8) | color.Blue);
+            uint raw = (uint) (color.Red << 16 | color.Green << 8 | color.Blue);
 
             // Get HSL and HSV values.
             var hsl = new Vector3();
@@ -104,7 +104,7 @@ namespace Asuka.Modules.Utility
             var stream = surface.Snapshot().Encode().AsStream();
 
             // Use hex code as filename but omit the pound sign.
-            string fileName = $"{raw:X6}.png";
+            string fileName = $"{raw.ToString("X6")}.png";
 
             // Construct embed with color information and thumbnail.
             var embed = new EmbedBuilder()
@@ -113,16 +113,16 @@ namespace Asuka.Modules.Utility
                 .AddField(
                     // Strip alpha from hex.
                     "HEX",
-                    $"`#{raw:X6}`")
+                    $"`#{raw.ToString("X6")}`")
                 .AddField(
                     "RGB",
-                    $"`rgb({color.Red}, {color.Green}, {color.Blue})`")
+                    $"`rgb({color.Red.ToString()}, {color.Green.ToString()}, {color.Blue.ToString()})`")
                 .AddField(
                     "HSL",
-                    $"**H**: {hsl.X:F2}, **S**: {hsl.Y:F2}, **L**: {hsl.Z:F2}")
+                    $"**H**: {hsl.X.ToString("F2")}, **S**: {hsl.Y.ToString("F2")}, **L**: {hsl.Z.ToString("F2")}")
                 .AddField(
                     "HSV",
-                    $"**H**: {hsv.X:F2}, **S**: {hsv.Y:F2}, **V**: {hsv.Z:F2}")
+                    $"**H**: {hsv.X.ToString("F2")}, **S**: {hsv.Y.ToString("F2")}, **V**: {hsv.Z.ToString("F2")}")
                 .Build();
 
             await Context.Channel.SendFileAsync(stream, fileName, embed: embed);

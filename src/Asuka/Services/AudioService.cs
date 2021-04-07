@@ -53,7 +53,7 @@ namespace Asuka.Services
 
         private async Task OnReadyAsync()
         {
-            if (!_lavaNode.IsConnected)
+            if (_lavaNode.IsConnected is false)
             {
                 await _lavaNode.ConnectAsync();
                 _logger.LogInformation("Lava Node connected");
@@ -82,7 +82,7 @@ namespace Asuka.Services
 
         private async Task OnTrackEnded(TrackEndedEventArgs args)
         {
-            if (!args.Reason.ShouldPlayNext())
+            if (args.Reason.ShouldPlayNext() is false)
             {
                 return;
             }
@@ -105,7 +105,7 @@ namespace Asuka.Services
             await player.TextChannel.SendMessageAsync(embed: embed);
 
             // Check next track in the queue or leave voice channel if queue is empty.
-            if (!player.Queue.TryDequeue(out var nextTrack))
+            if (player.Queue.TryDequeue(out var nextTrack) is false)
             {
                 await Task.Delay(TimeSpan.FromSeconds(60))
                     .ContinueWith(_ => _lavaNode.LeaveAsync(player.VoiceChannel));

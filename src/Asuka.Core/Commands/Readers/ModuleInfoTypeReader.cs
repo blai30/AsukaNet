@@ -7,7 +7,7 @@ namespace Asuka.Commands.Readers
 {
     public class ModuleInfoTypeReader : TypeReader
     {
-        public override Task<TypeReaderResult> ReadAsync(
+        public override async Task<TypeReaderResult> ReadAsync(
             ICommandContext context,
             string input,
             IServiceProvider services)
@@ -21,7 +21,7 @@ namespace Asuka.Commands.Readers
                 info.Aliases.Any(alias => alias.ToUpperInvariant() == moduleName));
 
             // Module is invalid.
-            return Task.FromResult(module == null
+            return await Task.FromResult(module is null
                 ? TypeReaderResult.FromError(CommandError.ParseFailed, $"Module `{input}` does not exist. UwU")
                 : TypeReaderResult.FromSuccess(module));
         }

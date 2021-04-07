@@ -33,7 +33,7 @@ namespace Asuka.Modules.General
             ModuleInfo module = null)
         {
             // No module was specified, reply with default help embed.
-            if (module == null)
+            if (module is null)
             {
                 await DefaultHelpAsync();
                 return;
