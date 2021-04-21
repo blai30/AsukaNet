@@ -46,4 +46,4 @@ docker-compose up -d
   * `avatar [@user]`
   * `calculate <expression>`
   * `color <hex|rgb|keywords>`
-  * `urban <terms>`
+  * `urban <term>`
