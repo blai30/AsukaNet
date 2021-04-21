@@ -48,7 +48,7 @@ namespace Asuka.Modules.Roles
 
         [Command("make")]
         [Alias("m", "setup")]
-        [Remarks("reactionrole make <description>")]
+        [Remarks("reactionrole make [description]")]
         [Summary("Create a reaction role message.")]
         public async Task MakeAsync([Remainder] string description = "")
         {
@@ -149,7 +149,7 @@ namespace Asuka.Modules.Roles
 
         [Command("edit")]
         [Alias("e")]
-        [Remarks("reactionrole edit <messageId> \"<title>\" <description>")]
+        [Remarks("reactionrole edit <messageId> \"[title]\" [description]")]
         [Summary(
             "Edit a reaction role message with a new title and description. Titles with spaces must be wrapped in quotes.")]
         public async Task EditAsync(IMessage message, string title = "", [Remainder] string description = "")
@@ -188,7 +188,7 @@ namespace Asuka.Modules.Roles
 
         [Command("clear")]
         [Alias("c")]
-        [Remarks("reactionrole clear [messageId]")]
+        [Remarks("reactionrole clear <messageId>")]
         [Summary("Clears all reaction roles from a message.")]
         public async Task ClearAsync(IMessage message)
         {
