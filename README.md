@@ -1,5 +1,7 @@
 # Asuka.Net
 
+![screenshot](https://github.com/blai30/Asuka.Net/blob/main/resources/asuka.png?raw=true)
+
 ## Instructions
 1. Copy `appsettings.Example.json` to `appsettings.json`.
 2. Edit `appsettings.json` then add bot token and other configurations.
