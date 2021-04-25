@@ -33,6 +33,20 @@ namespace Asuka.Modules.Utility
         }
 
         [Command]
+        [Remarks("color <red> <green> <blue>")]
+        public async Task ColorAsync(int r, int g, int b)
+        {
+            // Clamp rgb values between 0 and 255.
+            r = Math.Clamp(r, 0, 255);
+            g = Math.Clamp(g, 0, 255);
+            b = Math.Clamp(b, 0, 255);
+
+            // Create color object from rgb values.
+            var color = new SKColor((byte) r, (byte) g, (byte) b);
+            await GetColorAsync(color);
+        }
+
+        [Command]
         [Remarks("color <keywords>")]
         public async Task ColorAsync([Remainder] string keywords)
         {
@@ -45,13 +59,13 @@ namespace Asuka.Modules.Utility
             var type = typeof(SKColors);
 
             // Get color by keyword color name using reflection.
-            FieldInfo info = type.GetField(
+            FieldInfo? info = type.GetField(
                 keywords,
                 BindingFlags.IgnoreCase |
                 BindingFlags.Instance |
                 BindingFlags.Public |
                 BindingFlags.Static);
-            var temp = info?.GetValue(null);
+            object? temp = info?.GetValue(null);
 
             // Reflection was successful.
             if (temp is SKColor color)
@@ -61,20 +75,6 @@ namespace Asuka.Modules.Utility
             }
 
             await ReplyInlineAsync("Could not understand color keywords... (┬┬﹏┬┬)");
-        }
-
-        [Command]
-        [Remarks("color <red> <green> <blue>")]
-        public async Task ColorAsync(int r, int g, int b)
-        {
-            // Clamp rgb values between 0 and 255.
-            r = Math.Clamp(r, 0, 255);
-            g = Math.Clamp(g, 0, 255);
-            b = Math.Clamp(b, 0, 255);
-
-            // Create color object from rgb values.
-            var color = new SKColor((byte) r, (byte) g, (byte) b);
-            await GetColorAsync(color);
         }
 
         private async Task GetColorAsync(SKColor color)

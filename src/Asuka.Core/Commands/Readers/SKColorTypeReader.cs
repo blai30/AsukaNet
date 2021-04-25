@@ -16,7 +16,7 @@ namespace Asuka.Commands.Readers
 
             // Get color from hex, TryParse will take care of the pound (#) symbol.
             return await Task.FromResult(SKColor.TryParse(input, out var color)
-                ? TypeReaderResult.FromSuccess(color.ToString())
+                ? TypeReaderResult.FromSuccess(color)
                 : TypeReaderResult.FromError(CommandError.ParseFailed, "Not a valid hex!! (*/ω＼*)"));
         }
     }
