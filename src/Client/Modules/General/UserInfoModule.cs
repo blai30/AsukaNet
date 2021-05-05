@@ -24,7 +24,7 @@ namespace Asuka.Modules.General
 
         [Command]
         [Remarks("userinfo [@user]")]
-        public async Task UserInfoAsync(IUser user = null)
+        public async Task UserInfoAsync(IUser? user = null)
         {
             // Use self if no user was specified.
             user ??= Context.User;

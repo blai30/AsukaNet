@@ -30,7 +30,7 @@ namespace Asuka.Modules.General
         [Remarks("help [command]")]
         public async Task HelpAsync(
             [Summary("Command name of which to view help info.")]
-            ModuleInfo module = null)
+            ModuleInfo? module = null)
         {
             // No module was specified, reply with default help embed.
             if (module is null)

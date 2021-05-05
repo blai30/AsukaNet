@@ -22,7 +22,7 @@ namespace Asuka.Modules.Utility
 
         [Command]
         [Remarks("avatar [@user]")]
-        public async Task AvatarAsync(IUser user = null)
+        public async Task AvatarAsync(IUser? user = null)
         {
             user ??= Context.User;
             string avatarUrl = user.GetAvatarUrl(size: 4096);

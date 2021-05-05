@@ -6,10 +6,9 @@
         <OutputType>Exe</OutputType>
         <Authors>Brian Lai</Authors>
         <Description>Discord bot written in .NET 5 using Discord.Net.</Description>
-        <AssemblyName>Asuka</AssemblyName>
         <RootNamespace>Asuka</RootNamespace>
         <Nullable>enable</Nullable>
-        <PackageId>Asuka</PackageId>
+        <PackageId>Client</PackageId>
         <Title>Asuka Discord Bot</Title>
         <Product>Asuka</Product>
         <ApplicationIcon>asuka.ico</ApplicationIcon>
@@ -29,10 +28,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Asuka.Common\Asuka.Common.csproj" />
-      <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
-      <ProjectReference Include="..\Asuka.Database\Asuka.Database.csproj" />
-      <ProjectReference Include="..\Asuka.Extensions\Asuka.Extensions.csproj" />
+      <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\Core\Core.csproj" />
+      <ProjectReference Include="..\Database\Database.csproj" />
+      <ProjectReference Include="..\Extensions\Extensions.csproj" />
     </ItemGroup>
 
 </Project>
