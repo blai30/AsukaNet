@@ -30,7 +30,7 @@ namespace Asuka.Services
             _logger = logger;
         }
 
-        public Dictionary<int, Tag> Tags { get; private set; }
+        public Dictionary<int, Tag> Tags { get; private set; } = null;
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {

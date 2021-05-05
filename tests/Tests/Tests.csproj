@@ -6,20 +6,22 @@
         <IsPackable>false</IsPackable>
 
         <Authors>Brian Lai</Authors>
+
+        <RootNamespace>Asuka.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FluentAssertions" Version="5.10.3" />
-        <PackageReference Include="NUnit" Version="3.13.1" />
+        <PackageReference Include="NUnit" Version="3.13.2" />
         <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Asuka.Common\Asuka.Common.csproj" />
-      <ProjectReference Include="..\..\src\Asuka.Core\Asuka.Core.csproj" />
-      <ProjectReference Include="..\..\src\Asuka.Database\Asuka.Database.csproj" />
-      <ProjectReference Include="..\..\src\Asuka.Extensions\Asuka.Extensions.csproj" />
+      <ProjectReference Include="..\..\src\Common\Common.csproj" />
+      <ProjectReference Include="..\..\src\Core\Core.csproj" />
+      <ProjectReference Include="..\..\src\Database\Database.csproj" />
+      <ProjectReference Include="..\..\src\Extensions\Extensions.csproj" />
     </ItemGroup>
 
 </Project>

@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
-        <ProjectReference Include="..\Asuka.Extensions\Asuka.Extensions.csproj" />
+        <ProjectReference Include="..\Core\Core.csproj" />
+        <ProjectReference Include="..\Extensions\Extensions.csproj" />
     </ItemGroup>
 
 </Project>

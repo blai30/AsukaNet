@@ -39,7 +39,7 @@ namespace Asuka.Modules.Tags
         [Alias("a", "create", "c")]
         [Remarks("tag add <name> <content> [:reaction:]")]
         [Summary("Create a new tag for the server.")]
-        public async Task AddAsync(string tagName, string tagContent, IEmote reaction = null)
+        public async Task AddAsync(string tagName, string tagContent, IEmote? reaction = null)
         {
             if (tagName.Length > 100)
             {
@@ -117,7 +117,7 @@ namespace Asuka.Modules.Tags
         [Alias("e", "modify", "m")]
         [Remarks("tag edit <name> <content> [:reaction:]")]
         [Summary("Edit an existing tag from the server.")]
-        public async Task EditAsync(string tagName, string tagContent, IEmote reaction = null)
+        public async Task EditAsync(string tagName, string tagContent, IEmote? reaction = null)
         {
             var tag = _service.Tags.Values
                 .FirstOrDefault(t =>

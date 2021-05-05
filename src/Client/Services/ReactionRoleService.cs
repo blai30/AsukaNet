@@ -31,7 +31,7 @@ namespace Asuka.Services
             _logger = logger;
         }
 
-        public Dictionary<int, ReactionRole> ReactionRoles { get; private set; }
+        public Dictionary<int, ReactionRole> ReactionRoles { get; private set; } = null;
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -261,7 +261,7 @@ namespace Asuka.Services
         /// <param name="channel">Channel in which the message is referenced</param>
         /// <param name="reaction">Specific reaction to clear from message. If none is specified, clear all reactions from message.</param>
         /// <returns></returns>
-        private async Task ClearReactionRoles(ulong messageId, ISocketMessageChannel channel, IEmote reaction = null)
+        private async Task ClearReactionRoles(ulong messageId, ISocketMessageChannel channel, IEmote? reaction = null)
         {
             await using var context = _factory.CreateDbContext();
 

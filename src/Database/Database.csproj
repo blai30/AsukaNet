@@ -3,18 +3,19 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <Authors>Brian Lai</Authors>
+        <RootNamespace>Asuka.Database</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Asuka.Core\Asuka.Core.csproj" />
-        <ProjectReference Include="..\Asuka.Extensions\Asuka.Extensions.csproj" />
+        <ProjectReference Include="..\Core\Core.csproj" />
+        <ProjectReference Include="..\Extensions\Extensions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.5" />
-      <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0-alpha.2" />
+      <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0" />
     </ItemGroup>
 
 </Project>
