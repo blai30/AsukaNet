@@ -35,24 +35,24 @@ namespace Asuka.Modules.Utility
         [Remarks("urban <term>")]
         public async Task UrbanAsync([Remainder] string term)
         {
-            // Build query and send http request to urban api.
+            // Construct query to send http request.
             string query = Uri
                 .AppendPathSegment("define")
                 .SetQueryParam("term", term);
 
             // Send request and get JSON response.
             using var client = _factory.CreateClient();
-            var results = await client.GetFromJsonAsync<UrbanList>(query);
+            var responseBody = await client.GetFromJsonAsync<UrbanList>(query);
 
-            // No entry found for given query.
-            if (results?.UrbanEntries is null || results.UrbanEntries.Count <= 0)
+            // No response for given query.
+            if (responseBody?.UrbanEntries is null || responseBody.UrbanEntries.Count <= 0)
             {
                 await ReplyAsync($"`{term.Truncate(32, "...")}` was not found in the Urban Dictionary.");
                 return;
             }
 
             // Take the first result.
-            var entry = results.UrbanEntries[0];
+            var entry = responseBody.UrbanEntries[0];
 
             var embed = new EmbedBuilder()
                 .WithTitle(entry.Word)
