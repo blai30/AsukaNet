@@ -4,6 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <Authors>Brian Lai</Authors>
         <RootNamespace>Asuka.Extensions</RootNamespace>
+        <AssemblyName>Asuka.Extensions</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

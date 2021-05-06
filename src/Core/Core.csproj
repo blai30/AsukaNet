@@ -8,6 +8,7 @@
         <Authors>Brian Lai</Authors>
         <Company>Asuka.Core</Company>
         <Product>Asuka.Core</Product>
+        <AssemblyName>Asuka.Core</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

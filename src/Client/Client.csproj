@@ -13,6 +13,7 @@
         <Product>Asuka</Product>
         <ApplicationIcon>asuka.ico</ApplicationIcon>
         <StartupObject>Asuka.Program</StartupObject>
+        <AssemblyName>Asuka.Client</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

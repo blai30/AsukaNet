@@ -5,6 +5,7 @@
         <RootNamespace>Asuka</RootNamespace>
         <Authors>Brian Lai</Authors>
         <Nullable>enable</Nullable>
+        <AssemblyName>Asuka.Common</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

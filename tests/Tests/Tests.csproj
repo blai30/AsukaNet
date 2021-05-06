@@ -8,6 +8,8 @@
         <Authors>Brian Lai</Authors>
 
         <RootNamespace>Asuka.Tests</RootNamespace>
+
+        <AssemblyName>Asuka.Tests</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

@@ -16,7 +16,7 @@ services:
       - .env
     build:
       context: .
-      dockerfile: src/Asuka/Dockerfile
+      dockerfile: src/Client/Dockerfile
     # Application might continue crashing until
     # dependent service(s) fully initialize
     depends_on:
