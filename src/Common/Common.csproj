@@ -4,6 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>Asuka</RootNamespace>
         <Authors>Brian Lai</Authors>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
