@@ -20,10 +20,10 @@ namespace Asuka.Models.API.TraceMoe
         public float Similarity { get; set; }
 
         [JsonPropertyName("anilist_id")]
-        public int AnilistId { get; set; }
+        public ulong AnilistId { get; set; }
 
         [JsonPropertyName("mal_id")]
-        public int MalId { get; set; }
+        public ulong? MalId { get; set; }
 
         [JsonPropertyName("is_adult")]
         public bool IsAdult { get; set; }
