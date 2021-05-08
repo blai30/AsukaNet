@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Asuka.Database;
 using Asuka.Database.Models;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
+using Flurl;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -16,13 +17,15 @@ namespace Asuka.Services
 {
     public class TagListenerService : IHostedService
     {
+        private const string Uri = "https://localhost:5001/api/tags";
+
         private readonly DiscordSocketClient _client;
-        private readonly IDbContextFactory<AsukaDbContext> _factory;
+        private readonly IHttpClientFactory _factory;
         private readonly ILogger<TagListenerService> _logger;
 
         public TagListenerService(
             DiscordSocketClient client,
-            IDbContextFactory<AsukaDbContext> factory,
+            IHttpClientFactory factory,
             ILogger<TagListenerService> logger)
         {
             _client = client;
@@ -30,15 +33,8 @@ namespace Asuka.Services
             _logger = logger;
         }
 
-        public Dictionary<int, Tag> Tags { get; private set; } = null;
-
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            // Fetch all from database and store in dictionary for fast access.
-            await using var context = _factory.CreateDbContext();
-            Tags = await context.Tags.AsNoTracking()
-                .ToDictionaryAsync(tag => tag.Id, cancellationToken);
-
             _client.MessageReceived += OnMessageReceived;
 
             _logger.LogInformation($"{GetType().Name} started");
@@ -55,39 +51,21 @@ namespace Asuka.Services
 
         private async Task OnMessageReceived(SocketMessage socketMessage)
         {
-            // Ensure the message is from a user or bot and not a system message.
-            if (socketMessage is not SocketUserMessage message) return;
-            // Ensure message is from a guild channel.
-            if (message.Channel is not SocketGuildChannel guildChannel) return;
+            // Ensure the message is from a user or bot, is not a system message, and is from a guild channel.
+            if (socketMessage is not SocketUserMessage { Channel: SocketGuildChannel guildChannel } message) return;
             // Ignore self.
             if (message.Author.Id == _client.CurrentUser.Id) return;
 
-            // Get tag from dictionary by guild id and name.
-            var tag = Tags.Values
-                .FirstOrDefault(t =>
-                    t.GuildId == guildChannel.Guild.Id &&
-                    string.Equals(t.Name, message.Content, StringComparison.CurrentCultureIgnoreCase));
+            string query = Uri
+                .SetQueryParam("tagName", message)
+                .SetQueryParam("guildId", guildChannel.Guild.Id.ToString());
+
+            using var client = _factory.CreateClient();
+            var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
+
+            var tag = response?.FirstOrDefault();
 
             if (tag is null) return;
-
-            await using var context = _factory.CreateDbContext();
-            // Update usage count for both the tag object from dictionary and the entry in the database.
-            var entity = await context.Tags
-                .AsQueryable()
-                .FirstOrDefaultAsync(t => t.Id == tag.Id);
-
-            entity.UsageCount++;
-            tag.UsageCount++;
-
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch
-            {
-                _logger.LogError($"Error updating usage count for tag {tag.Name}, id ({tag.Id})");
-                throw;
-            }
 
             // Respond to tag with content and optional reaction.
             using IDisposable typingState = message.Channel.EnterTypingState();

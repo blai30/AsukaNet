@@ -67,9 +67,6 @@ namespace Asuka
             services.AddSingleton(provider => provider.GetRequiredService<IOptions<LavaConfig>>().Value);
             services.AddSingleton<LavaNode>();
 
-            // Data access. Using factory for easy using statement and disposal.
-            services.AddDbContextFactory<AsukaDbContext>();
-
             // Http client for interfacing with Api requests.
             services.AddHttpClient();
 
@@ -81,10 +78,12 @@ namespace Asuka
             services.AddHostedService<LoggingService>();
             services.AddHostedService<CommandHandlerService>();
             services.AddHostedService<AudioService>();
-            services.AddSingleton<TagListenerService>();
-            services.AddHostedService(provider => provider.GetService<TagListenerService>());
-            services.AddSingleton<ReactionRoleService>();
-            services.AddHostedService(provider => provider.GetService<ReactionRoleService>());
+            // services.AddSingleton<TagListenerService>();
+            // services.AddHostedService(provider => provider.GetService<TagListenerService>());
+            services.AddHostedService<TagListenerService>();
+            // services.AddSingleton<ReactionRoleService>();
+            // services.AddHostedService(provider => provider.GetService<ReactionRoleService>());
+            services.AddHostedService<ReactionRoleService>();
             services.AddHostedService<StartupService>();
         }
     }
