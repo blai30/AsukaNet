@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Asuka.Database.Models;
+using Asuka.Models.Api.Asuka;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
@@ -57,15 +57,13 @@ namespace Asuka.Services
             if (message.Author.Id == _client.CurrentUser.Id) return;
 
             string query = Uri
-                .SetQueryParam("tagName", message.Content)
+                .SetQueryParam("name", message.Content)
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString());
 
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
 
-            var tag = response?.FirstOrDefault(entity =>
-                entity.Name == message.Content &&
-                entity.GuildId == guildChannel.Guild.Id);
+            var tag = response?.FirstOrDefault();
 
             if (tag is null) return;
 

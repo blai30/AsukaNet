@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Database.Models;
+using Asuka.Models.Api.Asuka;
 using Discord;
 using Discord.Commands;
 using Flurl;
@@ -65,12 +65,11 @@ namespace Asuka.Modules.Tags
 
             // Send post request to api using json body.
             string json = JsonSerializer.Serialize(tag);
-            string command = Uri.AppendPathSegment("create");
             using var client = _factory.CreateClient();
 
             try
             {
-                await client.PostAsync(command, new StringContent(json, Encoding.UTF8, "application/json"));
+                await client.PostAsync(Uri, new StringContent(json, Encoding.UTF8, "application/json"));
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
             catch
@@ -210,7 +209,7 @@ namespace Asuka.Modules.Tags
         {
             // Get list of tags from this guild.
             string query = Uri
-                .SetQueryParam("tagName", tagName)
+                .SetQueryParam("name", tagName)
                 .SetQueryParam("guildId", Context.Guild.Id.ToString());
 
             // Send get request to api using query parameters for tag name and guild id.
