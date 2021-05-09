@@ -1,13 +1,16 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Database;
-using Asuka.Database.Models;
-using Asuka.Services;
+using Asuka.Models.Api.Asuka;
 using Discord;
 using Discord.Commands;
-using Microsoft.EntityFrameworkCore;
+using Flurl;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -32,18 +35,17 @@ namespace Asuka.Modules.Roles
     [RequireContext(ContextType.Guild)]
     public class ReactionRoleModule : CommandModuleBase
     {
-        private readonly IDbContextFactory<AsukaDbContext> _factory;
-        private readonly ReactionRoleService _service;
+        private const string Uri = "https://localhost:5001/api/reactionroles";
+
+        private readonly IHttpClientFactory _factory;
 
         public ReactionRoleModule(
             IOptions<DiscordOptions> config,
             ILogger<ReactionRoleModule> logger,
-            IDbContextFactory<AsukaDbContext> factory,
-            ReactionRoleService service) :
+            IHttpClientFactory factory) :
             base(config, logger)
         {
             _factory = factory;
-            _service = service;
         }
 
         [Command("make")]
@@ -87,14 +89,13 @@ namespace Asuka.Modules.Roles
                 Reaction = emoteText
             };
 
-            // Add reaction role to dictionary and database.
-            await using var context = _factory.CreateDbContext();
-            await context.ReactionRoles.AddAsync(reactionRole);
+            // Send post request to api using json body.
+            string json = JsonSerializer.Serialize(reactionRole);
+            using var client = _factory.CreateClient();
 
             try
             {
-                await context.SaveChangesAsync();
-                _service.ReactionRoles.Add(reactionRole.Id, reactionRole);
+                await client.PostAsync(Uri, new StringContent(json, Encoding.UTF8, "application/json"));
                 await message.AddReactionAsync(emote);
                 await ReplyAsync($"Added reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
@@ -115,8 +116,7 @@ namespace Asuka.Modules.Roles
             var guildRole = Context.Guild.GetRole(role.Id);
 
             // Get reaction role that references this message and role.
-            var reactionRole = _service.ReactionRoles.Values
-                .FirstOrDefault(r => r.RoleId == role.Id && r.MessageId == message.Id);
+            var reactionRole = await GetReactionRole(message, role);
 
             if (reactionRole is null)
             {
@@ -129,14 +129,13 @@ namespace Asuka.Modules.Roles
                 ? (IEmote) emote
                 : new Emoji(reactionRole.Reaction);
 
-            // Remove from dictionary and database. Context remove will use id.
-            await using var context = _factory.CreateDbContext();
-            context.ReactionRoles.Remove(reactionRole);
+            // Send delete request to api using id.
+            string command = Uri.AppendPathSegment(reactionRole.Id.ToString());
+            using var client = _factory.CreateClient();
 
             try
             {
-                await context.SaveChangesAsync();
-                _service.ReactionRoles.Remove(reactionRole.Id);
+                await client.DeleteAsync(command);
                 await message.RemoveAllReactionsForEmoteAsync(reaction);
                 await ReplyAsync($"Removed reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
@@ -193,6 +192,21 @@ namespace Asuka.Modules.Roles
         public async Task ClearAsync(IMessage message)
         {
             await message.RemoveAllReactionsAsync();
+        }
+
+        private async Task<ReactionRole?> GetReactionRole(IMessage message, IRole role)
+        {
+            // Get list of tags from this guild.
+            string query = Uri
+                .SetQueryParam("messageId", message.Id.ToString())
+                .SetQueryParam("roleId", role.Id.ToString());
+
+            // Send get request to api using query parameters for tag name and guild id.
+            using var client = _factory.CreateClient();
+            var response = await client.GetFromJsonAsync<IEnumerable<ReactionRole>>(query);
+            var reactionRole = response?.FirstOrDefault();
+
+            return reactionRole;
         }
     }
 }
