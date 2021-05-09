@@ -15,7 +15,7 @@ namespace Asuka.Models.Api.Asuka
         public string Content { get; set; }
 
         [JsonPropertyName("reaction")]
-        public string Reaction { get; set; }
+        public string? Reaction { get; set; }
 
         [JsonPropertyName("guild_id")]
         public ulong GuildId { get; set; }
