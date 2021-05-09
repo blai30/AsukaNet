@@ -1,33 +1,22 @@
 using System;
-using System.Threading.Tasks;
+using Asuka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Extensions;
 using Serilog;
 
-namespace Asuka
-{
-    public static class Program
-    {
-        public static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+Console.WriteLine(DateTime.UtcNow.ToString("R"));
+Console.WriteLine(Environment.ProcessId);
 
-        private static async Task MainAsync(string[] args)
-        {
-            Console.WriteLine(DateTime.UtcNow.ToString("R"));
-            Console.WriteLine(Environment.ProcessId);
-            await CreateHostBuilder(args).Build().RunAsync();
-        }
+// Typical ASP.NET host builder pattern but for console app without the web.
+// TODO: Official support planned for .NET 6.0.
+var host = Host
+    .CreateDefaultBuilder(args)
+    .UseSerilog()
+    .UseStartup<Startup>()
+    .Build();
 
-        // Typical ASP.NET host builder pattern but for console app without the web.
-        // TODO: Official support planned for .NET 6.0.
-        private static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            var host = Host
-                .CreateDefaultBuilder(args)
-                .UseSerilog()
-                .UseStartup<Startup>()
-                ;
+// Configure services.
+// using var scope = host.Services.CreateScope();
+// var services = scope.ServiceProvider;
 
-            return host;
-        }
-    }
-}
+await host.RunAsync();

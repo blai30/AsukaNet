@@ -57,13 +57,15 @@ namespace Asuka.Services
             if (message.Author.Id == _client.CurrentUser.Id) return;
 
             string query = Uri
-                .SetQueryParam("tagName", message)
+                .SetQueryParam("tagName", message.Content)
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString());
 
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
 
-            var tag = response?.FirstOrDefault();
+            var tag = response?.FirstOrDefault(entity =>
+                entity.Name == message.Content &&
+                entity.GuildId == guildChannel.Guild.Id);
 
             if (tag is null) return;
 
