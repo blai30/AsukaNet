@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Asuka.Models.API.TraceMoe
+namespace Asuka.Models.Api.TraceMoe
 {
     public class TraceMoeDoc
     {

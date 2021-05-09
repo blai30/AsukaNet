@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Models.API.TraceMoe;
+using Asuka.Models.Api.TraceMoe;
 using Discord;
 using Discord.Commands;
 using Flurl;

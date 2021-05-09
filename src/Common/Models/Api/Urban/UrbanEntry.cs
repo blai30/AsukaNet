@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Asuka.Models.API.Urban
+namespace Asuka.Models.Api.Urban
 {
     public class UrbanEntry
     {

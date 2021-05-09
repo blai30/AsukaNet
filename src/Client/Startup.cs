@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using Asuka.Configuration;
-using Asuka.Database;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
