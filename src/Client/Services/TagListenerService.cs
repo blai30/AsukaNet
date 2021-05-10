@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Asuka.Configuration;
 using Asuka.Models.Api.Asuka;
 using Discord;
 using Discord.Net;
@@ -12,22 +13,24 @@ using Discord.WebSocket;
 using Flurl;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Asuka.Services
 {
     public class TagListenerService : IHostedService
     {
-        private const string Uri = "https://localhost:5001/api/tags";
-
+        private readonly IOptions<ApiOptions> _api;
         private readonly DiscordSocketClient _client;
         private readonly IHttpClientFactory _factory;
         private readonly ILogger<TagListenerService> _logger;
 
         public TagListenerService(
+            IOptions<ApiOptions> api,
             DiscordSocketClient client,
             IHttpClientFactory factory,
             ILogger<TagListenerService> logger)
         {
+            _api = api;
             _client = client;
             _factory = factory;
             _logger = logger;
@@ -56,7 +59,7 @@ namespace Asuka.Services
             // Ignore self.
             if (message.Author.Id == _client.CurrentUser.Id) return;
 
-            string query = Uri
+            string query = _api.Value.TagsUri
                 .SetQueryParam("name", message.Content)
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString());
 

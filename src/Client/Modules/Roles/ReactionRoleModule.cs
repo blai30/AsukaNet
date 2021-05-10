@@ -35,16 +35,17 @@ namespace Asuka.Modules.Roles
     [RequireContext(ContextType.Guild)]
     public class ReactionRoleModule : CommandModuleBase
     {
-        private const string Uri = "https://localhost:5001/api/reactionroles";
-
+        private readonly IOptions<ApiOptions> _api;
         private readonly IHttpClientFactory _factory;
 
         public ReactionRoleModule(
+            IOptions<ApiOptions> api,
             IOptions<DiscordOptions> config,
             ILogger<ReactionRoleModule> logger,
             IHttpClientFactory factory) :
             base(config, logger)
         {
+            _api = api;
             _factory = factory;
         }
 
@@ -95,7 +96,7 @@ namespace Asuka.Modules.Roles
 
             try
             {
-                await client.PostAsync(Uri, new StringContent(json, Encoding.UTF8, "application/json"));
+                await client.PostAsync(_api.Value.ReactionRolesUri, new StringContent(json, Encoding.UTF8, "application/json"));
                 await message.AddReactionAsync(emote);
                 await ReplyAsync($"Added reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
             }
@@ -130,7 +131,7 @@ namespace Asuka.Modules.Roles
                 : new Emoji(reactionRole.Reaction);
 
             // Send delete request to api using id.
-            string command = Uri.AppendPathSegment(reactionRole.Id.ToString());
+            string command = _api.Value.ReactionRolesUri.AppendPathSegment(reactionRole.Id.ToString());
             using var client = _factory.CreateClient();
 
             try
@@ -197,7 +198,7 @@ namespace Asuka.Modules.Roles
         private async Task<ReactionRole?> GetReactionRole(IMessage message, IRole role)
         {
             // Get list of tags from this guild.
-            string query = Uri
+            string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("messageId", message.Id.ToString())
                 .SetQueryParam("roleId", role.Id.ToString());
 

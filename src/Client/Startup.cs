@@ -34,6 +34,7 @@ namespace Asuka
         {
             // App settings options.
             services.AddOptions();
+            services.Configure<ApiOptions>(Configuration.GetSection("AsukaApi"));
             services.Configure<TokenOptions>(Configuration.GetSection("Tokens"));
             services.Configure<DiscordOptions>(Configuration.GetSection("Discord"));
             services.Configure<LavaConfig>(Configuration.GetSection("Lavalink"));
@@ -77,11 +78,7 @@ namespace Asuka
             services.AddHostedService<LoggingService>();
             services.AddHostedService<CommandHandlerService>();
             services.AddHostedService<AudioService>();
-            // services.AddSingleton<TagListenerService>();
-            // services.AddHostedService(provider => provider.GetService<TagListenerService>());
             services.AddHostedService<TagListenerService>();
-            // services.AddSingleton<ReactionRoleService>();
-            // services.AddHostedService(provider => provider.GetService<ReactionRoleService>());
             services.AddHostedService<ReactionRoleService>();
             services.AddHostedService<StartupService>();
         }

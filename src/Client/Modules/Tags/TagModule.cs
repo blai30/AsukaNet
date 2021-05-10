@@ -23,16 +23,17 @@ namespace Asuka.Modules.Tags
     [RequireContext(ContextType.Guild)]
     public class TagModule : CommandModuleBase
     {
-        private const string Uri = "https://localhost:5001/api/tags";
-
+        private readonly IOptions<ApiOptions> _api;
         private readonly IHttpClientFactory _factory;
 
         public TagModule(
+            IOptions<ApiOptions> api,
             IOptions<DiscordOptions> config,
             ILogger<TagModule> logger,
             IHttpClientFactory factory) :
             base(config, logger)
         {
+            _api = api;
             _factory = factory;
         }
 
@@ -69,7 +70,7 @@ namespace Asuka.Modules.Tags
 
             try
             {
-                await client.PostAsync(Uri, new StringContent(json, Encoding.UTF8, "application/json"));
+                await client.PostAsync(_api.Value.TagsUri, new StringContent(json, Encoding.UTF8, "application/json"));
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
             catch
@@ -95,7 +96,7 @@ namespace Asuka.Modules.Tags
             }
 
             // Send delete request to api using id.
-            string command = Uri.AppendPathSegment(tag.Id.ToString());
+            string command = _api.Value.TagsUri.AppendPathSegment(tag.Id.ToString());
             using var client = _factory.CreateClient();
 
             try
@@ -133,7 +134,7 @@ namespace Asuka.Modules.Tags
             });
 
             // Send put request to api using json body.
-            string command = Uri.AppendPathSegment("edit");
+            string command = _api.Value.TagsUri.AppendPathSegment("edit");
             using var client = _factory.CreateClient();
 
             try
@@ -155,7 +156,7 @@ namespace Asuka.Modules.Tags
         public async Task ListAsync()
         {
             // Get list of tags from this guild.
-            string query = Uri
+            string query = _api.Value.TagsUri
                 .SetQueryParam("guildId", Context.Guild.Id.ToString());
 
             using var client = _factory.CreateClient();
@@ -208,7 +209,7 @@ namespace Asuka.Modules.Tags
         private async Task<Tag?> GetTagByName(string tagName)
         {
             // Get list of tags from this guild.
-            string query = Uri
+            string query = _api.Value.TagsUri
                 .SetQueryParam("name", tagName)
                 .SetQueryParam("guildId", Context.Guild.Id.ToString());
 

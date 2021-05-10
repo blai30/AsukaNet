@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Asuka.Configuration;
 using Asuka.Models.Api.Asuka;
 using Discord;
 using Discord.Net;
@@ -11,22 +12,24 @@ using Discord.WebSocket;
 using Flurl;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Asuka.Services
 {
     public class ReactionRoleService : IHostedService
     {
-        private const string Uri = "https://localhost:5001/api/reactionroles";
-
+        private readonly IOptions<ApiOptions> _api;
         private readonly DiscordSocketClient _client;
         private readonly IHttpClientFactory _factory;
         private readonly ILogger<ReactionRoleService> _logger;
 
         public ReactionRoleService(
+            IOptions<ApiOptions> api,
             DiscordSocketClient client,
             IHttpClientFactory factory,
             ILogger<ReactionRoleService> logger)
         {
+            _api = api;
             _client = client;
             _factory = factory;
             _logger = logger;
@@ -79,7 +82,7 @@ namespace Asuka.Services
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
-            string query = Uri
+            string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString())
                 .SetQueryParam("messageId", cachedMessage.Id.ToString())
                 .SetQueryParam("reaction", emoteText);
@@ -133,7 +136,7 @@ namespace Asuka.Services
             string emoteText = reaction.Emote.GetStringRepresentation();
             if (string.IsNullOrEmpty(emoteText)) return;
 
-            string query = Uri
+            string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString())
                 .SetQueryParam("messageId", cachedMessage.Id.ToString())
                 .SetQueryParam("reaction", emoteText);
@@ -205,7 +208,7 @@ namespace Asuka.Services
         private async Task OnRoleDeleted(SocketRole role)
         {
             // Construct query to send http request.
-            string query = Uri
+            string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("roleId", role.Id.ToString());
 
             using var client = _factory.CreateClient();
@@ -246,7 +249,7 @@ namespace Asuka.Services
             if (channel is not SocketGuildChannel guildChannel) return;
 
             // Construct query to send http request.
-            string query = Uri
+            string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("messageId", messageId.ToString());
 
             if (reaction is not null)
