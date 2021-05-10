@@ -84,15 +84,14 @@ namespace Asuka.Services
 
             string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString())
-                .SetQueryParam("messageId", cachedMessage.Id.ToString())
-                .SetQueryParam("reaction", emoteText);
+                .SetQueryParam("messageId", cachedMessage.Id.ToString());
 
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<ReactionRole>>(query);
 
             // Get reaction role.
             var reactionRole = response?
-                .FirstOrDefault();
+                .FirstOrDefault(r => r.Reaction == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole is null) return;
@@ -138,15 +137,14 @@ namespace Asuka.Services
 
             string query = _api.Value.ReactionRolesUri
                 .SetQueryParam("guildId", guildChannel.Guild.Id.ToString())
-                .SetQueryParam("messageId", cachedMessage.Id.ToString())
-                .SetQueryParam("reaction", emoteText);
+                .SetQueryParam("messageId", cachedMessage.Id.ToString());
 
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<ReactionRole>>(query);
 
             // Get reaction role.
             var reactionRole = response?
-                .FirstOrDefault();
+                .FirstOrDefault(r => r.Reaction == emoteText);
 
             // This reaction was not registered as a reaction role in the database.
             if (reactionRole is null) return;

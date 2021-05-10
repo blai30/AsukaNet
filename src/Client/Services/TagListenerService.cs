@@ -66,7 +66,9 @@ namespace Asuka.Services
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
 
-            var tag = response?.FirstOrDefault();
+            var tag = response?.FirstOrDefault(t =>
+                t.Name == message.Content &&
+                t.GuildId == guildChannel.Guild.Id);
 
             if (tag is null) return;
 

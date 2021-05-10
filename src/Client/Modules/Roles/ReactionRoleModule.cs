@@ -205,7 +205,9 @@ namespace Asuka.Modules.Roles
             // Send get request to api using query parameters for tag name and guild id.
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<ReactionRole>>(query);
-            var reactionRole = response?.FirstOrDefault();
+            var reactionRole = response?.FirstOrDefault(r =>
+                r.MessageId == message.Id &&
+                r.RoleId == role.Id);
 
             return reactionRole;
         }

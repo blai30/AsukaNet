@@ -216,7 +216,9 @@ namespace Asuka.Modules.Tags
             // Send get request to api using query parameters for tag name and guild id.
             using var client = _factory.CreateClient();
             var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
-            var tag = response?.FirstOrDefault();
+            var tag = response?.FirstOrDefault(t =>
+                t.Name == tagName &&
+                t.GuildId == Context.Guild.Id);
 
             return tag;
         }
