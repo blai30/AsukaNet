@@ -1,8 +1,8 @@
 ﻿namespace Asuka.Configuration
 {
-    public class ApiOptions
+    public record ApiOptions
     {
-        public string TagsUri { get; set; }
-        public string ReactionRolesUri { get; set; }
+        public string TagsUri { get; init; }
+        public string ReactionRolesUri { get; init; }
     }
 }

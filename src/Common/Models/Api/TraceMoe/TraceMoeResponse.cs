@@ -3,36 +3,36 @@ using System.Text.Json.Serialization;
 
 namespace Asuka.Models.Api.TraceMoe
 {
-    public class TraceMoeResponse
+    public record TraceMoeResponse
     {
         [JsonPropertyName("RawDocsCount")]
-        public int RawDocsCount { get; set; }
+        public int RawDocsCount { get; init; }
 
         [JsonPropertyName("RawDocsSearchTime")]
-        public int RawDocsSearchTime { get; set; }
+        public int RawDocsSearchTime { get; init; }
 
         [JsonPropertyName("ReRankSearchTime")]
-        public int ReRankSearchTime { get; set; }
+        public int ReRankSearchTime { get; init; }
 
         [JsonPropertyName("CacheHit")]
-        public bool CacheHit { get; set; }
+        public bool CacheHit { get; init; }
 
         [JsonPropertyName("trial")]
-        public int Trial { get; set; }
+        public int Trial { get; init; }
 
         [JsonPropertyName("limit")]
-        public int Limit { get; set; }
+        public int Limit { get; init; }
 
         [JsonPropertyName("limit_ttl")]
-        public int LimitTtl { get; set; }
+        public int LimitTtl { get; init; }
 
         [JsonPropertyName("quota")]
-        public int Quota { get; set; }
+        public int Quota { get; init; }
 
         [JsonPropertyName("quota_ttl")]
-        public int QuotaTtl { get; set; }
+        public int QuotaTtl { get; init; }
 
         [JsonPropertyName("docs")]
-        public IEnumerable<TraceMoeDoc>? Docs { get; set; }
+        public IEnumerable<TraceMoeDoc>? Docs { get; init; }
     }
 }

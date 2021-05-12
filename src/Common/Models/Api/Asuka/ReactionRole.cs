@@ -2,19 +2,19 @@
 
 namespace Asuka.Models.Api.Asuka
 {
-    public class ReactionRole
+    public record ReactionRole
     {
         [JsonPropertyName("id")]
-        public int Id { get; set; }
+        public int Id { get; init; }
         [JsonPropertyName("guild_id")]
-        public ulong GuildId { get; set; }
+        public ulong GuildId { get; init; }
         [JsonPropertyName("channel_id")]
-        public ulong ChannelId { get; set; }
+        public ulong ChannelId { get; init; }
         [JsonPropertyName("message_id")]
-        public ulong MessageId { get; set; }
+        public ulong MessageId { get; init; }
         [JsonPropertyName("role_id")]
-        public ulong RoleId { get; set; }
+        public ulong RoleId { get; init; }
         [JsonPropertyName("reaction")]
-        public string Reaction { get; set; }
+        public string Reaction { get; init; }
     }
 }
