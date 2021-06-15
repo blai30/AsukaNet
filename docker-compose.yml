@@ -15,7 +15,7 @@ services:
     image: asuka
     restart: always
     volumes:
-      - asuka
+      - asuka:/asuka
     env_file:
       - .env
     build:
@@ -31,7 +31,7 @@ services:
     image: fredboat/lavalink:dev
     restart: always
     volumes:
-      - lavalink
+      - lavalink:/lavalink
     env_file:
       - .env
     environment:
