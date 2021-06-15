@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Asuka.Models.API.Urban
+namespace Asuka.Models.Api.Urban
 {
-    public class UrbanList
+    public record UrbanList
     {
         [JsonPropertyName("list")]
-        public List<UrbanEntry> UrbanEntries { get; set; }
+        public List<UrbanEntry> UrbanEntries { get; init; }
     }
 }

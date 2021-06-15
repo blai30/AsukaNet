@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using Asuka.Configuration;
-using Asuka.Database;
 using Asuka.Services;
 using Discord;
 using Discord.Commands;
@@ -35,6 +34,7 @@ namespace Asuka
         {
             // App settings options.
             services.AddOptions();
+            services.Configure<ApiOptions>(Configuration.GetSection("AsukaApi"));
             services.Configure<TokenOptions>(Configuration.GetSection("Tokens"));
             services.Configure<DiscordOptions>(Configuration.GetSection("Discord"));
             services.Configure<LavaConfig>(Configuration.GetSection("Lavalink"));
@@ -67,9 +67,6 @@ namespace Asuka
             services.AddSingleton(provider => provider.GetRequiredService<IOptions<LavaConfig>>().Value);
             services.AddSingleton<LavaNode>();
 
-            // Data access. Using factory for easy using statement and disposal.
-            services.AddDbContextFactory<AsukaDbContext>();
-
             // Http client for interfacing with Api requests.
             services.AddHttpClient();
 
@@ -81,10 +78,8 @@ namespace Asuka
             services.AddHostedService<LoggingService>();
             services.AddHostedService<CommandHandlerService>();
             services.AddHostedService<AudioService>();
-            services.AddSingleton<TagListenerService>();
-            services.AddHostedService(provider => provider.GetService<TagListenerService>());
-            services.AddSingleton<ReactionRoleService>();
-            services.AddHostedService(provider => provider.GetService<ReactionRoleService>());
+            services.AddHostedService<TagListenerService>();
+            services.AddHostedService<ReactionRoleService>();
             services.AddHostedService<StartupService>();
         }
     }

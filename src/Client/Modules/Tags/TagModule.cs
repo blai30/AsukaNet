@@ -1,15 +1,17 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Asuka.Commands;
 using Asuka.Configuration;
-using Asuka.Database;
-using Asuka.Database.Models;
-using Asuka.Services;
+using Asuka.Models.Api.Asuka;
 using Discord;
 using Discord.Commands;
+using Flurl;
 using Humanizer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -21,18 +23,18 @@ namespace Asuka.Modules.Tags
     [RequireContext(ContextType.Guild)]
     public class TagModule : CommandModuleBase
     {
-        private readonly IDbContextFactory<AsukaDbContext> _factory;
-        private readonly TagListenerService _service;
+        private readonly IOptions<ApiOptions> _api;
+        private readonly IHttpClientFactory _factory;
 
         public TagModule(
+            IOptions<ApiOptions> api,
             IOptions<DiscordOptions> config,
             ILogger<TagModule> logger,
-            IDbContextFactory<AsukaDbContext> factory,
-            TagListenerService service) :
+            IHttpClientFactory factory) :
             base(config, logger)
         {
+            _api = api;
             _factory = factory;
-            _service = service;
         }
 
         [Command("add")]
@@ -62,13 +64,13 @@ namespace Asuka.Modules.Tags
                 UserId = Context.User.Id
             };
 
-            // Add to dictionary and database.
-            await using var context = _factory.CreateDbContext();
-            await context.Tags.AddAsync(tag);
+            // Send post request to api using json body.
+            string json = JsonSerializer.Serialize(tag);
+            using var client = _factory.CreateClient();
+
             try
             {
-                await context.SaveChangesAsync();
-                _service.Tags.Add(tag.Id, tag);
+                await client.PostAsync(_api.Value.TagsUri, new StringContent(json, Encoding.UTF8, "application/json"));
                 await ReplyAsync($"Added new tag `{tag.Name}`.");
             }
             catch
@@ -84,10 +86,7 @@ namespace Asuka.Modules.Tags
         [Summary("Remove a tag from the server.")]
         public async Task RemoveAsync(string tagName)
         {
-            var tag = _service.Tags.Values
-                .FirstOrDefault(t =>
-                    t.GuildId == Context.Guild.Id &&
-                    string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
+            var tag = await GetTagByName(tagName);
 
             // Tag does not exist.
             if (tag is null)
@@ -96,14 +95,13 @@ namespace Asuka.Modules.Tags
                 return;
             }
 
-            // Remove from dictionary and database. Context remove will use id.
-            await using var context = _factory.CreateDbContext();
-            context.Tags.Remove(tag);
+            // Send delete request to api using id.
+            string command = _api.Value.TagsUri.AppendPathSegment(tag.Id.ToString());
+            using var client = _factory.CreateClient();
 
             try
             {
-                await context.SaveChangesAsync();
-                _service.Tags.Remove(tag.Id);
+                await client.DeleteAsync(command);
                 await ReplyAsync($"Removed tag `{tag.Name}`.");
             }
             catch
@@ -119,10 +117,7 @@ namespace Asuka.Modules.Tags
         [Summary("Edit an existing tag from the server.")]
         public async Task EditAsync(string tagName, string tagContent, IEmote? reaction = null)
         {
-            var tag = _service.Tags.Values
-                .FirstOrDefault(t =>
-                    t.GuildId == Context.Guild.Id &&
-                    string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
+            var tag = await GetTagByName(tagName);
 
             // Tag does not exist.
             if (tag is null)
@@ -131,20 +126,20 @@ namespace Asuka.Modules.Tags
                 return;
             }
 
-            // Update values in dictionary and database.
-            await using var context = _factory.CreateDbContext();
+            string json = JsonSerializer.Serialize(new Tag
+            {
+                Id = tag.Id,
+                Content = tagContent,
+                Reaction = reaction?.ToString()
+            });
 
-            tag.Content = tagContent;
-            tag.Reaction = reaction?.ToString();
-
-            context.Tags.Attach(tag);
-            context.Entry(tag).Property(t => t.Content).IsModified = true;
-            context.Entry(tag).Property(t => t.Reaction).IsModified = true;
+            // Send put request to api using json body.
+            string command = _api.Value.TagsUri.AppendPathSegment("edit");
+            using var client = _factory.CreateClient();
 
             try
             {
-                await context.SaveChangesAsync();
-                _service.Tags[tag.Id] = tag;
+                await client.PutAsync(command, new StringContent(json, Encoding.UTF8, "application/json"));
                 await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
             }
             catch
@@ -161,8 +156,20 @@ namespace Asuka.Modules.Tags
         public async Task ListAsync()
         {
             // Get list of tags from this guild.
-            var tags = _service.Tags.Values
-                .Where(t => t.GuildId == Context.Guild.Id)
+            string query = _api.Value.TagsUri
+                .SetQueryParam("guildId", Context.Guild.Id.ToString());
+
+            using var client = _factory.CreateClient();
+            var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
+
+            if (response is null)
+            {
+                Logger.LogTrace($"Error getting list of tags for guild with id: {Context.Guild.Id.ToString()}");
+                await ReplyAsync("No tags found for this server.");
+                return;
+            }
+
+            var tags = response
                 .Select(t => $"`{t.Name}`")
                 .ToList();
 
@@ -177,10 +184,7 @@ namespace Asuka.Modules.Tags
         [Summary("Show info for a tag from the server.")]
         public async Task InfoAsync(string tagName)
         {
-            var tag = _service.Tags.Values
-                .FirstOrDefault(t =>
-                    t.GuildId == Context.Guild.Id &&
-                    string.Equals(t.Name, tagName, StringComparison.CurrentCultureIgnoreCase));
+            var tag = await GetTagByName(tagName);
 
             // Tag does not exist.
             if (tag is null)
@@ -200,6 +204,23 @@ namespace Asuka.Modules.Tags
                 .Build();
 
             await ReplyAsync(embed: embed);
+        }
+
+        private async Task<Tag?> GetTagByName(string tagName)
+        {
+            // Get list of tags from this guild.
+            string query = _api.Value.TagsUri
+                .SetQueryParam("name", tagName)
+                .SetQueryParam("guildId", Context.Guild.Id.ToString());
+
+            // Send get request to api using query parameters for tag name and guild id.
+            using var client = _factory.CreateClient();
+            var response = await client.GetFromJsonAsync<IEnumerable<Tag>>(query);
+            var tag = response?.FirstOrDefault(t =>
+                t.Name == tagName &&
+                t.GuildId == Context.Guild.Id);
+
+            return tag;
         }
     }
 }

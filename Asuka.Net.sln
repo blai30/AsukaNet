@@ -1,15 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6DE11CE-15A7-4C15-A5B3-054348222659}"
-	ProjectSection(SolutionItems) = preProject
-		.dockerignore = .dockerignore
-		.editorconfig = .editorconfig
-		.env = .env
-		.gitignore = .gitignore
-		docker-compose.yml = docker-compose.yml
-		README.md = README.md
-		flyway.conf = flyway.conf
-	EndProjectSection
+ProjectSection(SolutionItems) = preProject
+	.dockerignore = .dockerignore
+	.editorconfig = .editorconfig
+	.env = .env
+	.gitignore = .gitignore
+	docker-compose.yml = docker-compose.yml
+	README.md = README.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DA7792DE-6DA1-4EE1-98BA-CABE760B624E}"
 EndProject
@@ -21,13 +20,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "src\Common\Common
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{5B02A340-AA0B-4992-924A-8F6855514EF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "src\Database\Database.csproj", "{ACEA074E-F93B-4785-B2BA-257DC7F704FC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions", "src\Extensions\Extensions.csproj", "{98D48BF8-38E6-4906-9CAE-064277564CEC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "tests\Tests\Tests.csproj", "{7F7BD0D1-8043-4374-B5D4-0FF5295E4884}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "src\Benchmarks\Benchmarks.csproj", "{A8A955FD-8518-4914-B5DD-2C0E0949DAD3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +42,6 @@ Global
 		{5B02A340-AA0B-4992-924A-8F6855514EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B02A340-AA0B-4992-924A-8F6855514EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B02A340-AA0B-4992-924A-8F6855514EF9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ACEA074E-F93B-4785-B2BA-257DC7F704FC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D48BF8-38E6-4906-9CAE-064277564CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,17 +49,12 @@ Global
 		{7F7BD0D1-8043-4374-B5D4-0FF5295E4884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7F7BD0D1-8043-4374-B5D4-0FF5295E4884}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F7BD0D1-8043-4374-B5D4-0FF5295E4884}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8A955FD-8518-4914-B5DD-2C0E0949DAD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8A955FD-8518-4914-B5DD-2C0E0949DAD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8A955FD-8518-4914-B5DD-2C0E0949DAD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0FC9D60D-504E-455F-B90D-5476660C74E6} = {DA7792DE-6DA1-4EE1-98BA-CABE760B624E}
 		{99B5ED91-B160-4605-93C7-C24B6C8B5B1E} = {DA7792DE-6DA1-4EE1-98BA-CABE760B624E}
 		{5B02A340-AA0B-4992-924A-8F6855514EF9} = {DA7792DE-6DA1-4EE1-98BA-CABE760B624E}
-		{ACEA074E-F93B-4785-B2BA-257DC7F704FC} = {DA7792DE-6DA1-4EE1-98BA-CABE760B624E}
 		{98D48BF8-38E6-4906-9CAE-064277564CEC} = {DA7792DE-6DA1-4EE1-98BA-CABE760B624E}
 		{7F7BD0D1-8043-4374-B5D4-0FF5295E4884} = {A7AB6BEB-CF17-42DE-9A2E-067DB064DC8E}
-		{A8A955FD-8518-4914-B5DD-2C0E0949DAD3} = {DA7792DE-6DA1-4EE1-98BA-CABE760B624E}
 	EndGlobalSection
 EndGlobal

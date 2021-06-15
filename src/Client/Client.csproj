@@ -2,18 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <LangVersion>9.0</LangVersion>
         <OutputType>Exe</OutputType>
         <Authors>Brian Lai</Authors>
         <Description>Discord bot written in .NET 5 using Discord.Net.</Description>
         <RootNamespace>Asuka</RootNamespace>
+        <AssemblyName>Asuka.Client</AssemblyName>
         <Nullable>enable</Nullable>
-        <PackageId>Client</PackageId>
+        <PackageId>Asuka.Net</PackageId>
         <Title>Asuka Discord Bot</Title>
         <Product>Asuka</Product>
         <ApplicationIcon>asuka.ico</ApplicationIcon>
-        <StartupObject>Asuka.Program</StartupObject>
-        <AssemblyName>Asuka.Client</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
@@ -31,7 +29,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Common\Common.csproj" />
       <ProjectReference Include="..\Core\Core.csproj" />
-      <ProjectReference Include="..\Database\Database.csproj" />
       <ProjectReference Include="..\Extensions\Extensions.csproj" />
     </ItemGroup>
 

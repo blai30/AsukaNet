@@ -2,13 +2,13 @@
 
 namespace Asuka.Configuration
 {
-    public class DiscordOptions
+    public record DiscordOptions
     {
-        public string BotPrefix { get; set; }
-        public uint EmbedColor { get; set; }
-        public string InviteUrl { get; set; }
-        public ulong OwnerId { get; set; }
-        public Status Status { get; set; }
+        public string BotPrefix { get; init; }
+        public uint EmbedColor { get; init; }
+        public string InviteUrl { get; init; }
+        public ulong OwnerId { get; init; }
+        public Status Status { get; init; }
     }
 
     /// <summary>
@@ -17,7 +17,7 @@ namespace Asuka.Configuration
     /// </summary>
     public struct Status
     {
-        public ActivityType Activity { get; set; }
-        public string Game { get; set; }
+        public ActivityType Activity { get; init; }
+        public string Game { get; init; }
     }
 }
