@@ -1,4 +1,6 @@
-# Asuka.Net
+# Asuka.Net (Client)
+
+Backend repo here: [Link to API repo](https://www.github.com/blai30/Asuka.Net-Api)
 
 ![screenshot](https://github.com/blai30/Asuka.Net/blob/main/resources/asuka.png?raw=true)
 
