@@ -14,6 +14,7 @@ services:
     container_name: asuka
     image: asuka
     restart: always
+    # To store logs.
     volumes:
       - asuka:/asuka
     env_file:
@@ -22,7 +23,7 @@ services:
       context: .
       dockerfile: src/Client/Dockerfile
     # Application might continue crashing until
-    # dependent service(s) fully initialize
+    # dependent service(s) fully initialize.
     depends_on:
       - lavalink
 
