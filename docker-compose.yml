@@ -2,8 +2,7 @@ version: '3.8'
 
 networks:
   default:
-    external:
-      name: asukanet-api_default
+    name: asukanet-api_default
 
 volumes:
   asuka:

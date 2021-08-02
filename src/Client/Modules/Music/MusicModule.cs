@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Victoria;
 using Victoria.Enums;
+using Victoria.Responses.Search;
 
 namespace Asuka.Modules.Music
 {
@@ -125,17 +126,17 @@ namespace Asuka.Modules.Music
             {
                 // Play from url or search YouTube.
                 var search = Uri.IsWellFormedUriString(searchQuery, UriKind.Absolute)
-                    ? await _lavaNode.SearchAsync(searchQuery)
+                    ? await _lavaNode.SearchAsync(SearchType.Direct, searchQuery)
                     : await _lavaNode.SearchYouTubeAsync(searchQuery);
 
-                if (search.LoadStatus is LoadStatus.NoMatches or LoadStatus.LoadFailed)
+                if (search.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed)
                 {
                     await ReplyAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
                     return;
                 }
 
                 // TODO: Music enqueue interactive select from list.
-                var track = search.Tracks[0];
+                var track = search.Tracks.First();
 
                 // Player is already playing or paused but still has remaining tracks, enqueue new track.
                 if (player.Track is not null &&

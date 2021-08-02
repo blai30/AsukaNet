@@ -22,7 +22,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Common\Common.csproj" />
       <ProjectReference Include="..\..\src\Core\Core.csproj" />
-      <ProjectReference Include="..\..\src\Database\Database.csproj" />
       <ProjectReference Include="..\..\src\Extensions\Extensions.csproj" />
     </ItemGroup>
 
