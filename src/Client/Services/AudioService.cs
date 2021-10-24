@@ -82,10 +82,10 @@ namespace Asuka.Services
 
         private async Task OnTrackEnded(TrackEndedEventArgs args)
         {
-            if (args.Reason.ShouldPlayNext() is false)
-            {
-                return;
-            }
+            // if (args.Reason.ShouldPlayNext() is false)
+            // {
+            //     return;
+            // }
 
             var player = args.Player;
             var track = args.Track;
