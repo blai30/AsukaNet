@@ -1,8 +1,8 @@
-# Asuka.Net (Client)
+# AsukaNet (Client)
 
-Backend repo here: [Link to API repo](https://www.github.com/blai30/Asuka.Net-Api)
+Backend repo here: [Link to API repo](https://www.github.com/blai30/AsukaNet-Api)
 
-![screenshot](https://github.com/blai30/Asuka.Net/blob/main/resources/asuka.png?raw=true)
+![screenshot](https://github.com/blai30/AsukaNet/blob/main/resources/asuka.png?raw=true)
 
 ## Instructions
 1. Copy `appsettings.Example.json` to `appsettings.json`.
