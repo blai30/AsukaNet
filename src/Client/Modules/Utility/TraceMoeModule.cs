@@ -111,7 +111,7 @@ public class TraceMoeModule : CommandModuleBase
                 false)
             .AddField(
                 "For 18+",
-                (bool) doc.Anilist?.IsAdult! ? "Yes" : "No",
+                doc.Anilist?.IsAdult is null ? "Unknown" : doc.Anilist?.IsAdult ?? false ? "Yes" : "No",
                 true)
             .Build();
 

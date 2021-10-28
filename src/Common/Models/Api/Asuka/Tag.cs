@@ -9,10 +9,10 @@ public record Tag
     public int Id { get; init; }
 
     [JsonPropertyName("name")]
-    public string Name { get; init; }
+    public string? Name { get; init; }
 
     [JsonPropertyName("content")]
-    public string Content { get; init; }
+    public string? Content { get; init; }
 
     [JsonPropertyName("reaction")]
     public string? Reaction { get; init; }
