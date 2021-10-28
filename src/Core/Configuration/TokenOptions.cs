@@ -1,7 +1,6 @@
-﻿namespace Asuka.Configuration
+﻿namespace Asuka.Configuration;
+
+public record TokenOptions
 {
-    public record TokenOptions
-    {
-        public string Discord { get; init; }
-    }
+    public string Discord { get; init; }
 }

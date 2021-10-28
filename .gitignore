@@ -2,6 +2,10 @@
 **/appsettings.json
 **/appsettings.*.json
 !**/appsettings.Example.json
+# .env for Docker Compose
+**/.env
+**/.env.*
+!**/.env.example
 
 # Created by https://www.toptal.com/developers/gitignore/api/jetbrains+all,aspnetcore,dotnetcore,macos,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=jetbrains+all,aspnetcore,dotnetcore,macos,visualstudiocode
