@@ -7,32 +7,31 @@ using Discord.Commands;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility
+namespace Asuka.Modules.Utility;
+
+[Group("calculate")]
+[Alias("math", "solve")]
+[Remarks("Utility")]
+[Summary("Evaluate a mathematical expression.")]
+public class CalculateModule : CommandModuleBase
 {
-    [Group("calculate")]
-    [Alias("math", "solve")]
-    [Remarks("Utility")]
-    [Summary("Evaluate a mathematical expression.")]
-    public class CalculateModule : CommandModuleBase
+    private readonly DataTable _dataTable;
+
+    public CalculateModule(
+        IOptions<DiscordOptions> config,
+        ILogger<CalculateModule> logger,
+        DataTable dataTable) :
+        base(config, logger)
     {
-        private readonly DataTable _dataTable;
+        _dataTable = dataTable;
+    }
 
-        public CalculateModule(
-            IOptions<DiscordOptions> config,
-            ILogger<CalculateModule> logger,
-            DataTable dataTable) :
-            base(config, logger)
-        {
-            _dataTable = dataTable;
-        }
-
-        [Command]
-        [Remarks("calculate <expression>")]
-        public async Task CalculateAsync([Remainder] string expression)
-        {
-            // Evaluate the string expression using data table compute.
-            decimal result = Convert.ToDecimal(_dataTable.Compute(expression, null));
-            await ReplyAsync(result.ToString("0.########"));
-        }
+    [Command]
+    [Remarks("calculate <expression>")]
+    public async Task CalculateAsync([Remainder] string expression)
+    {
+        // Evaluate the string expression using data table compute.
+        decimal result = Convert.ToDecimal(_dataTable.Compute(expression, null));
+        await ReplyAsync(result.ToString("0.########"));
     }
 }

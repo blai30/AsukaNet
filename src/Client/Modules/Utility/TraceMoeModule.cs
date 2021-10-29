@@ -11,139 +11,140 @@ using Flurl;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility
+namespace Asuka.Modules.Utility;
+
+[Group("tracemoe")]
+[Alias("whatanime")]
+[Remarks("Utility")]
+[Summary("Find out what anime the image came from.")]
+public class TraceMoeModule : CommandModuleBase
 {
-    [Group("tracemoe")]
-    [Alias("whatanime")]
-    [Remarks("Utility")]
-    [Summary("Find out what anime the image came from.")]
-    public class TraceMoeModule : CommandModuleBase
+    private const string Uri = "https://api.trace.moe";
+
+    private readonly IHttpClientFactory _factory;
+
+    public TraceMoeModule(
+        IOptions<DiscordOptions> config,
+        ILogger<TraceMoeModule> logger,
+        IHttpClientFactory factory) :
+        base(config, logger)
     {
-        private const string Uri = "https://trace.moe";
+        _factory = factory;
+    }
 
-        private readonly IHttpClientFactory _factory;
+    [Command]
+    [Remarks("tracemoe <imageUrl>")]
+    public async Task TraceMoeAsync(string? imageUrl = null)
+    {
+        string image = imageUrl ?? GetImageFromMessage();
 
-        public TraceMoeModule(
-            IOptions<DiscordOptions> config,
-            ILogger<TraceMoeModule> logger,
-            IHttpClientFactory factory) :
-            base(config, logger)
+        if (string.IsNullOrEmpty(image))
         {
-            _factory = factory;
+            Logger.LogTrace($"Invalid image: {image}");
+            await ReplyAsync("Give me a valid image!! (っ °Д °;)っ");
+            return;
         }
 
-        [Command]
-        [Remarks("tracemoe <imageUrl>")]
-        public async Task TraceMoeAsync(string? imageUrl = null)
+        var responseBody = await GetTraceMoeResponse(image);
+
+        // No response for given query.
+        if (responseBody?.Result is null)
         {
-            string image = imageUrl ?? GetImageFromMessage();
-
-            if (string.IsNullOrEmpty(image))
-            {
-                Logger.LogTrace($"Invalid image: {image}");
-                await ReplyAsync("Give me a valid image!! (っ °Д °;)っ");
-                return;
-            }
-
-            var responseBody = await GetTraceMoeResponse(image);
-
-            // No response for given query.
-            if (responseBody?.Docs is null)
-            {
-                return;
-            }
-
-            // Results are always sorted by best similarity so take first..
-            var doc = responseBody.Docs.FirstOrDefault();
-
-            // Similarity less than 87% is usually considered bad match, discard.
-            if (doc is null || doc.Similarity < 0.87)
-            {
-                await ReplyAsync("Could not determine.");
-                return;
-            }
-
-            var embed = GenerateEmbed(image, doc);
-
-            await ReplyAsync(embed: embed);
+            return;
         }
 
-        /// <summary>
-        ///     Generate the embed message with trade moe doc information.
-        /// </summary>
-        /// <param name="image"></param>
-        /// <param name="doc"></param>
-        /// <returns>Embed message</returns>
-        private Embed GenerateEmbed(string image, TraceMoeDoc doc)
+        // Results are always sorted by best similarity so take first..
+        var doc = responseBody.Result.FirstOrDefault();
+
+        // Similarity less than 87% is usually considered bad match, discard.
+        if (doc is null || doc.Similarity < 0.87)
         {
-            string externalUrl = Uri
-                .SetQueryParam("url", image);
-
-            string description = doc.Synonyms is not null
-                ? $"**Alternate titles:** {string.Join(", ", doc.Synonyms)}"
-                : "No alternate titles.";
-
-            var embed = new EmbedBuilder()
-                .WithTitle(doc.TitleEnglish)
-                .WithUrl(externalUrl)
-                .WithColor(Config.Value.EmbedColor)
-                .WithDescription(description)
-                .WithFooter($"Traced from file: {doc.Filename}")
-                .AddField(
-                    "Romaji title",
-                    doc.TitleRomaji,
-                    true)
-                .AddField(
-                    "Native title",
-                    doc.TitleNative,
-                    true)
-                .AddField(
-                    "Chinese title",
-                    doc.TitleChinese,
-                    true)
-                .AddField(
-                    "AniList",
-                    $"https://anilist.co/anime/{doc.AnilistId.ToString()}",
-                    false)
-                .AddField(
-                    "MyAnimeList",
-                    $"https://myanimelist.net/anime/{doc.MalId.ToString()}",
-                    false)
-                .AddField(
-                    "For 18+",
-                    doc.IsAdult ? "Yes" : "No",
-                    true)
-                .Build();
-
-            return embed;
+            await ReplyAsync("Could not determine.");
+            return;
         }
 
-        /// <summary>
-        ///     Send request to API and get response using image url.
-        /// </summary>
-        /// <param name="imageUrl"></param>
-        /// <returns>TraceMoeResponse</returns>
-        private async Task<TraceMoeResponse?> GetTraceMoeResponse(string imageUrl)
-        {
-            // Construct query to send http request.
-            string query = Uri
-                .AppendPathSegment("api")
-                .AppendPathSegment("search")
-                .SetQueryParam("url", imageUrl);
+        var embed = GenerateEmbed(image, doc);
 
-            // Send request and get JSON response.
-            using var client = _factory.CreateClient();
-            var responseBody = await client.GetFromJsonAsync<TraceMoeResponse>(query);
-            return responseBody;
-        }
+        await ReplyAsync(embed: embed);
+    }
 
-        /// <summary>
-        ///     Get image url from first message attachment.
-        /// </summary>
-        /// <returns>Image url</returns>
-        private string GetImageFromMessage()
-        {
-            return Context.Message.Attachments.First().Url;
-        }
+    /// <summary>
+    ///     Generate the embed message with trade moe doc information.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="doc"></param>
+    /// <returns>Embed message</returns>
+    private Embed GenerateEmbed(string image, Result doc)
+    {
+        string externalUrl = Uri
+            .SetQueryParam("url", image);
+
+        string description = doc.Anilist?.Synonyms is not null
+            ? $"**Alternate title(s):** {string.Join(", ", doc.Anilist.Synonyms)}"
+            : "No alternate titles.";
+
+        var embed = new EmbedBuilder()
+            .WithTitle(doc.Anilist?.Title?.English ?? "No title")
+            .WithUrl(externalUrl)
+            .WithColor(Config.Value.EmbedColor)
+            .WithDescription(description)
+            .WithFooter($"Traced from file: {doc.Filename}")
+            .AddField(
+                "Romaji title",
+                doc.Anilist?.Title?.Romaji ?? "N/A",
+                true)
+            .AddField(
+                "Native title",
+                doc.Anilist?.Title?.Native ?? "N/A",
+                true)
+            .AddField(
+                "English title",
+                doc.Anilist?.Title?.English ?? "N/A",
+                true)
+            .AddField(
+                "AniList",
+                $"https://anilist.co/anime/{doc.Anilist?.Id.ToString()}",
+                false)
+            .AddField(
+                "MyAnimeList",
+                $"https://myanimelist.net/anime/{doc.Anilist?.IdMal.ToString()}",
+                false)
+            .AddField(
+                "For 18+",
+                doc.Anilist?.IsAdult is null ? "Unknown" : doc.Anilist?.IsAdult ?? false ? "Yes" : "No",
+                true)
+            .Build();
+
+        return embed;
+    }
+
+    /// <summary>
+    ///     Send request to API and get response using image url.
+    /// </summary>
+    /// <param name="imageUrl"></param>
+    /// <returns>TraceMoeResponse</returns>
+    private async Task<TraceMoeResponse?> GetTraceMoeResponse(string imageUrl)
+    {
+        // Construct query to send http request.
+        string query = Uri
+            .AppendPathSegment("search")
+            .SetQueryParam("anilistInfo")
+            .SetQueryParam("url", imageUrl);
+
+        Logger.LogInformation(query);
+
+        // Send request and get JSON response.
+        using var client = _factory.CreateClient();
+        var responseBody = await client.GetFromJsonAsync<TraceMoeResponse>(query);
+        return responseBody;
+    }
+
+    /// <summary>
+    ///     Get image url from first message attachment.
+    /// </summary>
+    /// <returns>Image url</returns>
+    private string GetImageFromMessage()
+    {
+        return Context.Message.Attachments.First().Url;
     }
 }

@@ -1,38 +1,61 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Asuka.Models.Api.TraceMoe
+namespace Asuka.Models.Api.TraceMoe;
+
+public record TraceMoeResponse
 {
-    public record TraceMoeResponse
-    {
-        [JsonPropertyName("RawDocsCount")]
-        public int RawDocsCount { get; init; }
+    [JsonPropertyName("result")]
+    public IEnumerable<Result>? Result { get; init; }
+}
 
-        [JsonPropertyName("RawDocsSearchTime")]
-        public int RawDocsSearchTime { get; init; }
+public record Result
+{
+    [JsonPropertyName("from")]
+    public float From { get; init; }
 
-        [JsonPropertyName("ReRankSearchTime")]
-        public int ReRankSearchTime { get; init; }
+    [JsonPropertyName("to")]
+    public float To { get; init; }
 
-        [JsonPropertyName("CacheHit")]
-        public bool CacheHit { get; init; }
+    [JsonPropertyName("episode")]
+    public object? Episode { get; init; }
 
-        [JsonPropertyName("trial")]
-        public int Trial { get; init; }
+    [JsonPropertyName("similarity")]
+    public float Similarity { get; init; }
 
-        [JsonPropertyName("limit")]
-        public int Limit { get; init; }
+    [JsonPropertyName("anilist")]
+    public Anilist? Anilist { get; init; } = null;
 
-        [JsonPropertyName("limit_ttl")]
-        public int LimitTtl { get; init; }
+    [JsonPropertyName("filename")]
+    public string? Filename { get; init; } = null;
+}
 
-        [JsonPropertyName("quota")]
-        public int Quota { get; init; }
+public record Anilist
+{
+    [JsonPropertyName("id")]
+    public ulong Id { get; init; }
 
-        [JsonPropertyName("quota_ttl")]
-        public int QuotaTtl { get; init; }
+    [JsonPropertyName("idMal")]
+    public ulong IdMal { get; init; }
 
-        [JsonPropertyName("docs")]
-        public IEnumerable<TraceMoeDoc>? Docs { get; init; }
-    }
+    [JsonPropertyName("title")]
+    public Title? Title { get; init; } = null;
+
+    [JsonPropertyName("synonyms")]
+    public string[]? Synonyms { get; init; } = null;
+
+    [JsonPropertyName("isAdult")]
+    public bool IsAdult { get; init; }
+}
+
+public record Title
+{
+    [JsonPropertyName("native")]
+    public string? Native { get; init; } = null;
+
+    [JsonPropertyName("romaji")]
+    public string? Romaji { get; init; } = null;
+
+    [JsonPropertyName("english")]
+    public string? English { get; init; } = null;
 }
