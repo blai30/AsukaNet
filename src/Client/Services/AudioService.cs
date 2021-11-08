@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Victoria;
+using Victoria.Enums;
 using Victoria.EventArgs;
 
 namespace Asuka.Services;
@@ -82,10 +83,10 @@ public class AudioService : IHostedService
 
     private async Task OnTrackEnded(TrackEndedEventArgs args)
     {
-        // if (args.Reason.ShouldPlayNext() is false)
-        // {
-        //     return;
-        // }
+        if (args.Reason is TrackEndReason.Finished or TrackEndReason.LoadFailed)
+        {
+            return;
+        }
 
         var player = args.Player;
         var track = args.Track;
