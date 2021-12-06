@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
@@ -19,6 +20,7 @@ public class AudioService : IHostedService
     private readonly IOptions<DiscordOptions> _config;
     private readonly LavaNode _lavaNode;
     private readonly ILogger<AudioService> _logger;
+    private readonly ConcurrentDictionary<ulong, CancellationTokenSource> _disconnectTokens = new();
 
     public AudioService(
         DiscordSocketClient client,
@@ -63,6 +65,18 @@ public class AudioService : IHostedService
 
     private async Task OnTrackStarted(TrackStartEventArgs args)
     {
+        if (_disconnectTokens.TryGetValue(args.Player.VoiceChannel.Id, out var tokenSource) is false)
+        {
+            return;
+        }
+
+        if (tokenSource.IsCancellationRequested)
+        {
+            return;
+        }
+
+        tokenSource.Cancel(true);
+
         var player = args.Player;
         var track = args.Track;
 
@@ -83,6 +97,11 @@ public class AudioService : IHostedService
 
     private async Task OnTrackEnded(TrackEndedEventArgs args)
     {
+        if (args.Reason is not TrackEndReason.Finished or TrackEndReason.LoadFailed)
+        {
+            return;
+        }
+
         var player = args.Player;
         var track = args.Track;
 
@@ -103,12 +122,33 @@ public class AudioService : IHostedService
         // Check next track in the queue or leave voice channel if queue is empty.
         if (player.Queue.TryDequeue(out var nextTrack) is false)
         {
-            await Task.Delay(TimeSpan.FromSeconds(60))
-                .ContinueWith(_ => _lavaNode.LeaveAsync(player.VoiceChannel));
+            _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromSeconds(10));
             return;
         }
 
         // Play next track in the queue.
         await player.PlayAsync(nextTrack);
+    }
+
+    private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeout)
+    {
+        if (_disconnectTokens.TryGetValue(player.VoiceChannel.Id, out var tokenSource) is false)
+        {
+            tokenSource = new CancellationTokenSource();
+            _disconnectTokens.TryAdd(player.VoiceChannel.Id, tokenSource);
+        }
+        else if (tokenSource.IsCancellationRequested)
+        {
+            _disconnectTokens.TryUpdate(player.VoiceChannel.Id, new CancellationTokenSource(), tokenSource);
+            tokenSource = _disconnectTokens[player.VoiceChannel.Id];
+        }
+
+        if (SpinWait.SpinUntil(() => tokenSource.IsCancellationRequested, timeout))
+        {
+            return;
+        }
+
+        _logger.LogTrace($"Disconnecting from {player.VoiceChannel.Guild.Name}");
+        await _lavaNode.LeaveAsync(player.VoiceChannel);
     }
 }
