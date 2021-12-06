@@ -83,11 +83,6 @@ public class AudioService : IHostedService
 
     private async Task OnTrackEnded(TrackEndedEventArgs args)
     {
-        if (args.Reason is TrackEndReason.Finished or TrackEndReason.LoadFailed)
-        {
-            return;
-        }
-
         var player = args.Player;
         var track = args.Track;
 
