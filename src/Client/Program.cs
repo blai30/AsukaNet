@@ -48,7 +48,6 @@ host.ConfigureServices((builder, services) =>
             GatewayIntents.GuildMembers |
             GatewayIntents.GuildMessages |
             GatewayIntents.GuildMessageReactions |
-            GatewayIntents.GuildPresences |
             GatewayIntents.GuildVoiceStates
     }));
     services.AddSingleton(new CommandService(new CommandServiceConfig
