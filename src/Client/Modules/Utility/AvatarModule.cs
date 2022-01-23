@@ -27,15 +27,17 @@ public class AvatarModule : CommandModuleBase
         user ??= Context.User;
         string avatarUrl = user.GetAvatarUrl(size: 4096);
 
-        // Construct embed with avatar image and direct link.
+        // Construct message with avatar image and direct link.
         var embed = new EmbedBuilder()
-            .WithTitle("Direct link")
-            .WithUrl(avatarUrl)
             .WithImageUrl(avatarUrl)
             .WithAuthor(user)
             .WithColor(Config.Value.EmbedColor)
             .Build();
 
-        await ReplyAsync(embed: embed);
+        var components = new ComponentBuilder()
+            .WithButton("Direct link", style: ButtonStyle.Link, url: avatarUrl)
+            .Build();
+
+        await ReplyAsync(embed: embed, components: components);
     }
 }
