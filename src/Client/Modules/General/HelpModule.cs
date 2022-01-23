@@ -4,6 +4,7 @@ using Asuka.Commands;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;
+using Flurl;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -73,10 +74,10 @@ public class HelpModule : CommandModuleBase
         var clientUser = Context.Client.CurrentUser;
         string avatarUrl = clientUser.GetAvatarUrl();
 
-        string[] links =
+        (string, string)[] links =
         {
-            $"[Invite me]({Config.Value.InviteUrl})",
-            $"[Invite me]({Config.Value.InviteUrl})"
+            ("Invite", Config.Value.InviteUrl),
+            ("GitHub", Config.Value.GitHubUrl)
         };
 
         // Initialize embed builder with basic info.
@@ -89,10 +90,14 @@ public class HelpModule : CommandModuleBase
             .WithColor(Config.Value.EmbedColor)
             .AddField(
                 "Examples",
-                $"`@{clientUser.Username} help avatar` to view help for the avatar command.")
-            .AddField(
-                "Useful links",
-                $"{string.Join(", ", links)}");
+                $"`@{clientUser.Username} help avatar` to view help for the avatar command.");
+
+        // Add button to component builder for each link.
+        var componentBuilder = new ComponentBuilder();
+        foreach ((string label, string url) in links)
+        {
+            componentBuilder.WithButton(label, style: ButtonStyle.Link, url: url);
+        }
 
         // Get a sorted collection of command categories using
         // the module's remarks attribute as the category name.
@@ -120,6 +125,6 @@ public class HelpModule : CommandModuleBase
             embed.AddField(category, commands);
         }
 
-        await ReplyAsync(embed: embed.Build());
+        await ReplyAsync(embed: embed.Build(), components: componentBuilder.Build());
     }
 }

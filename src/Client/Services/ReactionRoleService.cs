@@ -64,27 +64,27 @@ public class ReactionRoleService : IHostedService
     /// <summary>
     ///     Adds a role to a user when a reaction was added.
     /// </summary>
-    /// <param name="cachedMessage">Message from which a reaction was added</param>
+    /// <param name="message">Message from which a reaction was added</param>
     /// <param name="channel">Channel where the message is from</param>
     /// <param name="reaction">Reaction that was added</param>
     /// <returns></returns>
     private async Task OnReactionAdded(
-        Cacheable<IUserMessage, ulong> cachedMessage,
-        ISocketMessageChannel channel,
+        Cacheable<IUserMessage, ulong> message,
+        Cacheable<IMessageChannel, ulong> channel,
         SocketReaction reaction)
     {
         // Reaction must come from a guild user and not the bot.
         if (reaction.User.Value is not SocketGuildUser user) return;
         if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
         // Ensure message is from a guild channel.
-        if (channel is not SocketGuildChannel guildChannel) return;
+        if (channel.Value is not SocketGuildChannel guildChannel) return;
 
         string emoteText = reaction.Emote.GetStringRepresentation();
         if (string.IsNullOrEmpty(emoteText)) return;
 
         string query = _api.Value.ReactionRolesUri
             .SetQueryParam("guildId", guildChannel.Guild.Id.ToString())
-            .SetQueryParam("messageId", cachedMessage.Id.ToString());
+            .SetQueryParam("messageId", message.Id.ToString());
 
         using var client = _factory.CreateClient();
         var response = await client.GetFromJsonAsync<IEnumerable<ReactionRole>>(query);
@@ -106,7 +106,7 @@ public class ReactionRoleService : IHostedService
         }
         catch (HttpException e)
         {
-            await channel.SendMessageAsync(
+            await channel.Value.SendMessageAsync(
                 $"{e.Message}\nError adding role, make sure the role is lower than me in the server's roles list.");
             return;
         }
@@ -123,14 +123,14 @@ public class ReactionRoleService : IHostedService
     /// <returns></returns>
     private async Task OnReactionRemoved(
         Cacheable<IUserMessage, ulong> cachedMessage,
-        ISocketMessageChannel channel,
+        Cacheable<IMessageChannel, ulong> channel,
         SocketReaction reaction)
     {
         // Reaction must come from a guild user and not the bot.
         if (reaction.User.Value is not SocketGuildUser user) return;
         if (reaction.User.Value.Id == _client.CurrentUser.Id) return;
         // Ensure message is from a guild channel.
-        if (channel is not SocketGuildChannel guildChannel) return;
+        if (channel.Value is not SocketGuildChannel guildChannel) return;
 
         string emoteText = reaction.Emote.GetStringRepresentation();
         if (string.IsNullOrEmpty(emoteText)) return;
@@ -159,7 +159,7 @@ public class ReactionRoleService : IHostedService
         }
         catch (HttpException e)
         {
-            await channel.SendMessageAsync(
+            await channel.Value.SendMessageAsync(
                 $"{e.Message}\nError removing role, make sure the role is lower than me in the server's roles list.");
             return;
         }
@@ -176,7 +176,7 @@ public class ReactionRoleService : IHostedService
     /// <returns></returns>
     private async Task OnReactionsCleared(
         Cacheable<IUserMessage, ulong> cachedMessage,
-        ISocketMessageChannel channel)
+        Cacheable<IMessageChannel, ulong> channel)
     {
         await ClearReactionRoles(cachedMessage.Id, channel);
     }
@@ -191,7 +191,7 @@ public class ReactionRoleService : IHostedService
     /// <returns></returns>
     private async Task OnReactionsRemovedForEmote(
         Cacheable<IUserMessage, ulong> cachedMessage,
-        ISocketMessageChannel channel,
+        Cacheable<IMessageChannel, ulong> channel,
         IEmote reaction)
     {
         await ClearReactionRoles(cachedMessage.Id, channel, reaction);
@@ -228,7 +228,7 @@ public class ReactionRoleService : IHostedService
     /// <param name="cachedMessage">Deleted message</param>
     /// <param name="channel">Channel in which the message was deleted</param>
     /// <returns></returns>
-    private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cachedMessage, ISocketMessageChannel channel)
+    private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> channel)
     {
         await ClearReactionRoles(cachedMessage.Id, channel);
     }
@@ -241,10 +241,10 @@ public class ReactionRoleService : IHostedService
     /// <param name="channel">Channel in which the message is referenced</param>
     /// <param name="reaction">Specific reaction to clear from message. If none is specified, clear all reactions from message.</param>
     /// <returns></returns>
-    private async Task ClearReactionRoles(ulong messageId, ISocketMessageChannel channel, IEmote? reaction = null)
+    private async Task ClearReactionRoles(ulong messageId, Cacheable<IMessageChannel, ulong> channel, IEmote? reaction = null)
     {
         // Ensure message is from a guild channel.
-        if (channel is not SocketGuildChannel guildChannel) return;
+        if (channel.Value is not SocketGuildChannel guildChannel) return;
 
         // Construct query to send http request.
         string query = _api.Value.ReactionRolesUri
