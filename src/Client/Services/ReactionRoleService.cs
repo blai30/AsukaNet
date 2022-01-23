@@ -107,7 +107,7 @@ public class ReactionRoleService : IHostedService
         catch (HttpException e)
         {
             await channel.Value.SendMessageAsync(
-                $"{e.Message}\nError adding role, make sure the role is lower than me in the server's roles list.");
+                $"{e.Message}\nError adding role, role must be lower than me in the server's roles list.");
             return;
         }
 
@@ -117,12 +117,12 @@ public class ReactionRoleService : IHostedService
     /// <summary>
     ///     Removes a role from a user when a reaction was removed.
     /// </summary>
-    /// <param name="cachedMessage">Message from which a reaction was removed</param>
+    /// <param name="message">Message from which a reaction was removed</param>
     /// <param name="channel">Channel where the message is from</param>
     /// <param name="reaction">Reaction that was removed</param>
     /// <returns></returns>
     private async Task OnReactionRemoved(
-        Cacheable<IUserMessage, ulong> cachedMessage,
+        Cacheable<IUserMessage, ulong> message,
         Cacheable<IMessageChannel, ulong> channel,
         SocketReaction reaction)
     {
@@ -137,7 +137,7 @@ public class ReactionRoleService : IHostedService
 
         string query = _api.Value.ReactionRolesUri
             .SetQueryParam("guildId", guildChannel.Guild.Id.ToString())
-            .SetQueryParam("messageId", cachedMessage.Id.ToString());
+            .SetQueryParam("messageId", message.Id.ToString());
 
         using var client = _factory.CreateClient();
         var response = await client.GetFromJsonAsync<IEnumerable<ReactionRole>>(query);
@@ -160,7 +160,7 @@ public class ReactionRoleService : IHostedService
         catch (HttpException e)
         {
             await channel.Value.SendMessageAsync(
-                $"{e.Message}\nError removing role, make sure the role is lower than me in the server's roles list.");
+                $"{e.Message}\nError removing role, role must be lower than me in the server's roles list.");
             return;
         }
 
@@ -168,33 +168,33 @@ public class ReactionRoleService : IHostedService
     }
 
     /// <summary>
-    ///     Remove all reaction roles from the database that referenced the message when all reactions from the message get
-    ///     cleared.
+    ///     Remove all reaction roles from the database that referenced the message when all reactions from
+    ///     the message get cleared.
     /// </summary>
-    /// <param name="cachedMessage">Message whose reactions got cleared</param>
+    /// <param name="message">Message whose reactions got cleared</param>
     /// <param name="channel">Channel in which the reactions of the message was cleared</param>
     /// <returns></returns>
     private async Task OnReactionsCleared(
-        Cacheable<IUserMessage, ulong> cachedMessage,
+        Cacheable<IUserMessage, ulong> message,
         Cacheable<IMessageChannel, ulong> channel)
     {
-        await ClearReactionRoles(cachedMessage.Id, channel);
+        await ClearReactionRoles(message.Id, channel);
     }
 
     /// <summary>
-    ///     Remove all reactions to a specific emote from the database that referenced the message when its reactions was
-    ///     cleared.
+    ///     Remove all reactions to a specific emote from the database that referenced the message when
+    ///     its reactions was cleared.
     /// </summary>
-    /// <param name="cachedMessage">Message whose reaction got cleared</param>
+    /// <param name="message">Message whose reaction got cleared</param>
     /// <param name="channel">Channel in which the reaction of the message was cleared</param>
     /// <param name="reaction">Reaction that was cleared</param>
     /// <returns></returns>
     private async Task OnReactionsRemovedForEmote(
-        Cacheable<IUserMessage, ulong> cachedMessage,
+        Cacheable<IUserMessage, ulong> message,
         Cacheable<IMessageChannel, ulong> channel,
         IEmote reaction)
     {
-        await ClearReactionRoles(cachedMessage.Id, channel, reaction);
+        await ClearReactionRoles(message.Id, channel, reaction);
     }
 
     /// <summary>
@@ -225,12 +225,14 @@ public class ReactionRoleService : IHostedService
     ///     When a message is deleted, all reaction roles that referenced that message
     ///     will get removed from the database and cleaned out of the list.
     /// </summary>
-    /// <param name="cachedMessage">Deleted message</param>
+    /// <param name="message">Deleted message</param>
     /// <param name="channel">Channel in which the message was deleted</param>
     /// <returns></returns>
-    private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> channel)
+    private async Task OnMessageDeleted(
+        Cacheable<IMessage, ulong> message,
+        Cacheable<IMessageChannel, ulong> channel)
     {
-        await ClearReactionRoles(cachedMessage.Id, channel);
+        await ClearReactionRoles(message.Id, channel);
     }
 
     /// <summary>
@@ -239,9 +241,15 @@ public class ReactionRoleService : IHostedService
     /// </summary>
     /// <param name="messageId">Id of the message to clear reactions from</param>
     /// <param name="channel">Channel in which the message is referenced</param>
-    /// <param name="reaction">Specific reaction to clear from message. If none is specified, clear all reactions from message.</param>
+    /// <param name="reaction">
+    ///     Specific reaction to clear from message.
+    ///     If none is specified, clear all reactions from message.
+    /// </param>
     /// <returns></returns>
-    private async Task ClearReactionRoles(ulong messageId, Cacheable<IMessageChannel, ulong> channel, IEmote? reaction = null)
+    private async Task ClearReactionRoles(
+        ulong messageId,
+        Cacheable<IMessageChannel, ulong> channel,
+        IEmote? reaction = null)
     {
         // Ensure message is from a guild channel.
         if (channel.Value is not SocketGuildChannel guildChannel) return;
@@ -273,31 +281,5 @@ public class ReactionRoleService : IHostedService
         }
 
         await client.DeleteAsync(query);
-
-        // // Condition to remove all reaction roles from a message if no reaction was specified,
-        // // otherwise only remove all reaction roles for that specific reaction.
-        // Expression<Func<ReactionRole, bool>> expression = reaction is null
-        //     ? reactionRole => reactionRole.MessageId == messageId
-        //     : reactionRole => reactionRole.MessageId == messageId &&
-        //                       reactionRole.Reaction == reaction.GetStringRepresentation();
-        //
-        // // Get and remove all rows that referenced the message from database.
-        // // var reactionRoles = await context.ReactionRoles.AsQueryable()
-        // //     .Where(expression)
-        // //     .ToListAsync();
-        //
-        // context.ReactionRoles.RemoveRange(reactionRoles);
-        // try
-        // {
-        //     await context.SaveChangesAsync();
-        //
-        //     _logger.LogTrace(
-        //         $"Removed {reactionRoles.Count.ToString()} reaction roles from message ({messageId.ToString()}), channel ({channel.Id.ToString()})");
-        // }
-        // catch
-        // {
-        //     _logger.LogError($"Error removing reaction roles from message ({messageId}), channel ({channel.Id})");
-        //     throw;
-        // }
     }
 }

@@ -96,9 +96,12 @@ public class ReactionRoleModule : CommandModuleBase
 
         try
         {
-            await client.PostAsync(_api.Value.ReactionRolesUri, new StringContent(json, Encoding.UTF8, "application/json"));
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            await client.PostAsync(_api.Value.ReactionRolesUri, content);
             await message.AddReactionAsync(emote);
-            await ReplyAsync($"Added reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
+            await ReplyAsync(
+                $"Added reaction role {guildRole.Mention}.",
+                allowedMentions: AllowedMentions.None);
         }
         catch
         {
@@ -138,7 +141,9 @@ public class ReactionRoleModule : CommandModuleBase
         {
             await client.DeleteAsync(command);
             await message.RemoveAllReactionsForEmoteAsync(reaction);
-            await ReplyAsync($"Removed reaction role {guildRole.Mention}.", allowedMentions: AllowedMentions.None);
+            await ReplyAsync(
+                $"Removed reaction role {guildRole.Mention}.",
+                allowedMentions: AllowedMentions.None);
         }
         catch
         {
@@ -151,7 +156,8 @@ public class ReactionRoleModule : CommandModuleBase
     [Alias("e")]
     [Remarks("reactionrole edit <messageId> \"[title]\" [description]")]
     [Summary(
-        "Edit a reaction role message with a new title and description. Titles with spaces must be wrapped in quotes.")]
+        "Edit a reaction role message with a new title and description. " +
+        "Titles with spaces must be wrapped in quotes.")]
     public async Task EditAsync(IMessage message, string title = "", [Remainder] string description = "")
     {
         // Must be a user message sent by the bot.
