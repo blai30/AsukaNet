@@ -10,6 +10,8 @@ namespace Asuka.Commands;
 
 public abstract class CommandModuleBase : ModuleBase<SocketCommandContext>
 {
+    private IDisposable _typing;
+
     protected CommandModuleBase(IOptions<DiscordOptions> config, ILogger<CommandModuleBase> logger)
     {
         Config = config;
@@ -22,7 +24,7 @@ public abstract class CommandModuleBase : ModuleBase<SocketCommandContext>
     protected override void BeforeExecute(CommandInfo command)
     {
         base.BeforeExecute(command);
-        using IDisposable typing = Context.Channel.EnterTypingState();
+        _typing = Context.Channel.EnterTypingState();
     }
 
     protected async Task ReplyInlineAsync(
@@ -34,6 +36,7 @@ public abstract class CommandModuleBase : ModuleBase<SocketCommandContext>
         MessageReference messageReference = null)
     {
         await Context.Message.ReplyAsync(message, isTTS, embed, allowedMentions, options).ConfigureAwait(false);
+        _typing.Dispose();
     }
 
     protected async Task ReplyReactionAsync(IEmote emote)
