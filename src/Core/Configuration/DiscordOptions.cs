@@ -7,6 +7,7 @@ public record DiscordOptions
     public string BotPrefix { get; init; }
     public uint EmbedColor { get; init; }
     public string InviteUrl { get; init; }
+    public string GitHubUrl { get; init; }
     public ulong OwnerId { get; init; }
     public Status Status { get; init; }
 }
