@@ -29,9 +29,9 @@ public class AudioService : IHostedService
         ILogger<AudioService> logger)
     {
         _client = client;
+        _config = config;
         _lavaNode = lavaNode;
         _logger = logger;
-        _config = config;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

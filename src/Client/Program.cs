@@ -15,7 +15,6 @@ Console.WriteLine(DateTime.UtcNow.ToString("R"));
 Console.WriteLine(Environment.ProcessId);
 
 var host = Host.CreateDefaultBuilder(args);
-
 host.UseSerilog();
 
 host.ConfigureServices((builder, services) =>
@@ -74,18 +73,9 @@ host.ConfigureServices((builder, services) =>
     services.AddHostedService<CommandHandlerService>();
     services.AddHostedService<AudioService>();
     services.AddHostedService<TagListenerService>();
-    services.AddHostedService<ReactionRoleService>();
+    services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
 });
 
 var app = host.Build();
-
 await app.RunAsync();
-
-// Typical ASP.NET host builder pattern but for console app without the web.
-// TODO: Official support planned for .NET 6.0.
-// var host = Host
-//     .CreateDefaultBuilder(args)
-//     .UseSerilog()
-//     .UseStartup<Startup>()
-//     .Build();
