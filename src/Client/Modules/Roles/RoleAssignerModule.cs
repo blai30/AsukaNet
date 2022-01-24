@@ -28,6 +28,8 @@ namespace Asuka.Modules.Roles;
 [RequireContext(ContextType.Guild)]
 public class RoleAssignerModule : CommandModuleBase
 {
+    private const string Prefix = "RA";
+
     public RoleAssignerModule(
         IOptions<DiscordOptions> config,
         ILogger<RoleAssignerModule> logger) :
@@ -47,7 +49,6 @@ public class RoleAssignerModule : CommandModuleBase
             .Build();
 
         var components = new ComponentBuilder().Build();
-
         await ReplyAsync(embed: embed, components: components);
     }
 
@@ -61,7 +62,7 @@ public class RoleAssignerModule : CommandModuleBase
         componentBuilder.WithButton(
             $"@{role.Name}",
             emote: emote,
-            customId: $"roleassigner-{message.Id}-{role.Id}",
+            customId: $"{Prefix}-{message.Id}-{role.Id}",
             style: ButtonStyle.Secondary);
 
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
@@ -78,12 +79,15 @@ public class RoleAssignerModule : CommandModuleBase
         // Rebuild components without the role.
         IList<ActionRowBuilder> rows = message.Components
             .Select(row => row.Components
-                .Where(component => component.CustomId != $"{message.Id}-{role.Id}").ToList())
-            .Where(components => components.Count > 0)
-            .Select(components => new ActionRowBuilder().WithComponents(components)).ToList();
+                .Where(component =>
+                    component.CustomId != $"{Prefix}-{message.Id}-{role.Id}").ToList())
+            .Where(components =>
+                components.Count > 0)
+            .Select(components =>
+                new ActionRowBuilder().WithComponents(components))
+            .ToList();
 
         componentBuilder.WithRows(rows);
-
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
     }
 
@@ -94,29 +98,24 @@ public class RoleAssignerModule : CommandModuleBase
     public async Task EditAsync(SocketUserMessage message, [Remainder] string title)
     {
         // Must be a user message sent by the bot.
-        if (message.Author.Id != Context.Client.CurrentUser.Id ||
-            message is not IUserMessage original)
+        if (message.Author.Id != Context.Client.CurrentUser.Id)
         {
             await ReplyAsync("That message is not mine to edit. *(੭*ˊᵕˋ)੭*ଘ");
             return;
         }
 
         // Get embed from message.
-        var embed = original.Embeds.FirstOrDefault();
+        var embed = message.Embeds.FirstOrDefault();
         if (embed is null)
         {
             await ReplyAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻");
             return;
         }
 
-        // Edit the embed with the new title.
-        var edited = embed.ToEmbedBuilder()
-            .WithTitle(title)
-            .Build();
-
         try
         {
-            await original.ModifyAsync(properties => properties.Embed = edited);
+            await message.ModifyAsync(properties =>
+                properties.Embed = embed.ToEmbedBuilder().WithTitle(title).Build());
         }
         catch
         {
