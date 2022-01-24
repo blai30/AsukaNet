@@ -74,7 +74,7 @@ host.ConfigureServices((builder, services) =>
     services.AddHostedService<CommandHandlerService>();
     services.AddHostedService<AudioService>();
     services.AddHostedService<TagListenerService>();
-    services.AddHostedService<ReactionRoleService>();
+    services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
 });
 
