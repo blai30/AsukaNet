@@ -1,9 +1,10 @@
 using System;
 using System.Data;
+using System.Reflection;
 using Asuka.Configuration;
 using Asuka.Services;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,26 +36,24 @@ host.ConfigureServices((builder, services) =>
     services.Configure<LavaConfig>(builder.Configuration.GetSection("Lavalink"));
 
     // Discord client.
-    services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
+    var client = new DiscordSocketClient(new DiscordSocketConfig
     {
         LogLevel = LogSeverity.Verbose,
         MessageCacheSize = 1000,
         GatewayIntents =
-            GatewayIntents.DirectMessages |
-            GatewayIntents.DirectMessageReactions |
-            GatewayIntents.DirectMessageTyping |
             GatewayIntents.Guilds |
             GatewayIntents.GuildMembers |
             GatewayIntents.GuildMessages |
             GatewayIntents.GuildMessageReactions |
             GatewayIntents.GuildVoiceStates
-    }));
-    services.AddSingleton(new CommandService(new CommandServiceConfig
+    });
+
+    services.AddSingleton(client);
+    services.AddSingleton(new InteractionService(client, new InteractionServiceConfig
     {
         LogLevel = LogSeverity.Verbose,
         DefaultRunMode = RunMode.Async,
-        CaseSensitiveCommands = false,
-        IgnoreExtraArgs = true
+        UseCompiledLambda = true
     }));
 
     // Audio server using Lavalink.
@@ -70,11 +69,12 @@ host.ConfigureServices((builder, services) =>
 
     // Background hosted builder.Services.
     services.AddHostedService<LoggingService>();
-    services.AddHostedService<CommandHandlerService>();
-    services.AddHostedService<AudioService>();
-    services.AddHostedService<TagListenerService>();
+    // services.AddHostedService<CommandHandlerService>();
+    // services.AddHostedService<AudioService>();
+    // services.AddHostedService<TagListenerService>();
     services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
+    services.AddHostedService<InteractionHandlerService>();
 });
 
 var app = host.Build();

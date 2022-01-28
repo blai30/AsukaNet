@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,13 +56,14 @@ public class CommandHandlerService : IHostedService
     public async Task StartAsync(CancellationToken stoppingToken)
     {
         // Load custom command type readers. Must be done before loading modules.
-        _commandService.AddTypeReader<IEmote>(new EmoteTypeReader<IEmote>());
-        _commandService.AddTypeReader<IMessage>(new Commands.Readers.MessageTypeReader<IMessage>(), true);
-        _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
-        _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
+        // _commandService.AddTypeReader<IEmote>(new EmoteTypeReader<IEmote>());
+        // _commandService.AddTypeReader<IMessage>(new Commands.Readers.MessageTypeReader<IMessage>(), true);
+        // _commandService.AddTypeReader<ModuleInfo>(new ModuleInfoTypeReader());
+        // _commandService.AddTypeReader<SKColor>(new SKColorTypeReader());
 
         // Dynamically load all command modules.
-        await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+        var modules = await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+        _logger.LogInformation($"Loaded {modules.Count()} modules");
 
         _client.MessageReceived += OnMessageReceivedAsync;
         _commandService.CommandExecuted += OnCommandExecutedAsync;

@@ -8,6 +8,7 @@ public record DiscordOptions
     public uint EmbedColor { get; init; }
     public string InviteUrl { get; init; }
     public string GitHubUrl { get; init; }
+    public ulong DebugGuildId { get; init; }
     public ulong OwnerId { get; init; }
     public Status Status { get; init; }
 }
