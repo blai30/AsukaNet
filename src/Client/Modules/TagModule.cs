@@ -15,7 +15,7 @@ using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Tags;
+namespace Asuka.Modules;
 
 [Group(
     "tag",

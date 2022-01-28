@@ -6,7 +6,7 @@ using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Fun;
+namespace Asuka.Modules;
 
 public class RollModule : InteractionModule
 {

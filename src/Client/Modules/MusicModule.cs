@@ -12,7 +12,7 @@ using Victoria;
 using Victoria.Enums;
 using Victoria.Responses.Search;
 
-namespace Asuka.Modules.Music;
+namespace Asuka.Modules;
 
 [Group(
     "music",

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
 
-namespace Asuka.Modules.Utility;
+namespace Asuka.Modules;
 
 [Group(
     "color",

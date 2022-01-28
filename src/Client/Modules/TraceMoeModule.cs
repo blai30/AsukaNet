@@ -12,7 +12,7 @@ using Flurl;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility;
+namespace Asuka.Modules;
 
 public class TraceMoeModule : InteractionModule
 {

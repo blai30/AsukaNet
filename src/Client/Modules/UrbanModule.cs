@@ -11,7 +11,7 @@ using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility;
+namespace Asuka.Modules;
 
 public class UrbanModule : InteractionModule
 {

@@ -9,7 +9,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Roles;
+namespace Asuka.Modules;
 
 [Group(
     "roleassigner",
