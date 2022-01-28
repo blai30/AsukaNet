@@ -67,14 +67,13 @@ host.ConfigureServices((builder, services) =>
     services.AddSingleton(new Random(Guid.NewGuid().GetHashCode()));
     services.AddSingleton<DataTable>();
 
-    // Background hosted builder.Services.
+    // Background hosted services.
     services.AddHostedService<LoggingService>();
-    // services.AddHostedService<CommandHandlerService>();
-    // services.AddHostedService<AudioService>();
-    // services.AddHostedService<TagListenerService>();
+    services.AddHostedService<InteractionHandlerService>();
+    services.AddHostedService<AudioService>();
+    services.AddHostedService<TagListenerService>();
     services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
-    services.AddHostedService<InteractionHandlerService>();
 });
 
 var app = host.Build();
