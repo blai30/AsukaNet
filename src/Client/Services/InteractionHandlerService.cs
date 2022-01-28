@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Asuka.Commands.Converters;
 using Asuka.Configuration;
 using Discord;
 using Discord.Interactions;
@@ -9,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SkiaSharp;
 
 namespace Asuka.Services;
 
@@ -53,9 +55,9 @@ public class InteractionHandlerService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         // Load custom command type readers. Must be done before loading modules.
-        // _interactionService.AddTypeReader<IEmote>(new EmoteTypeReader<IEmote>());
-        // _interactionService.AddTypeReader<IMessage>(new Commands.Readers.MessageTypeReader<IMessage>(), true);
-        // _interactionService.AddTypeReader<SKColor>(new SKColorTypeReader());
+        _interactionService.AddTypeConverter<IEmote>(new EmoteTypeConverter<IEmote>());
+        _interactionService.AddTypeConverter<IMessage>(new MessageTypeConverter<IMessage>());
+        _interactionService.AddTypeConverter<SKColor>(new SKColorTypeConverter());
 
         // Dynamically load all command modules.
         _client.Ready += OnReadyAsync;
@@ -83,7 +85,8 @@ public class InteractionHandlerService : IHostedService
         var commands = await _interactionService.RegisterCommandsToGuildAsync(_config.Value.DebugGuildId);
         _logger.LogInformation($"Registered {commands.Count} total application commands");
 #else
-        await _interactionService.RegisterCommandsGloballyAsync();
+        var commands = await _interactionService.RegisterCommandsGloballyAsync();
+        _logger.LogInformation($"Registered {commands.Count} total application commands");
 #endif
     }
 

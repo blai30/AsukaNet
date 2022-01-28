@@ -1,17 +1,14 @@
 ﻿using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility;
 
-[Group("avatar")]
-[Remarks("Utility")]
-[Summary("Displays the avatar of a user or self.")]
-public class AvatarModule : CommandModuleBase
+public class AvatarModule : InteractionModule
 {
     public AvatarModule(
         IOptions<DiscordOptions> config,
@@ -20,9 +17,12 @@ public class AvatarModule : CommandModuleBase
     {
     }
 
-    [Command]
-    [Remarks("avatar [@user]")]
-    public async Task AvatarAsync(IUser? user = null)
+    [SlashCommand(
+        "avatar",
+        "Displays the avatar of a user or self.")]
+    [UserCommand("Get avatar")]
+    public async Task AvatarAsync(
+        [Summary(description: "User from which to get avatar.")] IUser? user = null)
     {
         user ??= Context.User;
         string avatarUrl = user.GetAvatarUrl(size: 4096);
@@ -38,6 +38,6 @@ public class AvatarModule : CommandModuleBase
             .WithButton("Direct link", style: ButtonStyle.Link, url: avatarUrl)
             .Build();
 
-        await ReplyAsync(embed: embed, components: components);
+        await RespondAsync(embed: embed, components: components);
     }
 }

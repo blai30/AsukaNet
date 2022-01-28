@@ -1,16 +1,14 @@
-﻿using System.Threading.Tasks;
-using Asuka.Commands;
+﻿using System;
+using System.Threading.Tasks;
 using Asuka.Configuration;
-using Discord.Commands;
+using Asuka.Interactions;
+using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General;
 
-[Group("ping")]
-[Remarks("General")]
-[Summary("View the latency of the bot and API.")]
-public class PingModule : CommandModuleBase
+public class PingModule : InteractionModule
 {
     public PingModule(
         IOptions<DiscordOptions> config,
@@ -19,17 +17,16 @@ public class PingModule : CommandModuleBase
     {
     }
 
-    [Command]
-    [Remarks("ping")]
+    [SlashCommand(
+        "ping",
+        "View the latency of the bot and API.")]
     public async Task PingAsync()
     {
         const string text = "Pong! Latency: `{0} ms`. API: `{1} ms`.";
 
-        var reply = await ReplyAsync(string.Format(text, "... ms", "... ms"));
-        int latency = (reply.Timestamp - Context.Message.Timestamp).Milliseconds;
+        int latency = (Context.Interaction.CreatedAt - DateTimeOffset.Now).Milliseconds;
         int botLatency = Context.Client.Latency;
 
-        await reply.ModifyAsync(message =>
-            message.Content = string.Format(text, latency.ToString(), botLatency.ToString()));
+        await RespondAsync(string.Format(text, latency.ToString(), botLatency.ToString()));
     }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Asuka.Commands.Readers;
+using Asuka.Commands.Converters;
 using Asuka.Configuration;
 using Discord;
 using Discord.Commands;

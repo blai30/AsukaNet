@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
-using Discord.Commands;
+using Asuka.Interactions;
+using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility;
 
-[Group("calculate")]
-[Alias("math", "solve")]
-[Remarks("Utility")]
-[Summary("Evaluate a mathematical expression.")]
-public class CalculateModule : CommandModuleBase
+public class CalculateModule : InteractionModule
 {
     private readonly DataTable _dataTable;
 
@@ -26,12 +22,13 @@ public class CalculateModule : CommandModuleBase
         _dataTable = dataTable;
     }
 
-    [Command]
-    [Remarks("calculate <expression>")]
-    public async Task CalculateAsync([Remainder] string expression)
+    [SlashCommand(
+        "calculate",
+        "Evaluate a mathematical expression.")]
+    public async Task CalculateAsync(string expression)
     {
         // Evaluate the string expression using data table compute.
         decimal result = Convert.ToDecimal(_dataTable.Compute(expression, null));
-        await ReplyAsync(result.ToString("0.########"));
+        await RespondAsync(result.ToString("0.########"));
     }
 }

@@ -5,11 +5,11 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Asuka.Models.Api.Asuka;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Flurl;
 using Humanizer;
 using Microsoft.Extensions.Logging;
@@ -17,11 +17,11 @@ using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Tags;
 
-[Group("tag")]
-[Remarks("Tags")]
-[Summary("Add, edit, or delete tags.")]
+[Group(
+    "tag",
+    "Add, edit, or delete tags.")]
 [RequireContext(ContextType.Guild)]
-public class TagModule : CommandModuleBase
+public class TagModule : InteractionModule
 {
     private readonly IOptions<ApiOptions> _api;
     private readonly IHttpClientFactory _factory;
@@ -37,21 +37,20 @@ public class TagModule : CommandModuleBase
         _factory = factory;
     }
 
-    [Command("add")]
-    [Alias("a", "create", "c")]
-    [Remarks("tag add <name> <content> [:reaction:]")]
-    [Summary("Create a new tag for the server.")]
+    [SlashCommand(
+        "add",
+        "Create a new tag for the server.")]
     public async Task AddAsync(string tagName, string tagContent, IEmote? reaction = null)
     {
         if (tagName.Length > 100)
         {
-            await ReplyAsync("Tag name must be 100 characters or less.");
+            await RespondAsync("Tag name must be 100 characters or less.");
             return;
         }
 
         if (tagContent.Length > 255)
         {
-            await ReplyAsync("Tag content must be 255 characters or less.");
+            await RespondAsync("Tag content must be 255 characters or less.");
             return;
         }
 
@@ -71,19 +70,18 @@ public class TagModule : CommandModuleBase
         try
         {
             await client.PostAsync(_api.Value.TagsUri, new StringContent(json, Encoding.UTF8, "application/json"));
-            await ReplyAsync($"Added new tag `{tag.Name}`.");
+            await RespondAsync($"Added new tag `{tag.Name}`.");
         }
         catch
         {
-            await ReplyAsync(
+            await RespondAsync(
                 $"Error adding `{tagName.Truncate(20, "...")}`, either a tag with the same name already exists or the input parameters are invalid.");
         }
     }
 
-    [Command("remove")]
-    [Alias("r", "delete", "d")]
-    [Remarks("tag remove <name>")]
-    [Summary("Remove a tag from the server.")]
+    [SlashCommand(
+        "remove",
+        "Remove a tag from the server.")]
     public async Task RemoveAsync(string tagName)
     {
         var tag = await GetTagByName(tagName);
@@ -91,7 +89,7 @@ public class TagModule : CommandModuleBase
         // Tag does not exist.
         if (tag is null)
         {
-            await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
+            await RespondAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
             return;
         }
 
@@ -102,19 +100,18 @@ public class TagModule : CommandModuleBase
         try
         {
             await client.DeleteAsync(command);
-            await ReplyAsync($"Removed tag `{tag.Name}`.");
+            await RespondAsync($"Removed tag `{tag.Name}`.");
         }
         catch
         {
-            await ReplyAsync($"Error removing tag `{tagName.Truncate(20, "...")}`.");
+            await RespondAsync($"Error removing tag `{tagName.Truncate(20, "...")}`.");
             throw;
         }
     }
 
-    [Command("edit")]
-    [Alias("e", "modify", "m")]
-    [Remarks("tag edit <name> <content> [:reaction:]")]
-    [Summary("Edit an existing tag from the server.")]
+    [SlashCommand(
+        "edit",
+        "Edit an existing tag from the server.")]
     public async Task EditAsync(string tagName, string tagContent, IEmote? reaction = null)
     {
         var tag = await GetTagByName(tagName);
@@ -122,7 +119,7 @@ public class TagModule : CommandModuleBase
         // Tag does not exist.
         if (tag is null)
         {
-            await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
+            await RespondAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
             return;
         }
 
@@ -140,19 +137,18 @@ public class TagModule : CommandModuleBase
         try
         {
             await client.PutAsync(command, new StringContent(json, Encoding.UTF8, "application/json"));
-            await ReplyAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
+            await RespondAsync($"Updated tag `{tag.Name}` with content `{tag.Content}`.");
         }
         catch
         {
-            await ReplyAsync($"Error updating tag `{tagName.Truncate(20, "...")}`.");
+            await RespondAsync($"Error updating tag `{tagName.Truncate(20, "...")}`.");
             throw;
         }
     }
 
-    [Command("list")]
-    [Alias("l", "all")]
-    [Remarks("tag list")]
-    [Summary("List all tags from the server.")]
+    [SlashCommand(
+        "list",
+        "List all tags from the server.")]
     public async Task ListAsync()
     {
         // Get list of tags from this guild.
@@ -165,7 +161,7 @@ public class TagModule : CommandModuleBase
         if (response is null)
         {
             Logger.LogTrace($"Error getting list of tags for guild with id: {Context.Guild.Id.ToString()}");
-            await ReplyAsync("No tags found for this server.");
+            await RespondAsync("No tags found for this server.");
             return;
         }
 
@@ -175,13 +171,12 @@ public class TagModule : CommandModuleBase
 
         // Join list of tag names with comma.
         string list = string.Join(", ", tags);
-        await ReplyAsync($"Tags: {list}");
+        await RespondAsync($"Tags: {list}");
     }
 
-    [Command("info")]
-    [Alias("i", "stats")]
-    [Remarks("tag info <name>")]
-    [Summary("Show info for a tag from the server.")]
+    [SlashCommand(
+        "info",
+        "Show info for a tag from the server.")]
     public async Task InfoAsync(string tagName)
     {
         var tag = await GetTagByName(tagName);
@@ -189,7 +184,7 @@ public class TagModule : CommandModuleBase
         // Tag does not exist.
         if (tag is null)
         {
-            await ReplyAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
+            await RespondAsync($"Tag `{tagName.Truncate(20, "...")}` does not exist in this server.");
             return;
         }
 
@@ -203,7 +198,7 @@ public class TagModule : CommandModuleBase
             .AddField("Last used", tag.UpdatedAt.GetValueOrDefault().ToString("R"))
             .Build();
 
-        await ReplyAsync(embed: embed);
+        await RespondAsync(embed: embed);
     }
 
     private async Task<Tag?> GetTagByName(string tagName)

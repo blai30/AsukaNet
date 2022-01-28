@@ -1,20 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Roles;
 
-[Group("roleassigner")]
-[Alias("ra")]
-[Remarks("Roles")]
-[Summary("Manage self-service roles assignment for the server.")]
+[Group(
+    "roleassigner",
+    "Manage self-service roles assignment for the server.")]
 [RequireBotPermission(
     ChannelPermission.ManageMessages |
     ChannelPermission.ManageRoles |
@@ -26,7 +25,7 @@ namespace Asuka.Modules.Roles;
     ChannelPermission.ReadMessageHistory |
     ChannelPermission.ViewChannel)]
 [RequireContext(ContextType.Guild)]
-public class RoleAssignerModule : CommandModuleBase
+public class RoleAssignerModule : InteractionModule
 {
     private const string Prefix = "RA";
 
@@ -37,11 +36,10 @@ public class RoleAssignerModule : CommandModuleBase
     {
     }
 
-    [Command("make")]
-    [Alias("m", "setup")]
-    [Remarks("roleassigner make")]
-    [Summary("Create a role assigner message.")]
-    public async Task MakeAsync([Remainder] string? title = null)
+    [SlashCommand(
+        "make",
+        "Create a role assigner message.")]
+    public async Task MakeAsync(string? title = null)
     {
         var embed = new EmbedBuilder()
             .WithTitle(title ?? "Assign roles for yourself")
@@ -49,13 +47,12 @@ public class RoleAssignerModule : CommandModuleBase
             .Build();
 
         var components = new ComponentBuilder().Build();
-        await ReplyAsync(embed: embed, components: components);
+        await RespondAsync(embed: embed, components: components);
     }
 
-    [Command("add")]
-    [Alias("a")]
-    [Remarks("roleassigner add <messageId> <:emoji:> <@role>")]
-    [Summary("Add a role assignment to a role assigner message.")]
+    [SlashCommand(
+        "add",
+        "Add a role assignment to a role assigner message.")]
     public async Task AddAsync(SocketUserMessage message, IRole role, IEmote? emote = null)
     {
         var componentBuilder = ComponentBuilder.FromComponents(message.Components);
@@ -68,10 +65,9 @@ public class RoleAssignerModule : CommandModuleBase
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
     }
 
-    [Command("remove")]
-    [Alias("r")]
-    [Remarks("roleassigner remove <messageId> <@role>")]
-    [Summary("Remove a reaction role from a reaction role message.")]
+    [SlashCommand(
+        "remove",
+        "Remove a reaction role from a reaction role message.")]
     public async Task RemoveAsync(SocketUserMessage message, IRole role)
     {
         var componentBuilder = new ComponentBuilder();
@@ -91,16 +87,15 @@ public class RoleAssignerModule : CommandModuleBase
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
     }
 
-    [Command("edit")]
-    [Alias("e")]
-    [Remarks("roleassigner edit <messageId> \"[title]\"")]
-    [Summary("Edit a role assigner message with a new title.")]
-    public async Task EditAsync(SocketUserMessage message, [Remainder] string title)
+    [SlashCommand(
+        "edit",
+        "Edit a role assigner message with a new title.")]
+    public async Task EditAsync(SocketUserMessage message, string title)
     {
         // Must be a user message sent by the bot.
         if (message.Author.Id != Context.Client.CurrentUser.Id)
         {
-            await ReplyAsync("That message is not mine to edit. *(੭*ˊᵕˋ)੭*ଘ");
+            await RespondAsync("That message is not mine to edit. *(੭*ˊᵕˋ)੭*ଘ");
             return;
         }
 
@@ -108,7 +103,7 @@ public class RoleAssignerModule : CommandModuleBase
         var embed = message.Embeds.FirstOrDefault();
         if (embed is null)
         {
-            await ReplyAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻");
+            await RespondAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻");
             return;
         }
 
@@ -119,14 +114,13 @@ public class RoleAssignerModule : CommandModuleBase
         }
         catch
         {
-            await ReplyAsync("Error editing message.");
+            await RespondAsync("Error editing message.");
         }
     }
 
-    [Command("clear")]
-    [Alias("c")]
-    [Remarks("roleassigner clear <messageId>")]
-    [Summary("Clears all reaction roles from a message.")]
+    [SlashCommand(
+        "clear",
+        "Clears all reaction roles from a message.")]
     public async Task ClearAsync(SocketUserMessage message)
     {
         var componentBuilder = new ComponentBuilder();

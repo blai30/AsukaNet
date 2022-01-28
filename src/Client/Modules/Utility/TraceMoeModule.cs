@@ -2,22 +2,19 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Asuka.Models.Api.TraceMoe;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
+using Discord.WebSocket;
 using Flurl;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.Utility;
 
-[Group("tracemoe")]
-[Alias("whatanime")]
-[Remarks("Utility")]
-[Summary("Find out what anime the image came from.")]
-public class TraceMoeModule : CommandModuleBase
+public class TraceMoeModule : InteractionModule
 {
     private const string Uri = "https://api.trace.moe";
 
@@ -32,20 +29,31 @@ public class TraceMoeModule : CommandModuleBase
         _factory = factory;
     }
 
-    [Command]
-    [Remarks("tracemoe <imageUrl>")]
-    public async Task TraceMoeAsync(string? imageUrl = null)
+    [SlashCommand(
+        "tracemoe",
+        "Find out what anime the image came from.")]
+    public async Task TraceMoeAsync(string imageUrl)
     {
-        string image = imageUrl ?? GetImageFromMessage();
+        await RunTraceMoe(imageUrl);
+    }
 
-        if (string.IsNullOrEmpty(image))
+    [MessageCommand("What anime?")]
+    public async Task TraceMoeAsync(SocketMessage message)
+    {
+        string imageUrl = message.Attachments.FirstOrDefault()?.Url ?? message.ToString();
+        await RunTraceMoe(imageUrl);
+    }
+
+    private async Task RunTraceMoe(string imageUrl)
+    {
+        if (string.IsNullOrEmpty(imageUrl))
         {
-            Logger.LogTrace($"Invalid image: {image}");
+            Logger.LogTrace($"Invalid image: {imageUrl}");
             await ReplyAsync("Give me a valid image!! (っ °Д °;)っ");
             return;
         }
 
-        var responseBody = await GetTraceMoeResponse(image);
+        var responseBody = await GetTraceMoeResponse(imageUrl);
 
         // No response for given query.
         if (responseBody?.Result is null)
@@ -59,13 +67,13 @@ public class TraceMoeModule : CommandModuleBase
         // Similarity less than 87% is usually considered bad match, discard.
         if (doc is null || doc.Similarity < 0.87)
         {
-            await ReplyAsync("Could not determine.");
+            await RespondAsync("Could not determine.");
             return;
         }
 
-        var embed = GenerateEmbed(image, doc);
+        var embed = GenerateEmbed(imageUrl, doc);
 
-        await ReplyAsync(embed: embed);
+        await RespondAsync(embed: embed);
     }
 
     /// <summary>
@@ -137,14 +145,5 @@ public class TraceMoeModule : CommandModuleBase
         using var client = _factory.CreateClient();
         var responseBody = await client.GetFromJsonAsync<TraceMoeResponse>(query);
         return responseBody;
-    }
-
-    /// <summary>
-    ///     Get image url from first message attachment.
-    /// </summary>
-    /// <returns>Image url</returns>
-    private string GetImageFromMessage()
-    {
-        return Context.Message.Attachments.First().Url;
     }
 }

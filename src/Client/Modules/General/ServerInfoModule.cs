@@ -1,20 +1,16 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Asuka.Modules.General;
 
-[Group("serverinfo")]
-[Alias("server")]
-[Remarks("General")]
-[Summary("Display information about the server.")]
 [RequireContext(ContextType.Guild)]
-public class ServerInfoModule : CommandModuleBase
+public class ServerInfoModule : InteractionModule
 {
     public ServerInfoModule(
         IOptions<DiscordOptions> config,
@@ -23,8 +19,9 @@ public class ServerInfoModule : CommandModuleBase
     {
     }
 
-    [Command]
-    [Remarks("serverinfo")]
+    [SlashCommand(
+        "serverinfo",
+        "Display information about the server.")]
     public async Task ServerInfoAsync()
     {
         // Collect guild information.
@@ -34,25 +31,28 @@ public class ServerInfoModule : CommandModuleBase
         var emotes = guild.Emotes;
         var roles = guild.Roles;
         string guildIconUrl = guild.IconUrl;
+        int staticEmotesCount = emotes.Count(emote => !emote.Animated);
+        int animatedEmotesCount = emotes.Count(emote => emote.Animated);
 
         // Sort collection of roles to print alphabetically.
-        var roleList = roles.Select(role => role.Name).ToList();
-        roleList.Sort();
+        var rolesList = roles.Select(role => role.Name).ToList();
+        rolesList.Sort();
+
+        var regionsList = await guild.GetVoiceRegionsAsync();
+        var regions = regionsList.Select(region => region.Name);
 
         var embed = new EmbedBuilder()
-            .WithTitle("Icon direct link")
-            .WithUrl(guildIconUrl)
             .WithAuthor(guild.Name, guildIconUrl)
-            .WithDescription($"Owner: {guild.Owner.Mention}")
             .WithColor(Config.Value.EmbedColor)
+            .WithImageUrl(guild.BannerUrl)
             .WithThumbnailUrl(guildIconUrl)
             .WithFooter($"Created: {guild.CreatedAt.ToString("R")}")
             .AddField(
-                "ID",
-                guild.Id.ToString())
+                "Voice regions",
+                string.Join(", ", regions))
             .AddField(
-                "Region",
-                guild.VoiceRegionId,
+                "ID",
+                guild.Id.ToString(),
                 true)
             .AddField(
                 "Max Bitrate",
@@ -68,7 +68,7 @@ public class ServerInfoModule : CommandModuleBase
                 true)
             .AddField(
                 "Emotes",
-                $"{emotes.Count(emote => !emote.Animated).ToString()} static\n{emotes.Count(emote => emote.Animated).ToString()} animated",
+                $"{staticEmotesCount.ToString()} static\n{animatedEmotesCount.ToString()} animated",
                 true)
             .AddField(
                 "Premium",
@@ -76,9 +76,13 @@ public class ServerInfoModule : CommandModuleBase
                 true)
             .AddField(
                 "Roles",
-                string.Join(", ", roleList))
+                string.Join(", ", rolesList))
             .Build();
 
-        await ReplyAsync(embed: embed);
+        var components = new ComponentBuilder()
+            .WithButton("Icon direct link", style: ButtonStyle.Link, url: guildIconUrl)
+            .Build();
+
+        await RespondAsync(embed: embed, components: components);
     }
 }
