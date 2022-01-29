@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
@@ -13,18 +12,15 @@ namespace Asuka.Services;
 public class LoggingService : IHostedService
 {
     private readonly DiscordSocketClient _client;
-    // private readonly CommandService _commandService;
     private readonly InteractionService _interactionService;
     private readonly ILogger<LoggingService> _logger;
 
     public LoggingService(
         DiscordSocketClient client,
-        // CommandService commandService,
         InteractionService interactionService,
         ILogger<LoggingService> logger)
     {
         _client = client;
-        // _commandService = commandService;
         _interactionService = interactionService;
         _logger = logger;
     }
@@ -33,7 +29,6 @@ public class LoggingService : IHostedService
     {
         _client.Ready += OnReadyAsync<StartupService>;
         _client.Log += OnLogAsync<StartupService>;
-        // _commandService.Log += OnLogAsync<CommandHandlerService>;
         _interactionService.Log += OnLogAsync<InteractionHandlerService>;
 
         _logger.LogInformation($"{GetType().Name} started");
@@ -44,7 +39,6 @@ public class LoggingService : IHostedService
     {
         _client.Ready -= OnReadyAsync<StartupService>;
         _client.Log -= OnLogAsync<StartupService>;
-        // _commandService.Log -= OnLogAsync<CommandHandlerService>;
         _interactionService.Log -= OnLogAsync<InteractionHandlerService>;
 
         _logger.LogInformation($"{GetType().Name} stopped");

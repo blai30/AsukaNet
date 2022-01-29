@@ -18,6 +18,8 @@ namespace Asuka.Modules;
     "music",
     "Play music in a voice channel.")]
 [RequireContext(ContextType.Guild)]
+[RequireUserPermission(ChannelPermission.Connect)]
+[RequireBotPermission(ChannelPermission.Connect)]
 public sealed class MusicModule : InteractionModule
 {
     private readonly LavaNode _lavaNode;
@@ -112,61 +114,41 @@ public sealed class MusicModule : InteractionModule
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(searchQuery))
+        await DeferAsync();
+
+        // Play from url or search YouTube.
+        var search = Uri.IsWellFormedUriString(searchQuery, UriKind.Absolute)
+            ? await _lavaNode.SearchAsync(SearchType.Direct, searchQuery)
+            : await _lavaNode.SearchYouTubeAsync(searchQuery);
+
+        if (search.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed)
         {
-            await RespondAsync("Please provide a query.");
+            await RespondAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
             return;
         }
 
-        await DeferAsync();
+        // Generate select menu for search results.
+        var selectMenu = new SelectMenuBuilder()
+            .WithPlaceholder("Select a track")
+            .WithCustomId($"tracks:{Context.Interaction.Id}")
+            .WithMinValues(1)
+            .WithMaxValues(1);
 
-        try
+        foreach (var track in search.Tracks.Take(10))
         {
-            // Play from url or search YouTube.
-            var search = Uri.IsWellFormedUriString(searchQuery, UriKind.Absolute)
-                ? await _lavaNode.SearchAsync(SearchType.Direct, searchQuery)
-                : await _lavaNode.SearchYouTubeAsync(searchQuery);
-
-            if (search.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed)
-            {
-                await RespondAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
-                return;
-            }
-
-            // TODO: Music enqueue interactive select from list.
-            var track = search.Tracks.First();
-
-            // Player is already playing or paused but still has remaining tracks, enqueue new track.
-            if (player.Track is not null &&
-                player.PlayerState is PlayerState.Playing or PlayerState.Paused)
-            {
-                player.Queue.Enqueue(track);
-
-                // Announce the track that was enqueued.
-                string artwork = await track.FetchArtworkAsync();
-                var embed = new EmbedBuilder()
-                    .WithTitle(track.Title)
-                    .WithUrl(track.Url)
-                    .WithAuthor($"Enqueued #{player.Queue.Count.ToString()}")
-                    .WithDescription(track.Duration.ToString("c"))
-                    .WithColor(Config.Value.EmbedColor)
-                    .WithThumbnailUrl(artwork)
-                    .Build();
-
-                Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
-                await Context.Interaction.ModifyOriginalResponseAsync(properties => properties.Embed = embed);
-            }
-            else
-            {
-                await player.PlayAsync(track);
-                await DeleteOriginalResponseAsync();
-            }
+            selectMenu.AddOption(
+                track.Title,
+                track.Url,
+                track.Duration.ToString("c"),
+                new Emoji("▶️"));
         }
-        catch (Exception e)
+
+        var components = new ComponentBuilder().WithSelectMenu(selectMenu);
+        await Context.Interaction.ModifyOriginalResponseAsync(properties =>
         {
-            Logger.LogError(e.ToString());
-            await RespondAsync(e.Message);
-        }
+            properties.Content = "Choose a track from the menu to play";
+            properties.Components = components.Build();
+        });
     }
 
     [SlashCommand(

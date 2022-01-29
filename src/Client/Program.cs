@@ -72,6 +72,7 @@ host.ConfigureServices((builder, services) =>
     services.AddHostedService<AudioService>();
     services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
+    services.AddHostedService<TrackSelectionService>();
 });
 
 var app = host.Build();

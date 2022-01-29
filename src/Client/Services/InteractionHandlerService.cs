@@ -109,6 +109,6 @@ public class InteractionHandlerService : IHostedService
     {
         if (result.IsSuccess) return;
         // Command not successful, reply with error.
-        await context.Interaction.RespondAsync(result.ToString(), allowedMentions: AllowedMentions.None);
+        await context.Channel.SendMessageAsync(result.ToString(), allowedMentions: AllowedMentions.None);
     }
 }
