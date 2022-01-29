@@ -47,7 +47,8 @@ public class RoleAssignerModule : InteractionModule
             .Build();
 
         var components = new ComponentBuilder().Build();
-        await RespondAsync(embed: embed, components: components);
+        var message = await ReplyAsync(embed: embed, components: components);
+        await RespondAsync($"Created role assigner message with Id: **{message.Id.ToString()}**.", ephemeral: true);
     }
 
     [SlashCommand(
@@ -63,11 +64,12 @@ public class RoleAssignerModule : InteractionModule
             style: ButtonStyle.Secondary);
 
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
+        await RespondAsync($"Added role {role.Mention} to message: **{message.Id.ToString()}**.", ephemeral: true);
     }
 
     [SlashCommand(
         "remove",
-        "Remove a reaction role from a reaction role message.")]
+        "Remove a role assignment from a role assigner message.")]
     public async Task RemoveAsync(SocketUserMessage message, IRole role)
     {
         var componentBuilder = new ComponentBuilder();
@@ -85,6 +87,7 @@ public class RoleAssignerModule : InteractionModule
 
         componentBuilder.WithRows(rows);
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
+        await RespondAsync($"Removed role {role.Mention} to message: **{message.Id.ToString()}**.", ephemeral: true);
     }
 
     [SlashCommand(
@@ -95,7 +98,7 @@ public class RoleAssignerModule : InteractionModule
         // Must be a user message sent by the bot.
         if (message.Author.Id != Context.Client.CurrentUser.Id)
         {
-            await RespondAsync("That message is not mine to edit. *(੭*ˊᵕˋ)੭*ଘ");
+            await RespondAsync("That message is not mine to edit. *(੭*ˊᵕˋ)੭*ଘ", ephemeral: true);
             return;
         }
 
@@ -103,7 +106,7 @@ public class RoleAssignerModule : InteractionModule
         var embed = message.Embeds.FirstOrDefault();
         if (embed is null)
         {
-            await RespondAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻");
+            await RespondAsync("That message does not contain an embed. (╯°□°）╯︵ ┻━┻", ephemeral: true);
             return;
         }
 
@@ -111,19 +114,21 @@ public class RoleAssignerModule : InteractionModule
         {
             await message.ModifyAsync(properties =>
                 properties.Embed = embed.ToEmbedBuilder().WithTitle(title).Build());
+            await RespondAsync($"Edited title for message: **{message.Id.ToString()}**.");
         }
         catch
         {
-            await RespondAsync("Error editing message.");
+            await RespondAsync("Error editing message.", ephemeral: true);
         }
     }
 
     [SlashCommand(
         "clear",
-        "Clears all reaction roles from a message.")]
+        "Clears all role assignments from a message.")]
     public async Task ClearAsync(SocketUserMessage message)
     {
         var componentBuilder = new ComponentBuilder();
         await message.ModifyAsync(properties => properties.Components = componentBuilder.Build());
+        await RespondAsync($"Cleared role assignments for message: **{message.Id.ToString()}**.");
     }
 }

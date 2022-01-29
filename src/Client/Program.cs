@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Reflection;
 using Asuka.Configuration;
 using Asuka.Services;
 using Discord;
