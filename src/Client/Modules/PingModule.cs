@@ -24,7 +24,7 @@ public class PingModule : InteractionModule
     {
         const string text = "Pong! Latency: `{0} ms`. API: `{1} ms`.";
 
-        int latency = (Context.Interaction.CreatedAt - DateTimeOffset.Now).Milliseconds;
+        int latency = (DateTimeOffset.Now - Context.Interaction.CreatedAt).Milliseconds;
         int botLatency = Context.Client.Latency;
 
         await RespondAsync(string.Format(text, latency.ToString(), botLatency.ToString()));

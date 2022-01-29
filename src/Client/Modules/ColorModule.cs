@@ -77,7 +77,7 @@ public class ColorModule : InteractionModule
             return;
         }
 
-        await RespondAsync("Could not understand color keywords... (┬┬﹏┬┬)");
+        await RespondAsync("Could not understand color keywords... (┬┬﹏┬┬)", ephemeral: true);
     }
 
     private async Task GetColorAsync(SKColor color)

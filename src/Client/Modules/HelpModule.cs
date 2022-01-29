@@ -54,10 +54,12 @@ public class HelpModule : InteractionModule
             .SelectMany(module => module.SlashCommands);
 
         var commandsList = slashCommands
-            .OrderBy(command => command.Name)
-            .Select(command => $"`/{command.Name}`");
+            .Select(command => command.Module.IsSlashGroup
+                ? $"`/{command.Module.SlashGroupName} {command.Name}`"
+                : $"`/{command.Name}`");
 
-        embed.AddField("Commands", string.Join("\n", commandsList));
+        // Sort list of commands in alphabetical order.
+        embed.AddField("Commands", string.Join("\n", commandsList.OrderBy(name => name)));
 
         // Add button to component builder for each link.
         var componentBuilder = new ComponentBuilder();

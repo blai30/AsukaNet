@@ -49,7 +49,7 @@ public class TraceMoeModule : InteractionModule
         if (string.IsNullOrEmpty(imageUrl))
         {
             Logger.LogTrace($"Invalid image: {imageUrl}");
-            await ReplyAsync("Give me a valid image!! (っ °Д °;)っ");
+            await RespondAsync("Give me a valid image!! (っ °Д °;)っ", ephemeral: true);
             return;
         }
 
@@ -67,7 +67,7 @@ public class TraceMoeModule : InteractionModule
         // Similarity less than 87% is usually considered bad match, discard.
         if (doc is null || doc.Similarity < 0.87)
         {
-            await RespondAsync("Could not determine.");
+            await RespondAsync("Could not determine.", ephemeral: true);
             return;
         }
 
