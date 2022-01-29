@@ -70,7 +70,6 @@ host.ConfigureServices((builder, services) =>
     services.AddHostedService<LoggingService>();
     services.AddHostedService<InteractionHandlerService>();
     services.AddHostedService<AudioService>();
-    services.AddHostedService<TagListenerService>();
     services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
 });
