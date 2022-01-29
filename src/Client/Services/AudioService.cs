@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
+using Victoria.Responses.Search;
 
 namespace Asuka.Services;
 
@@ -37,8 +40,9 @@ public class AudioService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _client.Ready += OnReadyAsync;
-        _lavaNode.OnTrackStarted += OnTrackStarted;
-        _lavaNode.OnTrackEnded += OnTrackEnded;
+        _client.SelectMenuExecuted += OnSelectMenuOptionSelectedAsync;
+        _lavaNode.OnTrackStarted += OnTrackStartedAsync;
+        _lavaNode.OnTrackEnded += OnTrackEndedAsync;
 
         _logger.LogInformation($"{GetType().Name} started");
         await Task.CompletedTask;
@@ -47,8 +51,9 @@ public class AudioService : IHostedService
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _client.Ready -= OnReadyAsync;
-        _lavaNode.OnTrackStarted -= OnTrackStarted;
-        _lavaNode.OnTrackEnded -= OnTrackEnded;
+        _client.SelectMenuExecuted -= OnSelectMenuOptionSelectedAsync;
+        _lavaNode.OnTrackStarted -= OnTrackStartedAsync;
+        _lavaNode.OnTrackEnded -= OnTrackEndedAsync;
 
         _logger.LogInformation($"{GetType().Name} stopped");
         await Task.CompletedTask;
@@ -63,7 +68,51 @@ public class AudioService : IHostedService
         }
     }
 
-    private async Task OnTrackStarted(TrackStartEventArgs args)
+    private async Task OnSelectMenuOptionSelectedAsync(SocketMessageComponent component)
+    {
+        if (component.Message.Author.Id != _client.CurrentUser.Id) return;
+        if (component.User is not SocketGuildUser user) return;
+        if (!component.Data.CustomId.StartsWith("tracks:")) return;
+
+        var player = _lavaNode.GetPlayer(user.Guild);
+        string? selection = component.Data.Values.FirstOrDefault();
+
+        var search = await _lavaNode.SearchAsync(SearchType.Direct, selection);
+        var track = search.Tracks.First();
+
+        // Player is already playing or paused but still has remaining tracks, enqueue new track.
+        if (player.Track is not null &&
+            player.PlayerState is PlayerState.Playing or PlayerState.Paused)
+        {
+            player.Queue.Enqueue(track);
+
+            // Announce the track that was enqueued.
+            string artwork = await track.FetchArtworkAsync();
+            var embed = new EmbedBuilder()
+                .WithTitle(track.Title)
+                .WithUrl(track.Url)
+                .WithAuthor($"Enqueued #{player.Queue.Count.ToString()}")
+                .WithDescription(track.Duration.ToString("c"))
+                .WithColor(_config.Value.EmbedColor)
+                .WithThumbnailUrl(artwork)
+                .Build();
+
+            _logger.LogTrace($"Enqueued: {track.Title} in {user.Guild.Name}");
+            await component.Message.ModifyAsync(properties =>
+            {
+                properties.Content = null;
+                properties.Components = null;
+                properties.Embed = embed;
+            });
+        }
+        else
+        {
+            await player.PlayAsync(track);
+            await component.Message.DeleteAsync();
+        }
+    }
+
+    private async Task OnTrackStartedAsync(TrackStartEventArgs args)
     {
         var player = args.Player;
         var track = args.Track;
@@ -97,7 +146,7 @@ public class AudioService : IHostedService
         tokenSource.Cancel(true);
     }
 
-    private async Task OnTrackEnded(TrackEndedEventArgs args)
+    private async Task OnTrackEndedAsync(TrackEndedEventArgs args)
     {
         if (args.Reason is not TrackEndReason.Finished or TrackEndReason.LoadFailed)
         {

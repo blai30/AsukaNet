@@ -83,7 +83,7 @@ public class InteractionHandlerService : IHostedService
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 #if DEBUG
         var guildCommands = await _interactionService.RegisterCommandsToGuildAsync(_config.Value.DebugGuildId);
-        _logger.LogInformation($"Registered {guildCommands.Count} total application commands to guild {_config.Value.DebugGuildId}");
+        _logger.LogInformation($"Registered {guildCommands.Count} total application commands in guild {_config.Value.DebugGuildId}");
 #endif
         var commands = await _interactionService.RegisterCommandsGloballyAsync();
         _logger.LogInformation($"Registered {commands.Count} total application commands globally");
@@ -109,6 +109,8 @@ public class InteractionHandlerService : IHostedService
     {
         if (result.IsSuccess) return;
         // Command not successful, reply with error.
+        _logger.LogError(result.ToString());
+        _logger.LogError($"{result.ErrorReason}: {result.Error.ToString()}");
         await context.Channel.SendMessageAsync(result.ToString(), allowedMentions: AllowedMentions.None);
     }
 }

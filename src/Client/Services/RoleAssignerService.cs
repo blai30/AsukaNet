@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,7 +30,7 @@ public class RoleAssignerService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _client.ButtonExecuted += OnButtonClicked;
+        _client.ButtonExecuted += OnButtonClickedAsync;
 
         _logger.LogInformation($"{GetType().Name} started");
         await Task.CompletedTask;
@@ -37,13 +38,13 @@ public class RoleAssignerService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _client.ButtonExecuted -= OnButtonClicked;
+        _client.ButtonExecuted -= OnButtonClickedAsync;
 
         _logger.LogInformation($"{GetType().Name} stopped");
         await Task.CompletedTask;
     }
 
-    private async Task OnButtonClicked(SocketMessageComponent component)
+    private async Task OnButtonClickedAsync(SocketMessageComponent component)
     {
         if (component.Message.Author.Id != _client.CurrentUser.Id) return;
         if (component.User is not SocketGuildUser user) return;

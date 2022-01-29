@@ -34,6 +34,10 @@ host.ConfigureServices((builder, services) =>
     services.Configure<DiscordOptions>(builder.Configuration.GetSection("Discord"));
     services.Configure<LavaConfig>(builder.Configuration.GetSection("Lavalink"));
 
+    services.AddHttpClient();
+    services.AddSingleton(new Random(Guid.NewGuid().GetHashCode()));
+    services.AddSingleton<DataTable>();
+
     // Discord client.
     var client = new DiscordSocketClient(new DiscordSocketConfig
     {
@@ -59,20 +63,12 @@ host.ConfigureServices((builder, services) =>
     services.AddSingleton(provider => provider.GetRequiredService<IOptions<LavaConfig>>().Value);
     services.AddSingleton<LavaNode>();
 
-    // Http client for interfacing with Api requests.
-    services.AddHttpClient();
-
-    // Mathematics.
-    services.AddSingleton(new Random(Guid.NewGuid().GetHashCode()));
-    services.AddSingleton<DataTable>();
-
     // Background hosted services.
     services.AddHostedService<LoggingService>();
     services.AddHostedService<InteractionHandlerService>();
     services.AddHostedService<AudioService>();
     services.AddHostedService<RoleAssignerService>();
     services.AddHostedService<StartupService>();
-    services.AddHostedService<TrackSelectionService>();
 });
 
 var app = host.Build();

@@ -18,8 +18,8 @@ namespace Asuka.Modules;
     "music",
     "Play music in a voice channel.")]
 [RequireContext(ContextType.Guild)]
-[RequireUserPermission(ChannelPermission.Connect)]
-[RequireBotPermission(ChannelPermission.Connect)]
+[RequireUserPermission(GuildPermission.Connect, Group = "Music")]
+[RequireBotPermission(GuildPermission.Connect, Group = "Music")]
 public sealed class MusicModule : InteractionModule
 {
     private readonly LavaNode _lavaNode;
@@ -66,34 +66,26 @@ public sealed class MusicModule : InteractionModule
             return;
         }
 
-        try
+        // Stop playing and leave.
+        if (player.PlayerState is PlayerState.Playing)
         {
-            // Stop playing and leave.
-            if (player.PlayerState is PlayerState.Playing)
-            {
-                await player.StopAsync();
-            }
-
-            var channel = player.VoiceChannel;
-            await _lavaNode.LeaveAsync(channel);
-
-            Logger.LogTrace($"Left: {channel.Name} in {Context.Guild}");
-
-            int bitrateKb = channel.Bitrate / 1000;
-            var embed = new EmbedBuilder()
-                .WithTitle(channel.Name)
-                .WithAuthor("Left")
-                .WithDescription($"{bitrateKb.ToString()} kbps")
-                .WithColor(Config.Value.EmbedColor)
-                .Build();
-
-            await ReplyAsync(embed: embed);
+            await player.StopAsync();
         }
-        catch (InvalidOperationException e)
-        {
-            Logger.LogError(e.ToString());
-            await RespondAsync(e.Message);
-        }
+
+        var channel = player.VoiceChannel;
+        await _lavaNode.LeaveAsync(channel);
+
+        int bitrateKb = channel.Bitrate / 1000;
+        var embed = new EmbedBuilder()
+            .WithTitle(channel.Name)
+            .WithAuthor("Left voice channel", Context.Client.CurrentUser.GetAvatarUrl())
+            .WithDescription($"{bitrateKb.ToString()} kbps")
+            .WithColor(Config.Value.EmbedColor)
+            .WithFooter($"Region: {channel.RTCRegion ?? "automatic"}")
+            .Build();
+
+        Logger.LogTrace($"Left: {channel.Name} in {Context.Guild}");
+        await RespondAsync(embed: embed);
     }
 
     [SlashCommand(
@@ -399,39 +391,31 @@ public sealed class MusicModule : InteractionModule
 
     private async Task TryJoinAsync(bool respond = false)
     {
-        if (Context.User is not IVoiceState user ||
-            user.VoiceChannel is null)
+        if (Context.User is not IVoiceState user || user.VoiceChannel is null)
         {
             await RespondAsync("You must be connected to a voice channel.");
             return;
         }
 
-        try
+        await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
+
+        int bitrateKb = user.VoiceChannel.Bitrate / 1000;
+        var embed = new EmbedBuilder()
+            .WithTitle(user.VoiceChannel.Name)
+            .WithAuthor("Joined voice channel", Context.Client.CurrentUser.GetAvatarUrl())
+            .WithDescription($"{bitrateKb.ToString()} kbps")
+            .WithColor(Config.Value.EmbedColor)
+            .WithFooter($"Region: {user.VoiceChannel.RTCRegion ?? "automatic"}")
+            .Build();
+
+        Logger.LogTrace($"Joined: {user.VoiceChannel.Name} in {Context.Guild}");
+        if (respond)
         {
-            await _lavaNode.JoinAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-
-            int bitrateKb = user.VoiceChannel.Bitrate / 1000;
-            var embed = new EmbedBuilder()
-                .WithTitle(user.VoiceChannel.Name)
-                .WithAuthor("Joined")
-                .WithDescription($"{bitrateKb.ToString()} kbps")
-                .WithColor(Config.Value.EmbedColor)
-                .Build();
-
-            Logger.LogTrace($"Joined: {user.VoiceChannel.Name} in {Context.Guild}");
-            if (respond)
-            {
-                await RespondAsync(embed: embed);
-            }
-            else
-            {
-                await ReplyAsync(embed: embed);
-            }
+            await RespondAsync(embed: embed);
         }
-        catch (Exception e)
+        else
         {
-            Logger.LogError(e.ToString());
-            await RespondAsync(e.Message);
+            await ReplyAsync(embed: embed);
         }
     }
 }

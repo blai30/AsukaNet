@@ -19,10 +19,10 @@ public class PingModule : InteractionModule
 
     [SlashCommand(
         "ping",
-        "View the latency of the bot and API.")]
+        "View the latency of the interaction and bot.")]
     public async Task PingAsync()
     {
-        const string text = "Pong! Latency: `{0} ms`. API: `{1} ms`.";
+        const string text = "Pong! Latency: `{0} ms`. Bot: `{1} ms`.";
 
         int latency = (DateTimeOffset.Now - Context.Interaction.CreatedAt).Milliseconds;
         int botLatency = Context.Client.Latency;
