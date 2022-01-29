@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,58 +12,57 @@ using Victoria;
 using Victoria.Enums;
 using Victoria.Responses.Search;
 
-namespace Asuka.Modules.Music;
+namespace Asuka.Modules;
 
-[Group("music")]
-[Alias("m")]
-[Remarks("Music")]
-[Summary("Play music in a voice channel.")]
+[Group(
+    "music",
+    "Play music in a voice channel.")]
 [RequireContext(ContextType.Guild)]
-public sealed class MusicModule : CommandModuleBase
+[RequireUserPermission(ChannelPermission.Connect)]
+[RequireBotPermission(ChannelPermission.Connect)]
+public sealed class MusicModule : InteractionModule
 {
     private readonly LavaNode _lavaNode;
 
     public MusicModule(
         IOptions<DiscordOptions> config,
-        ILogger<CommandModuleBase> logger,
+        ILogger<MusicModule> logger,
         LavaNode lavaNode) :
         base(config, logger)
     {
         _lavaNode = lavaNode;
     }
 
-    [Command("join")]
-    [Alias("j")]
-    [Remarks("music join")]
-    [Summary("Join a voice channel in the server.")]
+    [SlashCommand(
+        "join",
+        "Join a voice channel in the server.")]
     public async Task JoinAsync()
     {
         // TODO: Music join if playing but kicked from voice channel.
         if (_lavaNode.HasPlayer(Context.Guild))
         {
-            await ReplyAsync("I'm already playing in a voice channel in this server.");
+            await RespondAsync("I'm already playing in a voice channel in this server.");
             return;
         }
 
-        await TryJoinAsync();
+        await TryJoinAsync(true);
     }
 
-    [Command("leave")]
-    [Alias("l")]
-    [Remarks("music leave")]
-    [Summary("Leave the currently playing voice channel.")]
+    [SlashCommand(
+        "leave",
+        "Leave the currently playing voice channel.")]
     public async Task LeaveAsync()
     {
         if (_lavaNode.HasPlayer(Context.Guild) is false)
         {
-            await ReplyAsync("Currently not playing.");
+            await RespondAsync("Currently not playing.");
             return;
         }
 
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
         {
-            await ReplyAsync("You must be in the same voice channel.");
+            await RespondAsync("You must be in the same voice channel.");
             return;
         }
 
@@ -93,15 +92,14 @@ public sealed class MusicModule : CommandModuleBase
         catch (InvalidOperationException e)
         {
             Logger.LogError(e.ToString());
-            await ReplyAsync(e.Message);
+            await RespondAsync(e.Message);
         }
     }
 
-    [Command("play")]
-    [Alias("p")]
-    [Remarks("music play <query>")]
-    [Summary("Play music in a voice channel.")]
-    public async Task PlayAsync([Remainder] string searchQuery = "")
+    [SlashCommand(
+        "play",
+        "Play music in a voice channel.")]
+    public async Task PlayAsync(string searchQuery)
     {
         // Join if not playing.
         if (_lavaNode.HasPlayer(Context.Guild) is false)
@@ -112,80 +110,62 @@ public sealed class MusicModule : CommandModuleBase
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
         {
-            await ReplyAsync("You must be in the same voice channel.");
+            await RespondAsync("You must be in the same voice channel.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(searchQuery))
+        await DeferAsync();
+
+        // Play from url or search YouTube.
+        var search = Uri.IsWellFormedUriString(searchQuery, UriKind.Absolute)
+            ? await _lavaNode.SearchAsync(SearchType.Direct, searchQuery)
+            : await _lavaNode.SearchYouTubeAsync(searchQuery);
+
+        if (search.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed)
         {
-            await ReplyAsync("Please provide a query.");
+            await RespondAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
             return;
         }
 
-        try
+        // Generate select menu for search results.
+        var selectMenu = new SelectMenuBuilder()
+            .WithPlaceholder("Select a track")
+            .WithCustomId($"tracks:{Context.Interaction.Id}")
+            .WithMinValues(1)
+            .WithMaxValues(1);
+
+        foreach (var track in search.Tracks.Take(10))
         {
-            // Play from url or search YouTube.
-            var search = Uri.IsWellFormedUriString(searchQuery, UriKind.Absolute)
-                ? await _lavaNode.SearchAsync(SearchType.Direct, searchQuery)
-                : await _lavaNode.SearchYouTubeAsync(searchQuery);
-
-            if (search.Status is SearchStatus.NoMatches or SearchStatus.LoadFailed)
-            {
-                await ReplyAsync($"No matches found for query `{searchQuery.Truncate(100, "...")}`");
-                return;
-            }
-
-            // TODO: Music enqueue interactive select from list.
-            var track = search.Tracks.First();
-
-            // Player is already playing or paused but still has remaining tracks, enqueue new track.
-            if (player.Track is not null &&
-                player.PlayerState is PlayerState.Playing or PlayerState.Paused)
-            {
-                player.Queue.Enqueue(track);
-
-                // Announce the track that was enqueued.
-                string artwork = await track.FetchArtworkAsync();
-                var embed = new EmbedBuilder()
-                    .WithTitle(track.Title)
-                    .WithUrl(track.Url)
-                    .WithAuthor($"Enqueued #{player.Queue.Count.ToString()}")
-                    .WithDescription(track.Duration.ToString("c"))
-                    .WithColor(Config.Value.EmbedColor)
-                    .WithThumbnailUrl(artwork)
-                    .Build();
-
-                Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
-                await ReplyAsync(embed: embed);
-            }
-            else
-            {
-                await player.PlayAsync(track);
-            }
+            selectMenu.AddOption(
+                track.Title,
+                track.Url,
+                track.Duration.ToString("c"),
+                new Emoji("▶️"));
         }
-        catch (Exception e)
+
+        var components = new ComponentBuilder().WithSelectMenu(selectMenu);
+        await Context.Interaction.ModifyOriginalResponseAsync(properties =>
         {
-            Logger.LogError(e.ToString());
-            await ReplyAsync(e.Message);
-        }
+            properties.Content = "Choose a track from the menu to play";
+            properties.Components = components.Build();
+        });
     }
 
-    [Command("pause")]
-    [Alias("resume")]
-    [Remarks("music pause")]
-    [Summary("Pause the currently playing track or resume playing.")]
+    [SlashCommand(
+        "pause",
+        "Pause the currently playing track or resume playing.")]
     public async Task PauseAsync()
     {
         if (_lavaNode.HasPlayer(Context.Guild) is false)
         {
-            await ReplyAsync("Currently not playing.");
+            await RespondAsync("Currently not playing.");
             return;
         }
 
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
         {
-            await ReplyAsync("You must be in the same voice channel.");
+            await RespondAsync("You must be in the same voice channel.");
             return;
         }
 
@@ -216,7 +196,7 @@ public sealed class MusicModule : CommandModuleBase
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            await ReplyAsync(e.Message);
+            await RespondAsync(e.Message);
         }
 
         string position = track.Position.ToString("hh\\:mm\\:ss");
@@ -233,31 +213,30 @@ public sealed class MusicModule : CommandModuleBase
             .Build();
 
         Logger.LogTrace($"{status}: {track.Title} in {Context.Guild}");
-        await ReplyAsync(embed: embed);
+        await RespondAsync(embed: embed);
     }
 
-    [Command("skip")]
-    [Alias("s")]
-    [Remarks("music skip")]
-    [Summary("Skips the currently playing track.")]
+    [SlashCommand(
+        "skip",
+        "Skips the currently playing track.")]
     public async Task SkipAsync()
     {
         if (_lavaNode.HasPlayer(Context.Guild) is false)
         {
-            await ReplyAsync("Currently not playing.");
+            await RespondAsync("Currently not playing.");
             return;
         }
 
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
         {
-            await ReplyAsync("You must be in the same voice channel.");
+            await RespondAsync("You must be in the same voice channel.");
             return;
         }
 
         if (player.Track is null)
         {
-            await ReplyAsync("Nothing to skip.");
+            await RespondAsync("Nothing to skip.");
             return;
         }
 
@@ -287,31 +266,30 @@ public sealed class MusicModule : CommandModuleBase
                 .Build();
 
             Logger.LogTrace($"Skipped: {currentTrack.Title} in {Context.Guild}");
-            await ReplyAsync(embed: embed);
+            await RespondAsync(embed: embed);
         }
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            await ReplyAsync(e.Message);
+            await RespondAsync(e.Message);
         }
     }
 
-    [Command("remove")]
-    [Alias("r")]
-    [Remarks("music remove <index>")]
-    [Summary("Removes a track from the queue by index.")]
+    [SlashCommand(
+        "remove",
+        "Removes a track from the queue by index.")]
     public async Task RemoveAsync(int index)
     {
         if (_lavaNode.HasPlayer(Context.Guild) is false)
         {
-            await ReplyAsync("Currently not playing.");
+            await RespondAsync("Currently not playing.");
             return;
         }
 
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
         {
-            await ReplyAsync("You must be in the same voice channel.");
+            await RespondAsync("You must be in the same voice channel.");
             return;
         }
 
@@ -331,31 +309,30 @@ public sealed class MusicModule : CommandModuleBase
                 .Build();
 
             Logger.LogTrace($"Removed: {track.Title} in {Context.Guild.Name}");
-            await ReplyAsync(embed: embed);
+            await RespondAsync(embed: embed);
         }
         catch (Exception)
         {
             Logger.LogTrace($"Failed removing track at index {index.ToString()} in {Context.Guild.Name}");
-            await ReplyAsync($"No track in queue at index {index.ToString()}.");
+            await RespondAsync($"No track in queue at index {index.ToString()}.");
         }
     }
 
-    [Command("queue")]
-    [Alias("q")]
-    [Remarks("music queue")]
-    [Summary("View the current music queue.")]
+    [SlashCommand(
+        "queue",
+        "View the current music queue.")]
     public async Task QueueAsync()
     {
         if (_lavaNode.HasPlayer(Context.Guild) is false)
         {
-            await ReplyAsync("Currently not playing.");
+            await RespondAsync("Currently not playing.");
             return;
         }
 
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (player.Queue.Count <= 0)
         {
-            await ReplyAsync("Nothing in the queue.");
+            await RespondAsync("Nothing in the queue.");
             return;
         }
 
@@ -373,31 +350,30 @@ public sealed class MusicModule : CommandModuleBase
             .WithColor(Config.Value.EmbedColor)
             .Build();
 
-        await ReplyAsync(embed: embed);
+        await RespondAsync(embed: embed);
     }
 
-    [Command("clear")]
-    [Alias("c")]
-    [Remarks("music clear")]
-    [Summary("Clears the music queue.")]
+    [SlashCommand(
+        "clear",
+        "Clears the music queue.")]
     public async Task ClearAsync()
     {
         if (_lavaNode.HasPlayer(Context.Guild) is false)
         {
-            await ReplyAsync("Currently not playing.");
+            await RespondAsync("Currently not playing.");
             return;
         }
 
         var player = _lavaNode.GetPlayer(Context.Guild);
         if (Context.User is IVoiceState user && user.VoiceChannel != player.VoiceChannel)
         {
-            await ReplyAsync("You must be in the same voice channel.");
+            await RespondAsync("You must be in the same voice channel.");
             return;
         }
 
         if (player.Queue.Count <= 0)
         {
-            await ReplyAsync("Nothing in the queue to clear.");
+            await RespondAsync("Nothing in the queue to clear.");
             return;
         }
 
@@ -412,21 +388,21 @@ public sealed class MusicModule : CommandModuleBase
                 .WithColor(Config.Value.EmbedColor)
                 .Build();
 
-            await ReplyAsync(embed: embed);
+            await RespondAsync(embed: embed);
         }
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            await ReplyAsync(e.Message);
+            await RespondAsync(e.Message);
         }
     }
 
-    private async Task TryJoinAsync()
+    private async Task TryJoinAsync(bool respond = false)
     {
         if (Context.User is not IVoiceState user ||
             user.VoiceChannel is null)
         {
-            await ReplyAsync("You must be connected to a voice channel.");
+            await RespondAsync("You must be connected to a voice channel.");
             return;
         }
 
@@ -443,12 +419,19 @@ public sealed class MusicModule : CommandModuleBase
                 .Build();
 
             Logger.LogTrace($"Joined: {user.VoiceChannel.Name} in {Context.Guild}");
-            await ReplyAsync(embed: embed);
+            if (respond)
+            {
+                await RespondAsync(embed: embed);
+            }
+            else
+            {
+                await ReplyAsync(embed: embed);
+            }
         }
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            await ReplyAsync(e.Message);
+            await RespondAsync(e.Message);
         }
     }
 }

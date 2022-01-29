@@ -35,17 +35,11 @@ docker-compose up -d
   * `music queue`
   * `music clear`
 * Roles
-  * `reactionrole make [description]`
-  * `reactionrole add <messageId> <:emoji:> <@role>`
-  * `reactionrole remove <messageId> <@role>`
-  * `reactionrole edit <messageId> [title] [description]`
-  * `reactionrole clear <messageId>`
-* Tags
-  * `tag add <name> <content> [:reaction:]`
-  * `tag remove <name>`
-  * `tag edit <name> <content> [:reaction:]`
-  * `tag list`
-  * `tag info <name>`
+  * `roleassigner make [title]`
+  * `roleassigner add <messageId> <@role> [:emoji:]`
+  * `roleassigner remove <messageId> <@role>`
+  * `roleassigner edit <messageId> [title]`
+  * `roleassigner clear <messageId>`
 * Utility
   * `avatar [@user]`
   * `calculate <expression>`

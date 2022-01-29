@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.General;
+namespace Asuka.Modules;
 
-[Group("userinfo")]
-[Alias("user")]
-[Remarks("General")]
-[Summary("Display information about a user or self.")]
-public class UserInfoModule : CommandModuleBase
+public class UserInfoModule : InteractionModule
 {
     public UserInfoModule(
         IOptions<DiscordOptions> config,
@@ -22,8 +18,10 @@ public class UserInfoModule : CommandModuleBase
     {
     }
 
-    [Command]
-    [Remarks("userinfo [@user]")]
+    [SlashCommand(
+        "userinfo",
+        "Display information about a user or self.")]
+    [UserCommand("Get user info")]
     public async Task UserInfoAsync(IUser? user = null)
     {
         // Use self if no user was specified.
@@ -31,8 +29,7 @@ public class UserInfoModule : CommandModuleBase
         string avatarUrl = user.GetAvatarUrl();
 
         var embed = new EmbedBuilder()
-            .WithTitle("Icon direct link")
-            .WithUrl(avatarUrl)
+            .WithTitle("User info")
             .WithAuthor(user.ToString(), avatarUrl)
             .WithColor(Config.Value.EmbedColor)
             .WithThumbnailUrl(avatarUrl)
@@ -51,6 +48,10 @@ public class UserInfoModule : CommandModuleBase
                 true)
             .Build();
 
-        await ReplyAsync(embed: embed);
+        var components = new ComponentBuilder()
+            .WithButton("Avatar direct link", style: ButtonStyle.Link, url: avatarUrl)
+            .Build();
+
+        await RespondAsync(embed: embed, components: components);
     }
 }

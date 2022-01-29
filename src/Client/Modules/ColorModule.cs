@@ -3,20 +3,20 @@ using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SkiaSharp;
 
-namespace Asuka.Modules.Utility;
+namespace Asuka.Modules;
 
-[Group("color")]
-[Remarks("Utility")]
-[Summary("Get the color from hex code or RGB.")]
-public class ColorModule : CommandModuleBase
+[Group(
+    "color",
+    "Get the color from hex code, RGB, or keywords.")]
+public class ColorModule : InteractionModule
 {
     public ColorModule(
         IOptions<DiscordOptions> config,
@@ -25,30 +25,33 @@ public class ColorModule : CommandModuleBase
     {
     }
 
-    [Command]
-    [Remarks("color <hex>")]
+    [SlashCommand(
+        "hex",
+        "Get the color from hex code.")]
     public async Task ColorAsync(SKColor hex)
     {
         await GetColorAsync(hex);
     }
 
-    [Command]
-    [Remarks("color <red> <green> <blue>")]
-    public async Task ColorAsync(int r, int g, int b)
+    [SlashCommand(
+        "rgb",
+        "Get the color from RGB.")]
+    public async Task ColorAsync(int red, int green, int blue)
     {
         // Clamp rgb values between 0 and 255.
-        r = Math.Clamp(r, 0, 255);
-        g = Math.Clamp(g, 0, 255);
-        b = Math.Clamp(b, 0, 255);
+        red = Math.Clamp(red, 0, 255);
+        green = Math.Clamp(green, 0, 255);
+        blue = Math.Clamp(blue, 0, 255);
 
         // Create color object from rgb values.
-        var color = new SKColor((byte) r, (byte) g, (byte) b);
+        var color = new SKColor((byte) red, (byte) green, (byte) blue);
         await GetColorAsync(color);
     }
 
-    [Command]
-    [Remarks("color <keywords>")]
-    public async Task ColorAsync([Remainder] string keywords)
+    [SlashCommand(
+        "keywords",
+        "Get the color from keywords.")]
+    public async Task ColorAsync(string keywords)
     {
         // Remove non-alphabetical characters and spaces from keywords.
         var regex = new Regex("[^a-zA-Z]");
@@ -74,7 +77,7 @@ public class ColorModule : CommandModuleBase
             return;
         }
 
-        await ReplyInlineAsync("Could not understand color keywords... (┬┬﹏┬┬)");
+        await RespondAsync("Could not understand color keywords... (┬┬﹏┬┬)", ephemeral: true);
     }
 
     private async Task GetColorAsync(SKColor color)
@@ -125,6 +128,6 @@ public class ColorModule : CommandModuleBase
                 $"**H**: {hsv.X.ToString("F2")}, **S**: {hsv.Y.ToString("F2")}, **V**: {hsv.Z.ToString("F2")}")
             .Build();
 
-        await Context.Channel.SendFileAsync(stream, fileName, embed: embed);
+        await Context.Interaction.RespondWithFileAsync(stream, fileName, embed: embed);
     }
 }

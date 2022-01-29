@@ -47,40 +47,30 @@ public class RoleAssignerService : IHostedService
     {
         if (component.Message.Author.Id != _client.CurrentUser.Id) return;
         if (component.User is not SocketGuildUser user) return;
+        if (!component.Data.CustomId.StartsWith("RA-")) return;
 
         string[] tokens = component.Data.CustomId.Split('-');
-        if (tokens[0] != "roleassigner") return;
-
         var role = user.Guild.GetRole(Convert.ToUInt64(tokens[2]));
         if (role is null) return;
+
+        var embed = new EmbedBuilder()
+            .WithAuthor(user)
+            .WithDescription(role.Mention)
+            .WithColor(_config.Value.EmbedColor);
 
         if (user.Roles.Any(r => r.Id == role.Id))
         {
             await user.RemoveRoleAsync(role);
-
-            var embed = new EmbedBuilder()
-                .WithTitle("Removed role")
-                .WithAuthor(user)
-                .WithDescription(role.Mention)
-                .WithColor(_config.Value.EmbedColor)
-                .Build();
-
-            await component.RespondAsync(embed: embed, ephemeral: true);
+            embed.WithTitle("Removed role");
             _logger.LogTrace($"{role.Mention} is removed from {user.Mention}");
         }
         else
         {
             await user.AddRoleAsync(role);
-
-            var embed = new EmbedBuilder()
-                .WithTitle("Granted role")
-                .WithAuthor(user)
-                .WithDescription(role.Mention)
-                .WithColor(_config.Value.EmbedColor)
-                .Build();
-
-            await component.RespondAsync(embed: embed, ephemeral: true);
+            embed.WithTitle("Granted role");
             _logger.LogTrace($"{role.Mention} is granted to {user.Mention}");
         }
+
+        await component.RespondAsync(embed: embed.Build(), ephemeral: true);
     }
 }

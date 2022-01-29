@@ -1,22 +1,19 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Asuka.Commands;
 using Asuka.Configuration;
+using Asuka.Interactions;
 using Asuka.Models.Api.Urban;
 using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Flurl;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Asuka.Modules.Utility;
+namespace Asuka.Modules;
 
-[Group("urban")]
-[Remarks("Utility")]
-[Summary("Look up a word or phrase on Urban Dictionary.")]
-public class UrbanModule : CommandModuleBase
+public class UrbanModule : InteractionModule
 {
     private const string Uri = "https://api.urbandictionary.com/v0";
 
@@ -31,9 +28,10 @@ public class UrbanModule : CommandModuleBase
         _factory = factory;
     }
 
-    [Command]
-    [Remarks("urban <term>")]
-    public async Task UrbanAsync([Remainder] string term)
+    [SlashCommand(
+        "urban",
+        "Look up a word or phrase on Urban Dictionary.")]
+    public async Task UrbanAsync(string term)
     {
         // Construct query to send http request.
         string query = Uri
@@ -73,6 +71,6 @@ public class UrbanModule : CommandModuleBase
                 entry.Author)
             .Build();
 
-        await ReplyAsync(embed: embed);
+        await RespondAsync(embed: embed);
     }
 }

@@ -54,6 +54,9 @@ public class StartupService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        await _client.LogoutAsync();
+        await _client.StopAsync();
+
         _logger.LogInformation($"{GetType().Name} stopped");
         await Task.CompletedTask;
     }
