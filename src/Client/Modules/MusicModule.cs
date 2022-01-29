@@ -43,7 +43,7 @@ public sealed class MusicModule : InteractionModule
             return;
         }
 
-        await TryJoinAsync();
+        await TryJoinAsync(true);
     }
 
     [SlashCommand(
@@ -118,6 +118,8 @@ public sealed class MusicModule : InteractionModule
             return;
         }
 
+        await DeferAsync();
+
         try
         {
             // Play from url or search YouTube.
@@ -152,11 +154,12 @@ public sealed class MusicModule : InteractionModule
                     .Build();
 
                 Logger.LogTrace($"Enqueued: {track.Title} in {Context.Guild.Name}");
-                await RespondAsync(embed: embed);
+                await Context.Interaction.ModifyOriginalResponseAsync(properties => properties.Embed = embed);
             }
             else
             {
                 await player.PlayAsync(track);
+                await DeleteOriginalResponseAsync();
             }
         }
         catch (Exception e)
@@ -412,7 +415,7 @@ public sealed class MusicModule : InteractionModule
         }
     }
 
-    private async Task TryJoinAsync()
+    private async Task TryJoinAsync(bool respond = false)
     {
         if (Context.User is not IVoiceState user ||
             user.VoiceChannel is null)
@@ -434,7 +437,14 @@ public sealed class MusicModule : InteractionModule
                 .Build();
 
             Logger.LogTrace($"Joined: {user.VoiceChannel.Name} in {Context.Guild}");
-            await RespondAsync(embed: embed);
+            if (respond)
+            {
+                await RespondAsync(embed: embed);
+            }
+            else
+            {
+                await ReplyAsync(embed: embed);
+            }
         }
         catch (Exception e)
         {

@@ -82,12 +82,11 @@ public class InteractionHandlerService : IHostedService
     {
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
 #if DEBUG
-        var commands = await _interactionService.RegisterCommandsToGuildAsync(_config.Value.DebugGuildId);
-        _logger.LogInformation($"Registered {commands.Count} total application commands");
-#else
-        var commands = await _interactionService.RegisterCommandsGloballyAsync();
-        _logger.LogInformation($"Registered {commands.Count} total application commands");
+        var guildCommands = await _interactionService.RegisterCommandsToGuildAsync(_config.Value.DebugGuildId);
+        _logger.LogInformation($"Registered {guildCommands.Count} total application commands to guild {_config.Value.DebugGuildId}");
 #endif
+        var commands = await _interactionService.RegisterCommandsGloballyAsync();
+        _logger.LogInformation($"Registered {commands.Count} total application commands globally");
     }
 
     private async Task OnInteractionCreatedAsync(SocketInteraction interaction)

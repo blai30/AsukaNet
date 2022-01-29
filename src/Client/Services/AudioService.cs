@@ -65,18 +65,6 @@ public class AudioService : IHostedService
 
     private async Task OnTrackStarted(TrackStartEventArgs args)
     {
-        if (_disconnectTokens.TryGetValue(args.Player.VoiceChannel.Id, out var tokenSource) is false)
-        {
-            return;
-        }
-
-        if (tokenSource.IsCancellationRequested)
-        {
-            return;
-        }
-
-        tokenSource.Cancel(true);
-
         var player = args.Player;
         var track = args.Track;
 
@@ -91,8 +79,22 @@ public class AudioService : IHostedService
             .WithThumbnailUrl(artwork)
             .Build();
 
-        _logger.LogTrace($"Playing: {args.Track.Title} in {args.Player.VoiceChannel.Guild.Name}");
+        _logger.LogTrace($"Playing: {track.Title} in {player.VoiceChannel.Guild.Name}");
         await player.TextChannel.SendMessageAsync(embed: embed);
+
+        // Handle auto disconnect when no more tracks are queued or a user leaves.
+        if (_disconnectTokens.TryGetValue(args.Player.VoiceChannel.Id, out var tokenSource) is false)
+        {
+            return;
+        }
+
+        if (tokenSource.IsCancellationRequested)
+        {
+            return;
+        }
+
+        // Auto disconnect cancelled (ie. a user joined and another track was enqueued).
+        tokenSource.Cancel(true);
     }
 
     private async Task OnTrackEnded(TrackEndedEventArgs args)
