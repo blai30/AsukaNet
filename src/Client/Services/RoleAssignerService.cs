@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
-using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

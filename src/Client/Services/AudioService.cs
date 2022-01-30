@@ -97,7 +97,7 @@ public class AudioService : IHostedService
                 .Build();
 
             _logger.LogTrace($"Enqueued: {track.Title} in {user.Guild.Name}");
-            await component.Message.ModifyAsync(properties =>
+            await component.UpdateAsync(properties =>
             {
                 properties.Content = null;
                 properties.Components = null;
