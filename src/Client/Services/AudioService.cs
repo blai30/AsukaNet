@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Discord;
-using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -142,7 +141,7 @@ public class AudioService : IHostedService
             return;
         }
 
-        // Auto disconnect cancelled (ie. a user joined and another track was enqueued).
+        // Auto disconnect cancelled.
         tokenSource.Cancel(true);
     }
 
