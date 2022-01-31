@@ -39,6 +39,7 @@ public class AudioService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _client.Ready += OnReadyAsync;
+        _client.UserVoiceStateUpdated += OnVoiceStateUpdatedAsync;
         _client.SelectMenuExecuted += OnSelectMenuOptionSelectedAsync;
         _lavaNode.OnTrackStarted += OnTrackStartedAsync;
         _lavaNode.OnTrackEnded += OnTrackEndedAsync;
@@ -50,6 +51,7 @@ public class AudioService : IHostedService
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _client.Ready -= OnReadyAsync;
+        _client.UserVoiceStateUpdated -= OnVoiceStateUpdatedAsync;
         _client.SelectMenuExecuted -= OnSelectMenuOptionSelectedAsync;
         _lavaNode.OnTrackStarted -= OnTrackStartedAsync;
         _lavaNode.OnTrackEnded -= OnTrackEndedAsync;
@@ -65,6 +67,17 @@ public class AudioService : IHostedService
             await _lavaNode.ConnectAsync();
             _logger.LogInformation("Lava Node connected");
         }
+    }
+
+    private async Task OnVoiceStateUpdatedAsync(
+        SocketUser user,
+        SocketVoiceState before,
+        SocketVoiceState after)
+    {
+        if (user.Id != _client.CurrentUser.Id) return;
+        if (before.VoiceChannel is null || after.VoiceChannel is not null) return;
+
+        await _lavaNode.LeaveAsync(before.VoiceChannel);
     }
 
     private async Task OnSelectMenuOptionSelectedAsync(SocketMessageComponent component)
