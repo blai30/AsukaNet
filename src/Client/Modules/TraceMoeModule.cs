@@ -53,11 +53,14 @@ public class TraceMoeModule : InteractionModule
             return;
         }
 
+        await DeferAsync();
         var responseBody = await GetTraceMoeResponse(imageUrl);
 
         // No response for given query.
         if (responseBody?.Result is null)
         {
+            await Context.Interaction
+                .ModifyOriginalResponseAsync(properties => properties.Content = "Command failed.");
             return;
         }
 
@@ -67,13 +70,13 @@ public class TraceMoeModule : InteractionModule
         // Similarity less than 87% is usually considered bad match, discard.
         if (doc is null || doc.Similarity < 0.87)
         {
-            await RespondAsync("Could not determine.", ephemeral: true);
+            await Context.Interaction
+                .ModifyOriginalResponseAsync(properties => properties.Content = "Could not determine.");
             return;
         }
 
         var embed = GenerateEmbed(imageUrl, doc);
-
-        await RespondAsync(embed: embed);
+        await Context.Interaction.ModifyOriginalResponseAsync(properties => properties.Embed = embed);
     }
 
     /// <summary>
@@ -143,7 +146,15 @@ public class TraceMoeModule : InteractionModule
 
         // Send request and get JSON response.
         using var client = _factory.CreateClient();
-        var responseBody = await client.GetFromJsonAsync<TraceMoeResponse>(query);
-        return responseBody;
+        try
+        {
+            var responseBody = await client.GetFromJsonAsync<TraceMoeResponse>(query);
+            return responseBody;
+        }
+        catch (HttpRequestException e)
+        {
+            Logger.LogError(e.ToString());
+            return null;
+        }
     }
 }
