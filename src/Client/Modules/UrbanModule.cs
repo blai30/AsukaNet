@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Asuka.Interactions;
-using Asuka.Models.Api.Urban;
+using Asuka.Models;
 using Discord;
 using Discord.Interactions;
 using Flurl;

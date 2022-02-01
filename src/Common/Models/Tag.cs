@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Asuka.Models.Api.Asuka;
+namespace Asuka.Models;
 
 public record Tag
 {
