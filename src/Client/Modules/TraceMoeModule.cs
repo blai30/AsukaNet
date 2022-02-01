@@ -1,14 +1,18 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Asuka.Configuration;
 using Asuka.Interactions;
-using Asuka.Models.Api.TraceMoe;
+using Asuka.Models;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Flurl;
+using GraphQL;
+using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.SystemTextJson;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -34,7 +38,12 @@ public class TraceMoeModule : InteractionModule
         "Find out what anime the image came from.")]
     public async Task TraceMoeAsync(string imageUrl)
     {
-        await RunTraceMoe(imageUrl);
+        bool success = await RunTraceMoe(imageUrl);
+
+        if (success)
+        {
+            await ReplyAsync(imageUrl);
+        }
     }
 
     [MessageCommand("What anime?")]
@@ -44,13 +53,13 @@ public class TraceMoeModule : InteractionModule
         await RunTraceMoe(imageUrl);
     }
 
-    private async Task RunTraceMoe(string imageUrl)
+    private async Task<bool> RunTraceMoe(string imageUrl)
     {
         if (string.IsNullOrEmpty(imageUrl))
         {
             Logger.LogTrace($"Invalid image: {imageUrl}");
             await RespondAsync("Give me a valid image!! (っ °Д °;)っ", ephemeral: true);
-            return;
+            return false;
         }
 
         await DeferAsync();
@@ -61,7 +70,7 @@ public class TraceMoeModule : InteractionModule
         {
             await Context.Interaction
                 .ModifyOriginalResponseAsync(properties => properties.Content = "Command failed.");
-            return;
+            return false;
         }
 
         // Results are always sorted by best similarity so take first..
@@ -72,11 +81,13 @@ public class TraceMoeModule : InteractionModule
         {
             await Context.Interaction
                 .ModifyOriginalResponseAsync(properties => properties.Content = "Could not determine.");
-            return;
+            return false;
         }
 
-        var embed = GenerateEmbed(imageUrl, doc);
+        var coverImageUrl = await GetAnilistCoverImage(doc.Anilist?.Id);
+        var embed = GenerateEmbed(imageUrl, doc, coverImageUrl);
         await Context.Interaction.ModifyOriginalResponseAsync(properties => properties.Embed = embed);
+        return true;
     }
 
     /// <summary>
@@ -84,10 +95,11 @@ public class TraceMoeModule : InteractionModule
     /// </summary>
     /// <param name="image"></param>
     /// <param name="doc"></param>
+    /// <param name="coverImageUrl"></param>
     /// <returns>Embed message</returns>
-    private Embed GenerateEmbed(string image, Result doc)
+    private Embed GenerateEmbed(string image, Result doc, Uri? coverImageUrl)
     {
-        string externalUrl = Uri
+        string externalUrl = "https://trace.moe"
             .SetQueryParam("url", image);
 
         string description = doc.Anilist?.Synonyms is not null
@@ -97,8 +109,9 @@ public class TraceMoeModule : InteractionModule
         var embed = new EmbedBuilder()
             .WithTitle(doc.Anilist?.Title?.English ?? "No title")
             .WithUrl(externalUrl)
-            .WithColor(Config.Value.EmbedColor)
             .WithDescription(description)
+            .WithColor(Config.Value.EmbedColor)
+            .WithThumbnailUrl(coverImageUrl?.ToString())
             .WithFooter($"Traced from file: {doc.Filename}")
             .AddField(
                 "Romaji title",
@@ -140,6 +153,7 @@ public class TraceMoeModule : InteractionModule
         string query = Uri
             .AppendPathSegment("search")
             .SetQueryParam("anilistInfo")
+            .SetQueryParam("cutBorders")
             .SetQueryParam("url", imageUrl);
 
         Logger.LogInformation(query);
@@ -150,6 +164,34 @@ public class TraceMoeModule : InteractionModule
         {
             var responseBody = await client.GetFromJsonAsync<TraceMoeResponse>(query);
             return responseBody;
+        }
+        catch (HttpRequestException e)
+        {
+            Logger.LogError(e.ToString());
+            return null;
+        }
+    }
+
+    private async Task<Uri?> GetAnilistCoverImage(ulong? anilistId)
+    {
+        var graphQlClient = new GraphQLHttpClient(
+            "https://graphql.anilist.co",
+            new SystemTextJsonSerializer());
+
+        var request = new GraphQLRequest(@"
+            query ($id: Int) {
+                Media (id: $id) {
+                    coverImage {
+                        large
+                    }
+                }
+            }
+        ", new { id = anilistId });
+
+        try
+        {
+            var response = await graphQlClient.SendQueryAsync<AnilistResponse>(request);
+            return response.Data.Media?.CoverImage?.Large;
         }
         catch (HttpRequestException e)
         {
