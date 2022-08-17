@@ -20,6 +20,11 @@ namespace Asuka.Modules;
 [RequireContext(ContextType.Guild)]
 [RequireUserPermission(GuildPermission.Connect, Group = "Music")]
 [RequireBotPermission(GuildPermission.Connect, Group = "Music")]
+[RequireBotPermission(
+    ChannelPermission.ReadMessageHistory |
+    ChannelPermission.SendMessages |
+    ChannelPermission.ViewChannel,
+    Group = "Music")]
 public sealed class MusicModule : InteractionModule
 {
     private readonly LavaNode _lavaNode;
@@ -241,7 +246,7 @@ public sealed class MusicModule : InteractionModule
             {
                 await player.SkipAsync();
             }
-            else if (player.PlayerState is PlayerState.Playing || player.PlayerState is PlayerState.Paused)
+            else if (player.PlayerState is PlayerState.Playing or PlayerState.Paused)
             {
                 await player.StopAsync();
             }
