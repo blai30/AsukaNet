@@ -160,6 +160,11 @@ public class AudioService : IHostedService
 
     private async Task OnTrackEndedAsync(TrackEndedEventArgs args)
     {
+        if (args.Reason is not TrackEndReason.Finished or TrackEndReason.LoadFailed or TrackEndReason.Stopped)
+        {
+            return;
+        }
+
         var player = args.Player;
         var track = args.Track;
 
@@ -180,7 +185,7 @@ public class AudioService : IHostedService
         // Check next track in the queue or leave voice channel if queue is empty.
         if (player.Queue.TryDequeue(out var nextTrack) is false)
         {
-            _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromSeconds(10));
+            await InitiateDisconnectAsync(args.Player, TimeSpan.FromSeconds(10));
             return;
         }
 
